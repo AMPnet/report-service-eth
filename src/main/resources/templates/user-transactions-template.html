@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+        "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="en">
+<div th:replace="fragments/head.html :: head(logo=${data.logo})"></div>
+<body>
+<div class="container">
+    <div class="page-1">
+        <div th:include="fragments/userInfo.html :: userInfo(data=${data})"></div>
+        <div class="account-summary">
+            <div th:include="fragments/accountSummary.html :: accountSummary(data=${data})"></div>
+            <div th:include="fragments/accountSummaryTable.html :: accountSummaryTable(data=${data})"></div>
+        </div>
+    </div>
+    <div class="page-2">
+        <div class="transactions">
+            <h2 th:text="${data.translations.transactions}">Transactions</h2>
+            <table id="transactions-summary-table">
+                <div th:replace = "fragments/transactionsTableHead.html :: transactionsTableHead(data=${data})"></div>
+                <tbody>
+                    <tr th:each="tx,iStat : ${data.transactions}" th:classappend="${(iStat.even? 'table-grey-background': '') + ' ' + (iStat.last? 'table-border-bottom': '')}">
+                        <td th:text="${tx.txDate}" th:classappend="${iStat.last? 'table-no-bottom-border': ''}" class="text-left table-border-right">Aug 1, 2020 13:30</td>
+                        <td th:utext="${tx.name} + (${tx.description != null} ? ('<br/>' + ${tx.description}) : '') + (${tx.percentageInProject != null} ? (' | ' +${tx.percentageInProject}) + '%' : '')" th:classappend="${iStat.last? 'table-no-bottom-border': ''}" class="text-left table-border-right">Deposit</td>
+                        <td th:utext="${tx.txStatus.name() == 'PAID_IN'} ? ('€' + ${tx.amountInEuro}) : ''" th:classappend="${iStat.last? 'table-no-bottom-border': ''}" class="table-border-right">Deposit</td>
+                        <td th:utext="${tx.txStatus.name() == 'PENDING'} ? ('€' + ${tx.amountInEuro}) : ''" th:classappend="${iStat.last? 'table-no-bottom-border': ''}" class="table-border-right">Deposit</td>
+                        <td th:utext="${tx.txStatus.name() == 'PAID_OUT'} ? ('€' + ${tx.amountInEuro}) : ''" th:classappend="${iStat.last? 'table-no-bottom-border': ''}">Deposit</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

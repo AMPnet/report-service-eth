@@ -1,0 +1,15 @@
+<tr th:fragment="accountSummary(data)">
+        <h1 th:text="${data.translations.transactionsStatement}">Transactions Statement</h1>
+        <div class="summary-info">
+            <table>
+                <tr>
+                    <td valign="bottom">
+                        <div class="summary-left">
+                            <h2 th:text="${data.translations.accountSummary}">Account Summary</h2>
+                            <p th:text="${data.dateOfFinish} ?: ''">Aug 31, 2020</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+</tr>

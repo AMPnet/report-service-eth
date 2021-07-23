@@ -1,0 +1,57 @@
+= AMPnet Report Service API Documentation
+Version {version}, {date}
+:doctype: book
+:toc: left
+:sectnums:
+:toclevels: 2
+:source-highlighter: prettify
+:docinfo: shared
+:icons: font
+
+== Introduction
+This document contains generated documentation for `AMPnet report-service`. Report service contains all endpoints
+for generating reports in PDF
+Source code is available on https://github.com/AMPnet/report-service[Github].
+
+== Reporting API
+All requests need header: `Authorization: Bearer JWT`.
+
+=== Get user transactions report
+Query parameters `from` and `to` are both optional.
+
+.Request
+include::{snippets}/ReportingControllerTest/mustBeAbleToGeneratePdfForAllUserTransactions/http-request.adoc[]
+Response is a PDF file data.
+
+=== Get user transaction report
+Query parameters `txHash`, `fromTxHash` and `toTxHash` are required.
+
+.Request
+include::{snippets}/ReportingControllerTest/mustBeAbleToGeneratePdfForUserTransaction/http-request.adoc[]
+Response is a PDF file data.
+
+== Admin Reporting API
+All requests need header: `Authorization: Bearer JWT`.
+
+=== Get active users accounts summary report
+Query parameters `from` and `to` are both optional.
+
+.Request
+include::{snippets}/AdminControllerTest/mustBeAbleToGeneratePdfForAllActiveUsers/http-request.adoc[]
+Response is a PDF file data.
+
+=== User stats report
+Admin can download the xlsx report with users list.
+Following report types are available:
+
+* REGISTERED - users that have registered on the platform
+* VERIFIED - users that have completed KYC
+* WALLET - users that have initialized wallet
+* DEPOSIT - users that have at least one minted deposit
+* INVESTMENT - users that have completed at least one investment
+
+Query parameter `type` is mandatory.
+
+.Request
+include::{snippets}/AdminControllerTest/mustBeAbleToDownloadXlsxForVerifiedUsers/http-request.adoc[]
+Response is xlsx file data.
