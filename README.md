@@ -1,13 +1,13 @@
 # Report Service
 
-![Release](https://github.com/AMPnet/report-service/workflows/Release/badge.svg?branch=master) [![codecov](https://codecov.io/gh/AMPnet/report-service/branch/master/graph/badge.svg)](https://codecov.io/gh/AMPnet/report-service)
+![Release](https://github.com/AMPnet/report-service-eth/workflows/Release/badge.svg?branch=master) [![codecov](https://codecov.io/gh/AMPnet/report-service-eth/branch/master/graph/badge.svg)](https://codecov.io/gh/AMPnet/report-service-eth)
 
 
-Report service is a part of the AMPnet crowdfunding project.
+Report service is a part of the AMPnet crowdfunding project on Ethereum blockchain.
 
 ## Start
 
-Application is running on port: `8129`. To change default port set configuration: `server.port`.
+Application is running on port: `8137`. To change default port set configuration: `server.port`.
 
 ### Build
 
@@ -21,7 +21,7 @@ Application is running on port: `8129`. To change default port set configuration
 ./gradlew bootRun
 ```
 
-After starting the application, API documentation is available at: `localhost:8129/docs/index.html`.
+After starting the application, API documentation is available at: `localhost:8137/docs/index.html`.
 If documentation is missing generate it by running gradle task:
 
 ```sh
