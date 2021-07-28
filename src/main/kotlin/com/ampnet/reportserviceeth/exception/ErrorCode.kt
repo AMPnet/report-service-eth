@@ -7,7 +7,7 @@ enum class ErrorCode(val categoryCode: String, var specificCode: String, var mes
     USER_NOT_ISSUER("03", "02", "User is not the issuer owner"),
 
     // Internal: 08
-    INT_GRPC_BLOCKCHAIN("08", "03", "Failed gRPC call to blockchain service"),
+    INT_JSON_RPC_BLOCKCHAIN("08", "03", "Failed JSON-RPC call to blockchain"),
     INT_GRPC_USER("08", "04", "Failed gRPC call to user service"),
     INT_REQUEST("08", "08", "Invalid controller request exception"),
     INT_GENERATING_PDF("08", "10", "Could not generate pdf from data"),
