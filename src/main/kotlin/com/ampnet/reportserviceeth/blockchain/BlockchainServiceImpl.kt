@@ -1,6 +1,8 @@
 package com.ampnet.reportserviceeth.blockchain
 
 import com.ampnet.reportserviceeth.config.ApplicationProperties
+import com.ampnet.reportserviceeth.exception.ErrorCode
+import com.ampnet.reportserviceeth.exception.InternalException
 import mu.KLogging
 import org.springframework.stereotype.Service
 import org.web3j.protocol.Web3j
@@ -29,16 +31,32 @@ class BlockchainServiceImpl(private val applicationProperties: ApplicationProper
         TODO("Not implemented")
     }
 
+    @Suppress("TooGenericExceptionCaught")
     override fun getIssuerOwner(issuer: String): String {
         logger.debug { "Get owner of issuer: $issuer" }
         val contract = IIssuer.load(issuer, web3j, readonlyTransactionManager, DefaultGasProvider())
-        return contract.state.send().owner
+        return try {
+            contract.state.send().owner
+        } catch (ex: Exception) {
+            throw InternalException(
+                ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
+                "Failed to fetch issuer owner address for contract address: $issuer", ex
+            )
+        }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     override fun getWhitelistedAddress(issuer: String): List<String> {
         logger.debug { "Get whitelisted accounts for issuer: $issuer" }
         val contract = IIssuer.load(issuer, web3j, readonlyTransactionManager, DefaultGasProvider())
-        val addresses = contract.walletRecords.send() as List<IIssuer.WalletRecord>
-        return addresses.filter { it.whitelisted }.map { it.wallet }
+        return try {
+            val addresses = contract.walletRecords.send() as List<IIssuer.WalletRecord>
+            addresses.filter { it.whitelisted }.map { it.wallet }
+        } catch (ex: Exception) {
+            throw InternalException(
+                ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
+                "Failed to fetch whitelisted addresses for issuer contract address: $issuer", ex
+            )
+        }
     }
 }

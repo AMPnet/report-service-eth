@@ -177,7 +177,3 @@ tasks.register<Copy>("copyDocs") {
     into(file("src/main/resources/static/docs"))
     dependsOn(tasks.asciidoctor)
 }
-
-sourceSets.main {
-    java.srcDirs("$buildDir/generated/sources/web3j/main/java")
-}
