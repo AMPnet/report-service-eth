@@ -21,6 +21,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
     id("io.gitlab.arturbosch.detekt").version("1.16.0")
     id("com.google.protobuf") version "0.8.17"
+    id("org.web3j").version("4.8.4")
     idea
     jacoco
 }
@@ -57,6 +58,8 @@ dependencies {
     implementation("com.github.AMPnet:jwt:1.0.1")
     implementation("net.devh:grpc-client-spring-boot-starter:2.12.0.RELEASE")
     implementation("org.apache.poi:poi-ooxml:5.0.0")
+    implementation("org.web3j:core:4.8.4")
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
 
     val openHtmlToPdfVersion = "1.0.6"
     implementation("com.openhtmltopdf:openhtmltopdf-core:$openHtmlToPdfVersion")
@@ -174,4 +177,16 @@ tasks.register<Copy>("copyDocs") {
     from(file("$buildDir/docs/asciidoc"))
     into(file("src/main/resources/static/docs"))
     dependsOn(tasks.asciidoctor)
+}
+
+solidity {
+    version = "0.8.0"
+}
+
+web3j {
+    generatedPackageName = "com.ampnet.reportserviceeth.contract"
+}
+
+sourceSets.main {
+    java.srcDirs("$buildDir/generated/sources/web3j/main/java")
 }

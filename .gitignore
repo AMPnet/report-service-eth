@@ -63,3 +63,6 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Ignore secret properties
+src/main/resources/application-secret.properties
