@@ -21,7 +21,6 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
     id("io.gitlab.arturbosch.detekt").version("1.16.0")
     id("com.google.protobuf") version "0.8.17"
-    id("org.web3j").version("4.8.4")
     idea
     jacoco
 }
@@ -177,14 +176,6 @@ tasks.register<Copy>("copyDocs") {
     from(file("$buildDir/docs/asciidoc"))
     into(file("src/main/resources/static/docs"))
     dependsOn(tasks.asciidoctor)
-}
-
-solidity {
-    version = "0.8.0"
-}
-
-web3j {
-    generatedPackageName = "com.ampnet.reportserviceeth.contract"
 }
 
 sourceSets.main {

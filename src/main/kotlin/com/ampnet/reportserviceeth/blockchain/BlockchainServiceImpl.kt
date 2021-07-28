@@ -1,7 +1,6 @@
 package com.ampnet.reportserviceeth.blockchain
 
 import com.ampnet.reportserviceeth.config.ApplicationProperties
-import com.ampnet.reportserviceeth.contract.IIssuer
 import mu.KLogging
 import org.springframework.stereotype.Service
 import org.web3j.protocol.Web3j
