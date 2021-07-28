@@ -1,5 +1,3 @@
-package com.ampnet.reportserviceeth.blockchain;
-
 /**
  * <p>Auto generated code.
  * <p><strong>Do not modify!</strong>
@@ -43,7 +41,7 @@ public class IIssuer extends org.web3j.tx.Contract {
         super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
-    public org.web3j.protocol.core.RemoteFunctionCall<org.web3j.protocol.core.methods.response.TransactionReceipt> _define_struct_Auditor(com.ampnet.reportserviceeth.blockchain.IIssuer.WalletRecord auditor) {
+    public org.web3j.protocol.core.RemoteFunctionCall<org.web3j.protocol.core.methods.response.TransactionReceipt> _define_struct_Auditor(IIssuer.WalletRecord auditor) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC__DEFINE_STRUCT_AUDITOR, 
                 java.util.Arrays.<org.web3j.abi.datatypes.Type>asList(auditor),
@@ -70,7 +68,7 @@ public class IIssuer extends org.web3j.tx.Contract {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETSTATE,
                 java.util.Arrays.<org.web3j.abi.datatypes.Type>asList(),
                 java.util.Arrays.<org.web3j.abi.TypeReference<?>>asList(new org.web3j.abi.TypeReference<IIssuer.IssuerState>() {}));
-        return executeRemoteCallSingleValueReturn(function, com.ampnet.reportserviceeth.blockchain.IIssuer.IssuerState.class);
+        return executeRemoteCallSingleValueReturn(function, IIssuer.IssuerState.class);
     }
 
     public org.web3j.protocol.core.RemoteFunctionCall<java.util.List> getWalletRecords() {

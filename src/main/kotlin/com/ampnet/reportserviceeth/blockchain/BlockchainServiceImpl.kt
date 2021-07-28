@@ -14,6 +14,9 @@ class BlockchainServiceImpl(private val applicationProperties: ApplicationProper
     companion object : KLogging()
 
     private val web3j by lazy { Web3j.build(HttpService(applicationProperties.provider.blockchainApi)) }
+    private val readonlyTransactionManager = ReadonlyTransactionManager(
+        web3j, applicationProperties.smartContract.walletAddress
+    )
 
     override fun getTransactions(wallet: String): List<TransactionInfo> {
         logger.debug { "Get transactions for wallet address: $wallet" }
@@ -28,13 +31,13 @@ class BlockchainServiceImpl(private val applicationProperties: ApplicationProper
 
     override fun getIssuerOwner(issuer: String): String {
         logger.debug { "Get owner of issuer: $issuer" }
-        TODO("Not implemented")
+        val contract = IIssuer.load(issuer, web3j, readonlyTransactionManager, DefaultGasProvider())
+        return contract.state.send().owner
     }
 
     override fun getWhitelistedAddress(issuer: String): List<String> {
         logger.debug { "Get whitelisted accounts for issuer: $issuer" }
-        val transactionManager = ReadonlyTransactionManager(web3j, applicationProperties.smartContract.walletAddress)
-        val contract = IIssuer.load(issuer, web3j, transactionManager, DefaultGasProvider())
+        val contract = IIssuer.load(issuer, web3j, readonlyTransactionManager, DefaultGasProvider())
         val addresses = contract.walletRecords.send() as List<IIssuer.WalletRecord>
         return addresses.filter { it.whitelisted }.map { it.wallet }
     }

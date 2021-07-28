@@ -30,4 +30,10 @@ class BlockchainServiceTest {
         val addresses = service.getWhitelistedAddress(issuerContract)
         assertThat(addresses).isNotEmpty
     }
+
+    @Test
+    fun mustGetIssuerOwner() {
+        val owner = service.getIssuerOwner(issuerContract)
+        assertThat(owner).isNotNull
+    }
 }
