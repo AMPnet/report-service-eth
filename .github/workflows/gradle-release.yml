@@ -29,7 +29,6 @@ jobs:
       run: ./gradlew build
       env:
         BLOCKCHAIN_API: ${{ secrets.BLOCKCHAIN_API }}
-        WALLET_PRIVATE_KEY: ${{ secrets.WALLET_PRIVATE_KEY }}
     - name: Copy docs
       run: ./gradlew copyDocs
     - name: Push docker image

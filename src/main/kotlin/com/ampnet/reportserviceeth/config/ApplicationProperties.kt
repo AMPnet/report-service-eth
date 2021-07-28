@@ -26,5 +26,5 @@ class ProviderProperties {
 }
 
 class SmartContractProperties {
-    lateinit var privateKey: String
+    lateinit var walletAddress: String
 }
