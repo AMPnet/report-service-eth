@@ -12,22 +12,8 @@ import java.time.LocalDateTime
 class TransactionFactoryTest : TestBase() {
 
     @Test
-    fun mustNotCreateApprovedInvestmentTransaction() {
-        val tx = TransactionFactory.createTransaction(
-            createTransaction(
-                type = TransactionType.TOKEN_TRANSFER
-            )
-        )
-        assertThat(tx).isNull()
-    }
-
-    @Test
-    fun mustNotCreateUnrecognizedTransaction() {
-        val tx = TransactionFactory.createTransaction(
-            createTransaction(
-                type = TransactionType.REVENUE_SHARE
-            )
-        )
+    fun mustNotCreateTokenTransferTransaction() {
+        val tx = TransactionFactory.createTransaction(createTransaction(type = TransactionType.TRANSFER_TOKEN))
         assertThat(tx).isNull()
     }
 

@@ -19,15 +19,17 @@
     "marketplaceBought": "Marketplace shares bought",
     "marketplaceSold": "Marketplace shares sold",
     "totalBalanceAsOf": "Total balance as of ",
-    "investment": "Investment",
-    "investmentCancel": "Investment cancel",
+    "reserveInvestment": "Reserve investment",
+    "cancelInvestment": "Cancel Investment",
     "revenueSharePayout": "Revenue share payout",
+    "investmentCompleted": "Investment completed",
     "withdraw": "Withdraw",
     "dateOfBirth": "Date of Birth",
     "documentNumber": "Document Number",
     "dateOfIssue": "Date of Issue",
     "dateOfExpiry": "Date of Expiry",
-    "personalNumber": "Personal Number"
+    "personalNumber": "Personal Number",
+    "asset": "Asset"
   },
   "es": {
     "transactions": "Transacciones",
@@ -49,8 +51,8 @@
     "marketplaceBought": "Cuotas de mercado compradas",
     "marketplaceSold": "Cuotas de mercado vendidas",
     "totalBalanceAsOf": "Saldo total en",
-    "investment": "Inversión",
-    "investmentCancel": "Inversión cancelada",
+    "reserveInvestment": "Inversión",
+    "cancelInvestment": "Inversión cancelada",
     "revenueSharePayout": "Pago de la cuota de ingresos",
     "withdraw": "Retirar"
   },
@@ -74,8 +76,8 @@
     "marketplaceBought": "Αγορές μεριδίων",
     "marketplaceSold": "Πωλήσεις μεριδίων",
     "totalBalanceAsOf": "Συνολικό υπόλοιπο από ",
-    "investment": "Επένδυση",
-    "investmentCancel": "Ακύρωση Επένδυσης",
+    "reserveInvestment": "Επένδυση",
+    "cancelInvestment": "Ακύρωση Επένδυσης",
     "revenueSharePayout": "Πληρωμή μεριδίου εσόδων",
     "withdraw": "Απόσυρση"
   }

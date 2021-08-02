@@ -28,11 +28,11 @@ class TransactionsSummary(
     }
     val period: String = getPeriod(periodRequest)
     val dateOfFinish: String? = getDateOfFinish(transactions, periodRequest)
-    val revenueShare = sumTransactionAmountsByType(TransactionType.CLAIM_TOKENS).toEurAmount()
+    val revenueShare = sumTransactionAmountsByType(TransactionType.REVENUE_SHARE).toEther()
     val investments = (
-        sumTransactionAmountsByType(TransactionType.INVEST) -
+        sumTransactionAmountsByType(TransactionType.RESERVE_INVESTMENT) -
             sumTransactionAmountsByType(TransactionType.CANCEL_INVESTMENT)
-        ).toEurAmount()
+        ).toEther()
 
     private fun getPeriod(periodRequest: PeriodServiceRequest): String {
         val fromPeriod = formatToYearMonthDay(periodRequest.from ?: userInfo.createdAt)
@@ -52,6 +52,6 @@ class TransactionsSummary(
         date?.format(DateTimeFormatter.ofPattern(DATE_FORMAT).withLocale(locale))
 
     private fun sumTransactionAmountsByType(type: TransactionType): BigInteger {
-        return transactionsByType[type]?.sumOf { it.amount } ?: BigInteger.ZERO
+        return transactionsByType[type]?.sumOf { it.value } ?: BigInteger.ZERO
     }
 }
