@@ -3,6 +3,7 @@ package com.ampnet.reportserviceeth.service.data
 import com.ampnet.reportserviceeth.blockchain.TransactionInfo
 import com.ampnet.reportserviceeth.blockchain.TransactionStatusType
 import com.ampnet.reportserviceeth.blockchain.TransactionType
+import com.ampnet.reportserviceeth.service.toEther
 import java.math.BigInteger
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -47,22 +48,13 @@ abstract class Transaction(transaction: TransactionInfo) {
     var percentageInProject: String? = null
     var locale: Locale = Locale.ENGLISH
 
-//    fun setPercentageInProject(expectedProjectFunding: BigInteger) {
-//        if (expectedProjectFunding.signum() == 1) {
-//            percentageInProject = amount
-//                .multiply(BigInteger.valueOf(TO_PERCENTAGE))
-//                .divide(expectedProjectFunding)
-//                .toString().take(LENGTH_OF_PERCENTAGE)
-//        }
-//    }
+    fun setPercentageInProject() {
+        TODO("Not implemented")
+    }
 
-//    fun amountToCalculate(): BigInteger {
-//        return when (txStatus) {
-//            TransactionStatusType.PAID_IN -> amount
-//            TransactionStatusType.PAID_OUT -> -amount
-//            TransactionStatusType.UNDEFINED -> BigInteger.ZERO
-//        }
-//    }
+    fun amountToCalculate(): BigInteger {
+        TODO("Not implemented")
+    }
 
     fun setLanguage(language: String) {
         if (language.isNotBlank()) {
@@ -90,7 +82,7 @@ class TransactionSharePayout(transaction: TransactionInfo) : Transaction(transac
 }
 
 class TransactionInvestmentCompleted(transaction: TransactionInfo) : Transaction(transaction) {
-    override val txStatus = TransactionStatusType.PAID_OUT
+    override val txStatus = TransactionStatusType.PAID_IN
     override val name: String
         get() = translations.investmentCompleted
 }

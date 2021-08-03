@@ -1,10 +1,9 @@
 package com.ampnet.reportserviceeth.blockchain
 
+import com.ampnet.reportserviceeth.service.toLocalDateTime
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import java.math.BigInteger
-import java.time.Instant
 import java.time.LocalDateTime
-import java.util.TimeZone
 
 data class TransactionInfo(
     val type: TransactionType,
@@ -76,6 +75,3 @@ data class TransactionInfo(
         asset
     )
 }
-
-fun BigInteger.toLocalDateTime(): LocalDateTime =
-    LocalDateTime.ofInstant(Instant.ofEpochSecond(this.toLong()), TimeZone.getDefault().toZoneId())

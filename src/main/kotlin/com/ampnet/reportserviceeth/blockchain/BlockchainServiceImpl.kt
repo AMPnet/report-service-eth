@@ -4,26 +4,20 @@ import TransactionEvents
 import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
+import com.ampnet.reportserviceeth.service.sendSafely
 import com.ampnet.reportserviceeth.service.unwrap
-import mu.KLogging
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.RemoteFunctionCall
-import org.web3j.protocol.core.Request
-import org.web3j.protocol.core.Response
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.ReadonlyTransactionManager
 import org.web3j.tx.gas.DefaultGasProvider
-import java.io.IOException
 
 private val logger = KotlinLogging.logger {}
 
 @Service
 class BlockchainServiceImpl(private val applicationProperties: ApplicationProperties) : BlockchainService {
-
-    companion object : KLogging()
 
     private val web3j by lazy { Web3j.build(HttpService(applicationProperties.provider.blockchainApi)) }
     private val readonlyTransactionManager = ReadonlyTransactionManager(
@@ -36,10 +30,18 @@ class BlockchainServiceImpl(private val applicationProperties: ApplicationProper
         TODO("Not implemented")
     }
 
-    // Transaction receipt is fetched for the txHash and it contains `to` and `from` variables.
-    // In case of INVEST, CANCEL_INVESTMENT, CLAIM_TOKENS events `to` is the address of CfManagerSoftcap contract.
-    // In case of REVENUE_SHARE event `from` is the address of PayoutManager contract.
-    // Both of these contracts contain state pointing to Asset contract which is used to fetch the asset name.
+    /**
+     * Transaction receipt is fetched for the txHash and it contains `to` and `from` variables
+     * and list of all the events.
+     * In case of INVEST, CANCEL_INVESTMENT, CLAIM_TOKENS events `to` is the address of CfManagerSoftcap contract.
+     * In case of REVENUE_SHARE event `from` is the address of PayoutManager contract.
+     * Both of these contracts contain state pointing to Asset contract which is used to fetch the asset name.
+     * Returns transactionInfo object which is mapped from the type of events available.
+     * If transaction receipt not found for the txHash or doesn't contain any events returns InternalException.
+     *
+     * @param txHash String hash of the transaction
+     * @return [TransactionInfo] object
+     */
     @Suppress("ReturnCount")
     override fun getTransactionInfo(txHash: String): TransactionInfo {
         logger.debug { "Get info for transaction with hash: $txHash" }
@@ -130,24 +132,5 @@ class BlockchainServiceImpl(private val applicationProperties: ApplicationProper
     private fun getAssetName(assetContractAddress: String): String? {
         val assetContract = IAsset.load(assetContractAddress, web3j, readonlyTransactionManager, DefaultGasProvider())
         return assetContract.state.sendSafely()?.name
-    }
-}
-
-fun <S, T : Response<*>?> Request<S, T>.sendSafely(): T? {
-    return try {
-        this.send()
-    } catch (ex: IOException) {
-        logger.warn("Failed blockchain call", ex)
-        null
-    }
-}
-
-@Suppress("TooGenericExceptionCaught")
-fun <T> RemoteFunctionCall<T>.sendSafely(): T? {
-    return try {
-        this.send()
-    } catch (ex: Exception) {
-        logger.warn("Failed smart contract call", ex)
-        null
     }
 }

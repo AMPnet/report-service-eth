@@ -1,6 +1,6 @@
 package com.ampnet.reportserviceeth
 
-import com.ampnet.reportserviceeth.service.data.DECIMALS_PRECISION
+import com.ampnet.reportserviceeth.service.DECIMALS_PRECISION
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigInteger
 
@@ -16,4 +16,4 @@ abstract class TestBase {
     }
 }
 
-fun String.toGwei(): BigInteger = BigInteger(this).times(BigInteger(DECIMALS_PRECISION.toString()))
+fun String.toGwei(): BigInteger = BigInteger(this).times(BigInteger.valueOf(DECIMALS_PRECISION))

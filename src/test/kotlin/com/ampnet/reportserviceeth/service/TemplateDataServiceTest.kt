@@ -12,7 +12,6 @@ import com.ampnet.reportserviceeth.service.data.DATE_FORMAT
 import com.ampnet.reportserviceeth.service.data.DEFAULT_LOGO
 import com.ampnet.reportserviceeth.service.data.LENGTH_OF_PERCENTAGE
 import com.ampnet.reportserviceeth.service.data.TO_PERCENTAGE
-import com.ampnet.reportserviceeth.service.data.toEther
 import com.ampnet.reportserviceeth.service.impl.TemplateDataServiceImpl
 import com.ampnet.reportserviceeth.toGwei
 import org.assertj.core.api.Assertions.assertThat
