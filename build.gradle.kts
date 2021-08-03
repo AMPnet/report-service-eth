@@ -26,7 +26,7 @@ plugins {
 }
 
 group = "com.ampnet"
-version = "0.0.1"
+version = "0.0.2"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 configurations {
@@ -146,7 +146,7 @@ tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = "0.7".toBigDecimal()
+                minimum = "0.5".toBigDecimal()
             }
         }
     }

@@ -8,6 +8,7 @@ import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.ErrorResponse
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
+import com.ampnet.reportserviceeth.toGwei
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
@@ -29,7 +30,6 @@ import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import java.io.File
-import java.math.BigInteger
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
@@ -138,10 +138,11 @@ abstract class ControllerTestBase : TestBase() {
         type: TransactionType,
         from: String,
         to: String,
-        amount: String = "700000"
+        amount: String = "70"
     ): TransactionInfo = TransactionInfo(
-        type, from, to, BigInteger(amount), BigInteger(amount),
-        LocalDateTime.now(), "0xafd91eb7096efdc4e8ef331a83bc512f279b80730dfbd62824df92e4e504f2f8", "asset"
+        type, from, to, amount.toGwei(), amount.toGwei(),
+        LocalDateTime.now(), "0xafd91eb7096efdc4e8ef331a83bc512f279b80730dfbd62824df92e4e504f2f8",
+        "Gold mine in Chile"
     )
 
     protected fun getDownloadDirectory(name: String): String =
@@ -151,7 +152,7 @@ abstract class ControllerTestBase : TestBase() {
         val investment = "30000"
         val invests = MutableList(2) {
             createTransaction(
-                TransactionType.INVEST,
+                TransactionType.RESERVE_INVESTMENT,
                 userAddress,
                 projectWallet,
                 amount = investment
@@ -160,10 +161,10 @@ abstract class ControllerTestBase : TestBase() {
         val revenueShares =
             MutableList(2) {
                 createTransaction(
-                    TransactionType.CLAIM_TOKENS,
+                    TransactionType.REVENUE_SHARE,
                     projectWallet,
                     userAddress,
-                    amount = "6670"
+                    amount = "500"
                 )
             }
         val cancelInvestments = MutableList(1) {

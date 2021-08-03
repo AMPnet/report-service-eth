@@ -12,13 +12,14 @@ import com.ampnet.reportserviceeth.service.data.DATE_FORMAT
 import com.ampnet.reportserviceeth.service.data.DEFAULT_LOGO
 import com.ampnet.reportserviceeth.service.data.LENGTH_OF_PERCENTAGE
 import com.ampnet.reportserviceeth.service.data.TO_PERCENTAGE
-import com.ampnet.reportserviceeth.service.data.toEurAmount
 import com.ampnet.reportserviceeth.service.impl.TemplateDataServiceImpl
+import com.ampnet.reportserviceeth.toGwei
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
+import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -46,16 +47,16 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         suppose("Blockchain service will return transactions for wallet") {
             testContext.transactions = listOf(
                 createTransaction(
-                    userAddress, projectWallet, testContext.invest.toString(),
-                    TransactionType.INVEST
+                    userAddress, projectWallet, testContext.reserveInvestment.toString(),
+                    TransactionType.RESERVE_INVESTMENT
                 ),
                 createTransaction(
                     projectWallet, userAddress, testContext.cancelInvestment.toString(),
                     TransactionType.CANCEL_INVESTMENT
                 ),
                 createTransaction(
-                    projectWallet, userAddress, testContext.sharePayout.toString(),
-                    TransactionType.CLAIM_TOKENS
+                    projectWallet, userAddress, testContext.completeInvestment.toString(),
+                    TransactionType.COMPLETED_INVESTMENT
                 ),
             )
             Mockito.`when`(blockchainService.getTransactions(testContext.user.address))
@@ -66,18 +67,18 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             val periodRequest = PeriodServiceRequest(null, null)
             val txSummary = templateDataService.getUserTransactionsData(userAddress, periodRequest)
             assertThat(txSummary.investments)
-                .isEqualTo((testContext.invest - testContext.cancelInvestment).toEurAmount())
-            assertThat(txSummary.revenueShare).isEqualTo(testContext.sharePayout.toEurAmount())
+                .isEqualTo(BigInteger.valueOf(testContext.reserveInvestment - testContext.cancelInvestment).toEther())
+            assertThat(txSummary.revenueShare).isEqualTo(BigInteger.valueOf(testContext.sharePayout).toEther())
 
             val transactions = txSummary.transactions
             assertThat(transactions).hasSize(3)
-            val investTx = transactions.first { it.type == TransactionType.INVEST }
+            val investTx = transactions.first { it.type == TransactionType.RESERVE_INVESTMENT }
 //            assertThat(investTx.description).isEqualTo(project.name)
 //            assertThat(investTx.percentageInProject).isEqualTo(
 //                getPercentageInProject(project.expectedFunding, investTx.amount)
 //            )
             assertThat(investTx.txDate).isNotBlank
-            assertThat(investTx.amountInEuro).isEqualTo(investTx.amount.toEurAmount())
+            assertThat(investTx.valueInDollar).isEqualTo(investTx.value.toEther())
             val cancelInvestmentTx =
                 transactions.first { it.type == TransactionType.CANCEL_INVESTMENT }
 //            assertThat(cancelInvestmentTx.description).isEqualTo(project.name)
@@ -85,11 +86,11 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
 //                getPercentageInProject(project.expectedFunding, cancelInvestmentTx.amount)
 //            )
             assertThat(cancelInvestmentTx.txDate).isNotBlank
-            assertThat(cancelInvestmentTx.amountInEuro).isEqualTo(cancelInvestmentTx.amount.toEurAmount())
-            val sharePayoutTx = transactions.first { it.type == TransactionType.CLAIM_TOKENS }
+            assertThat(cancelInvestmentTx.valueInDollar).isEqualTo(cancelInvestmentTx.value.toEther())
+            val sharePayoutTx = transactions.first { it.type == TransactionType.COMPLETED_INVESTMENT }
 //            assertThat(sharePayoutTx.description).isEqualTo(project.name)
             assertThat(sharePayoutTx.txDate).isNotBlank
-            assertThat(sharePayoutTx.amountInEuro).isEqualTo(sharePayoutTx.amount.toEurAmount())
+            assertThat(sharePayoutTx.valueInDollar).isEqualTo(sharePayoutTx.value.toEther())
         }
     }
 
@@ -103,23 +104,23 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         suppose("Blockchain service will return transactions for wallet") {
             testContext.transactions = listOf(
                 createTransaction(
-                    userAddress, projectWallet, testContext.invest.toString(),
-                    TransactionType.INVEST,
+                    userAddress, projectWallet, testContext.reserveInvestment.toString(),
+                    TransactionType.RESERVE_INVESTMENT,
                     LocalDateTime.of(2020, 9, 1, 1, 0, 0, 0)
                 ),
                 createTransaction(
-                    userAddress, projectWallet, testContext.invest.toString(),
-                    TransactionType.INVEST,
+                    userAddress, projectWallet, testContext.reserveInvestment.toString(),
+                    TransactionType.RESERVE_INVESTMENT,
                     LocalDateTime.of(2020, 8, 1, 1, 0, 0, 0)
                 ),
                 createTransaction(
-                    userAddress, projectWallet, testContext.invest.toString(),
-                    TransactionType.INVEST,
+                    userAddress, projectWallet, testContext.reserveInvestment.toString(),
+                    TransactionType.RESERVE_INVESTMENT,
                     LocalDateTime.of(2020, 7, 1, 1, 0, 0, 0)
                 ),
                 createTransaction(
-                    userAddress, projectWallet, testContext.invest.toString(),
-                    TransactionType.INVEST,
+                    userAddress, projectWallet, testContext.reserveInvestment.toString(),
+                    TransactionType.RESERVE_INVESTMENT,
                     LocalDateTime.of(2020, 6, 1, 1, 0, 0, 0)
                 )
             )
@@ -142,7 +143,8 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
     fun mustGenerateCorrectSingleTransactionSummary() {
         suppose("Blockchain service will return transaction info for txHash, fromTxHash and toTxHash") {
             testContext.transaction = createTransaction(
-                userAddress, projectWallet, testContext.invest.toString(), TransactionType.INVEST, txHash = txHash
+                userAddress, projectWallet, testContext.reserveInvestment.toString(),
+                TransactionType.RESERVE_INVESTMENT, txHash = txHash
             )
             Mockito.`when`(blockchainService.getTransactionInfo(txHash))
                 .thenReturn(testContext.transaction)
@@ -159,12 +161,13 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             val singleTxSummary = templateDataService.getUserTransactionData(transactionServiceRequest)
             val tx = singleTxSummary.transaction
             val userInfo = singleTxSummary.userInfo
-            assertThat(tx.amount).isEqualTo(transaction.amount.toLong())
+            assertThat(tx.amount).isEqualTo(transaction.tokenAmount)
+            assertThat(tx.value).isEqualTo(transaction.tokenValue)
             assertThat(tx.date).isBeforeOrEqualTo(LocalDateTime.now())
             assertThat(tx.type).isEqualTo(transaction.type)
             assertThat(tx.from).isEqualTo(transaction.from)
             assertThat(tx.to).isEqualTo(transaction.to)
-//            assertThat(tx.description).isNull()
+            assertThat(tx.description).isEqualTo(transaction.asset)
             assertThat(tx.percentageInProject).isNull()
             assertThat(userInfo.address).isEqualTo(testContext.user.address)
         }
@@ -174,7 +177,10 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
     fun mustThrowExceptionIfTransactionDoesNotBelongToUser() {
         suppose("Blockchain service will return transaction for tx hash") {
             testContext.transaction = createTransaction(
-                secondUserAddress, projectWallet, testContext.invest.toString(), TransactionType.INVEST
+                secondUserAddress,
+                projectWallet,
+                testContext.reserveInvestment.toString(),
+                TransactionType.RESERVE_INVESTMENT
             )
             Mockito.`when`(blockchainService.getTransactionInfo(txHash))
                 .thenReturn(testContext.transaction)
@@ -193,7 +199,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
     fun mustGenerateSingleReportInEnglishOnInvalidLanguage() {
         suppose("Blockchain service will return transaction info for txHash") {
             testContext.transaction = createTransaction(
-                userAddress, projectWallet, testContext.invest.toString(), TransactionType.INVEST
+                userAddress, projectWallet, testContext.reserveInvestment.toString(), TransactionType.RESERVE_INVESTMENT
             )
             Mockito.`when`(blockchainService.getTransactionInfo(txHash))
                 .thenReturn(testContext.transaction)
@@ -228,7 +234,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         verify("Template data service can get user transactions") {
             val periodRequest = PeriodServiceRequest(null, null)
             val txSummary = templateDataService.getUserTransactionsData(userAddress, periodRequest)
-            assertThat(txSummary.transactions.first().name).isEqualTo(translationService.getTranslations().investment)
+            assertThat(txSummary.transactions.first().name).isEqualTo(translationService.getTranslations().reserveInvestment)
         }
     }
 
@@ -238,7 +244,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             testContext.user = createUserResponse(userAddress)
             testContext.secondUser = createUserResponse(secondUserAddress)
             testContext.thirdUser = createUserResponse(thirdUserAddress)
-            Mockito.`when`(userService.getUsersForIssuer(coop))
+            Mockito.`when`(userService.getUsersForIssuer(issuer))
                 .thenReturn(listOf(testContext.user, testContext.secondUser, testContext.thirdUser))
         }
         suppose("Blockchain service will return transactions for wallets") {
@@ -248,7 +254,8 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
                 .thenReturn(
                     listOf(
                         createTransaction(
-                            secondUserAddress, projectWallet, testContext.invest.toString(), TransactionType.INVEST
+                            secondUserAddress, projectWallet, testContext.reserveInvestment.toString(),
+                            TransactionType.RESERVE_INVESTMENT
                         )
                     )
                 )
@@ -258,7 +265,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
 
         verify("Template data service can get users accounts summary") {
             val periodRequest = PeriodServiceRequest(null, null)
-            val usersAccountsSummary = templateDataService.getAllActiveUsersSummaryData(coop, periodRequest)
+            val usersAccountsSummary = templateDataService.getAllActiveUsersSummaryData(issuer, periodRequest)
             val transactionsSummaryList = usersAccountsSummary.summaries
             val logo = usersAccountsSummary.logo
             assertThat(transactionsSummaryList).hasSize(3)
@@ -266,10 +273,17 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             transactionsSummaryList.forEach {
                 when (it.userInfo.address) {
                     userAddress -> {
-                        assertThat(it.investments).isEqualTo((testContext.invest - testContext.cancelInvestment).toEurAmount())
-                        assertThat(it.revenueShare).isEqualTo(testContext.sharePayout.toEurAmount())
+                        assertThat(it.investments).isEqualTo(
+                            (
+                                testContext.reserveInvestment.toString().toGwei() -
+                                    testContext.cancelInvestment.toString().toGwei()
+                                ).toEther()
+                        )
+                        assertThat(it.revenueShare).isEqualTo(testContext.sharePayout.toString().toGwei().toEther())
                     }
-                    secondUserAddress -> assertThat(it.investments).isEqualTo((testContext.invest).toEurAmount())
+                    secondUserAddress -> assertThat(it.investments).isEqualTo(
+                        BigInteger.valueOf(testContext.reserveInvestment).toString().toGwei().toEther()
+                    )
                     thirdUserAddress -> assertThat(it.transactions).isEmpty()
                 }
             }
@@ -279,23 +293,23 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
     @Test
     fun mustThrowExceptionIfNoUserWithInfoFound() {
         suppose("User service will return empty list") {
-            Mockito.`when`(userService.getUsersForIssuer(coop)).thenReturn(emptyList())
+            Mockito.`when`(userService.getUsersForIssuer(issuer)).thenReturn(emptyList())
         }
 
         verify("Template data service can get users accounts summary") {
             val periodRequest = PeriodServiceRequest(null, null)
             val exception = assertThrows<ResourceNotFoundException> {
-                templateDataService.getAllActiveUsersSummaryData(coop, periodRequest)
+                templateDataService.getAllActiveUsersSummaryData(issuer, periodRequest)
             }
             assertThat(exception.errorCode).isEqualTo(ErrorCode.USER_MISSING_INFO)
         }
     }
 
     @Test
-    fun mustThrowExceptionIfForEmptyListTransaction() {
+    fun mustThrowExceptionForEmptyListTransaction() {
         suppose("User service will return a user") {
             testContext.user = createUserResponse(userAddress)
-            Mockito.`when`(userService.getUsersForIssuer(coop))
+            Mockito.`when`(userService.getUsersForIssuer(issuer))
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Blockchain service will return empty list") {
@@ -306,7 +320,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         verify("Template data service can get users accounts summary") {
             val periodRequest = PeriodServiceRequest(null, null)
             val exception = assertThrows<ResourceNotFoundException> {
-                templateDataService.getAllActiveUsersSummaryData(coop, periodRequest)
+                templateDataService.getAllActiveUsersSummaryData(issuer, periodRequest)
             }
             assertThat(exception.errorCode).isEqualTo(ErrorCode.USER_MISSING_INFO)
         }
@@ -315,12 +329,12 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
     private fun createUserTransactionFlow(): List<TransactionInfo> =
         listOf(
             createTransaction(
-                userWallet, projectWallet, testContext.invest.toString(),
-                TransactionType.INVEST
+                userWallet, projectWallet, testContext.reserveInvestment.toString(),
+                TransactionType.RESERVE_INVESTMENT
             ),
             createTransaction(
                 projectWallet, userWallet, testContext.sharePayout.toString(),
-                TransactionType.CLAIM_TOKENS
+                TransactionType.REVENUE_SHARE
             ),
             createTransaction(
                 projectWallet, userWallet, testContext.cancelInvestment.toString(),
@@ -343,8 +357,9 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         lateinit var user: UserResponse
         lateinit var secondUser: UserResponse
         lateinit var thirdUser: UserResponse
-        val invest = 20000L
+        val reserveInvestment = 20000L
         val cancelInvestment = 20000L
+        val completeInvestment = 20000L
         val sharePayout = 1050L
     }
 }

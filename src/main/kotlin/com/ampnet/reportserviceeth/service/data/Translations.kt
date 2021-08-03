@@ -20,13 +20,15 @@ data class Translations(val translations: Map<String, String>) {
     val marketplaceBought: String by translations
     val marketplaceSold: String by translations
     val totalBalanceAsOf: String by translations
-    val investment: String by translations
-    val investmentCancel: String by translations
+    val reserveInvestment: String by translations
+    val cancelInvestment: String by translations
     val revenueSharePayout: String by translations
+    val investmentCompleted: String by translations
     val withdraw: String by translations
     val dateOfBirth: String by translations
     val documentNumber: String by translations
     val dateOfIssue: String by translations
     val dateOfExpiry: String by translations
     val personalNumber: String by translations
+    val asset: String by translations
 }

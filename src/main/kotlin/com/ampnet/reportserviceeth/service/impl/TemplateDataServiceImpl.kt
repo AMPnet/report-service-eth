@@ -14,7 +14,7 @@ import com.ampnet.reportserviceeth.service.data.SingleTransactionSummary
 import com.ampnet.reportserviceeth.service.data.Transaction
 import com.ampnet.reportserviceeth.service.data.TransactionCancelInvestment
 import com.ampnet.reportserviceeth.service.data.TransactionFactory
-import com.ampnet.reportserviceeth.service.data.TransactionInvest
+import com.ampnet.reportserviceeth.service.data.TransactionReserveInvestment
 import com.ampnet.reportserviceeth.service.data.TransactionsSummary
 import com.ampnet.reportserviceeth.service.data.Translations
 import com.ampnet.reportserviceeth.service.data.UserInfo
@@ -92,7 +92,7 @@ class TemplateDataServiceImpl(
             transaction.setLanguage(language)
             transaction.translations = translations
             when (transaction) {
-                is TransactionInvest -> {
+                is TransactionReserveInvestment -> {
 //                    getExpectedProjectFunding(ownerUuidTo, projects)?.let {
 //                        transaction.setPercentageInProject(it)
 //                    }

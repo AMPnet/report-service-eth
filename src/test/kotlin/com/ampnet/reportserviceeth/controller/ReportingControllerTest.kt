@@ -53,7 +53,7 @@ class ReportingControllerTest : ControllerTestBase() {
 
             val pdfContent = result.response.contentAsByteArray
             verifyPdfFormat(pdfContent)
-//             File(getDownloadDirectory("transactions.pdf")).writeBytes(pdfContent)
+            // File(getDownloadDirectory("transactions.pdf")).writeBytes(pdfContent)
         }
     }
 
@@ -67,10 +67,10 @@ class ReportingControllerTest : ControllerTestBase() {
         }
         suppose("Blockchain service will return transaction info for txHash, fromTxHash and toTxHash") {
             testContext.transaction = createTransaction(
-                TransactionType.INVEST,
+                TransactionType.RESERVE_INVESTMENT,
                 "0x316E89e5455DaD761f289Ead1F612Ab0b3bF32Bf",
                 userAddress,
-                "1000000"
+                "700"
             )
             given(blockchainService.getTransactionInfo(txHash)).willReturn(testContext.transaction)
         }
@@ -85,7 +85,7 @@ class ReportingControllerTest : ControllerTestBase() {
 
             val pdfContent = result.response.contentAsByteArray
             verifyPdfFormat(pdfContent)
-//             File(getDownloadDirectory("transaction.pdf")).writeBytes(pdfContent)
+            // File(getDownloadDirectory("transaction.pdf")).writeBytes(pdfContent)
         }
     }
 

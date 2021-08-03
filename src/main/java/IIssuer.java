@@ -23,18 +23,8 @@ public class IIssuer extends org.web3j.tx.Contract {
 
     public static final String FUNC_SETINFO = "setInfo";
 
-    @Deprecated
-    protected IIssuer(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
-        super(BINARY, contractAddress, web3j, credentials, gasPrice, gasLimit);
-    }
-
     protected IIssuer(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, credentials, contractGasProvider);
-    }
-
-    @Deprecated
-    protected IIssuer(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
-        super(BINARY, contractAddress, web3j, transactionManager, gasPrice, gasLimit);
     }
 
     protected IIssuer(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
@@ -101,16 +91,6 @@ public class IIssuer extends org.web3j.tx.Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    @Deprecated
-    public static IIssuer load(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
-        return new IIssuer(contractAddress, web3j, credentials, gasPrice, gasLimit);
-    }
-
-    @Deprecated
-    public static IIssuer load(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
-        return new IIssuer(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
-    }
-
     public static IIssuer load(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
         return new IIssuer(contractAddress, web3j, credentials, contractGasProvider);
     }
@@ -123,18 +103,8 @@ public class IIssuer extends org.web3j.tx.Contract {
         return deployRemoteCall(IIssuer.class, web3j, credentials, contractGasProvider, BINARY, "");
     }
 
-    @Deprecated
-    public static org.web3j.protocol.core.RemoteCall<IIssuer> deploy(org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
-        return deployRemoteCall(IIssuer.class, web3j, credentials, gasPrice, gasLimit, BINARY, "");
-    }
-
     public static org.web3j.protocol.core.RemoteCall<IIssuer> deploy(org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
         return deployRemoteCall(IIssuer.class, web3j, transactionManager, contractGasProvider, BINARY, "");
-    }
-
-    @Deprecated
-    public static org.web3j.protocol.core.RemoteCall<IIssuer> deploy(org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
-        return deployRemoteCall(IIssuer.class, web3j, transactionManager, gasPrice, gasLimit, BINARY, "");
     }
 
     public static class WalletRecord extends org.web3j.abi.datatypes.StaticStruct {

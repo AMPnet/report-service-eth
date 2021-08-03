@@ -8,6 +8,7 @@ import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.config.JsonConfig
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.service.impl.TranslationServiceImpl
+import com.ampnet.reportserviceeth.toGwei
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.math.BigInteger
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
@@ -30,7 +30,7 @@ abstract class JpaServiceTestBase : TestBase() {
     protected val projectWallet: String = "0xFeC646017105fA2A4FFDc773e9c539Eda5af724a"
     protected val txHash = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
     protected val logo = "https://ampnet.io/assets/images/logo-amp.png"
-    protected val coop = "ampnet-test"
+    protected val issuer = "0x5013F6ce0f9Beb07Be528E408352D03f3FCa1857"
 
     @Mock
     protected lateinit var blockchainService: BlockchainService
@@ -54,7 +54,7 @@ abstract class JpaServiceTestBase : TestBase() {
         date: LocalDateTime = LocalDateTime.now().minusDays(1),
         txHash: String = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
     ): TransactionInfo = TransactionInfo(
-        type, from, to, BigInteger(amount), BigInteger(amount),
+        type, from, to, amount.toGwei(), amount.toGwei(),
         date, txHash, "asset"
     )
 

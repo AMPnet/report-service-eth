@@ -73,7 +73,7 @@ class TransactionsSummaryTest : TestBase() {
     }
 
     private fun createTransaction(date: LocalDateTime): TransactionInfo = TransactionInfo(
-        TransactionType.INVEST,
+        TransactionType.RESERVE_INVESTMENT,
         "0x8f52B0cC50967fc59C6289f8FDB3E356EdeEBD23",
         "0xd43e088622404A5A21267033EC200383d39C22ca",
         BigInteger.TEN,
