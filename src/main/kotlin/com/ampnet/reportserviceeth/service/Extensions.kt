@@ -18,6 +18,7 @@ private val logger = KotlinLogging.logger {}
 
 fun <T> Optional<T>.unwrap(): T? = if (this.isPresent) this.get() else null
 
+@Suppress("ReturnCount")
 fun <S, T : Response<*>?> Request<S, T>.sendSafely(): T? {
     try {
         val value = this.send()
