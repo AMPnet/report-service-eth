@@ -142,7 +142,7 @@ abstract class ControllerTestBase : TestBase() {
     ): TransactionInfo = TransactionInfo(
         type, from, to, amount.toGwei(), amount.toGwei(),
         LocalDateTime.now(), "0xafd91eb7096efdc4e8ef331a83bc512f279b80730dfbd62824df92e4e504f2f8",
-        "Gold mine in Chile", "APX"
+        "Gold mine in Chile", "GMC"
     )
 
     protected fun getDownloadDirectory(name: String): String =
