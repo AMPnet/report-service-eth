@@ -55,7 +55,7 @@ abstract class JpaServiceTestBase : TestBase() {
         txHash: String = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
     ): TransactionInfo = TransactionInfo(
         type, from, to, amount.toGwei(), amount.toGwei(),
-        date, txHash, "asset"
+        date, txHash, "asset", "GMC"
     )
 
     protected fun createUserResponse(address: String, language: String = "en"): UserResponse =

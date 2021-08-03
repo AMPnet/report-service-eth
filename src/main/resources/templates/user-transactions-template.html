@@ -19,10 +19,10 @@
                 <tbody>
                     <tr th:each="tx,iStat : ${data.transactions}" th:classappend="${(iStat.even? 'table-grey-background': '') + ' ' + (iStat.last? 'table-border-bottom': '')}">
                         <td th:text="${tx.txDate}" th:classappend="${iStat.last? 'table-no-bottom-border': ''}" class="text-left table-border-right">Aug 1, 2020 13:30</td>
-                        <td th:utext="${tx.name}" th:classappend="${iStat.last? 'table-no-bottom-border': ''}" class="text-left table-border-right">Deposit</td>
-                        <td th:utext="${tx.description != null} ? ${tx.description} : ''" th:classappend="${iStat.last? 'table-no-bottom-border': ''}" class="text-left table-border-right">Deposit</td>
-                        <td th:utext="${tx.txStatus.name() == 'PAID_IN'} ? ('€' + ${tx.valueInDollar} + '<br/>' + ${tx.amountInEther} + ' ERC-20 Tokens') : ''" th:classappend="${iStat.last? 'table-no-bottom-border': ''}" class="table-border-right">Deposit</td>
-                        <td th:utext="${tx.txStatus.name() == 'PAID_OUT'} ? ('€' + ${tx.valueInDollar} + '<br/>' + ${tx.amountInEther} + ' ERC-20 Tokens') : ''" th:classappend="${iStat.last? 'table-no-bottom-border': ''}">Deposit</td>
+                        <td th:utext="${tx.name}" th:classappend="${iStat.last? 'table-no-bottom-border': ''}" class="text-left table-border-right">Reserve Investment</td>
+                        <td th:utext="${tx.description != null} ? ${tx.description} : ''" th:classappend="${iStat.last? 'table-no-bottom-border': ''}" class="text-left table-border-right">Asset name</td>
+                        <td th:utext="${tx.txStatus.name() == 'PAID_IN'} ? ('€' + ${tx.valueInDollar} + '<br/>' + ${tx.amountInEther} + ' ' + ${tx.assetTokenSymbol}) : ''" th:classappend="${iStat.last? 'table-no-bottom-border': ''}" class="table-border-right">Token Value/Amount</td>
+                        <td th:utext="${tx.txStatus.name() == 'PAID_OUT'} ? ('€' + ${tx.valueInDollar} + '<br/>' + ${tx.amountInEther}+ ' ' + ${tx.assetTokenSymbol}) : ''" th:classappend="${iStat.last? 'table-no-bottom-border': ''}">Token Value/Amount</td>
                     </tr>
                 </tbody>
             </table>
