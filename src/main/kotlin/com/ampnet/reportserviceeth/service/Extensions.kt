@@ -19,16 +19,16 @@ private val logger = KotlinLogging.logger {}
 fun <T> Optional<T>.unwrap(): T? = if (this.isPresent) this.get() else null
 
 fun <S, T : Response<*>?> Request<S, T>.sendSafely(): T? {
-    return try {
+    try {
         val value = this.send()
         if (value?.hasError() == true) {
             logger.warn { "Errors: ${value.error.message}" }
             return null
         }
-        value
+        return value
     } catch (ex: IOException) {
         logger.warn("Failed blockchain call", ex)
-        null
+        return null
     }
 }
 
