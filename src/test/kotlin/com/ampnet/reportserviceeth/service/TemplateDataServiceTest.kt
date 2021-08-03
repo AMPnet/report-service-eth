@@ -168,6 +168,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             assertThat(tx.from).isEqualTo(transaction.from)
             assertThat(tx.to).isEqualTo(transaction.to)
             assertThat(tx.description).isEqualTo(transaction.asset)
+            assertThat(tx.assetTokenSymbol).isEqualTo(transaction.assetTokenSymbol)
             assertThat(tx.percentageInProject).isNull()
             assertThat(userInfo.address).isEqualTo(testContext.user.address)
         }

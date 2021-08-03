@@ -51,7 +51,7 @@ class BlockchainServiceImpl(private val applicationProperties: ApplicationProper
             "Failed to fetch transaction info for txHash: $txHash"
         )
         val contract = TransactionEvents.load(txReceipt.to, web3j, readonlyTransactionManager, DefaultGasProvider())
-        val asset = getAssetNameViaCfManagerContract(txReceipt.to)
+        val asset = getAssetStateViaCfManagerContract(txReceipt.to)
         getEvents { contract.getInvestEvents(txReceipt) }?.firstOrNull()?.let {
             logger.debug { "Fetched reserve investment even for hash: $txHash" }
             return TransactionInfo(it, txReceipt, asset)
@@ -69,7 +69,7 @@ class BlockchainServiceImpl(private val applicationProperties: ApplicationProper
         )
         getEvents { payoutManagerContract.getCreatePayoutEvents(txReceipt) }?.firstOrNull()?.let {
             logger.debug { "Fetched revenue share payout even for hash: $txHash" }
-            return TransactionInfo(it, txReceipt, getAssetNameViaPayoutManagerContract(txReceipt.from))
+            return TransactionInfo(it, txReceipt, getAssetStateViaPayoutManagerContract(txReceipt.from))
         }
         throw InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "Failed to map transaction info for txHash: $txHash")
     }
@@ -113,24 +113,24 @@ class BlockchainServiceImpl(private val applicationProperties: ApplicationProper
         }
     }
 
-    private fun getAssetNameViaCfManagerContract(contractAddress: String): String? {
+    private fun getAssetStateViaCfManagerContract(contractAddress: String): IAsset.AssetState? {
         val cfManagerContract = ICfManagerSoftcap.load(
             contractAddress, web3j, readonlyTransactionManager, DefaultGasProvider()
         )
         val assetContractAddress = cfManagerContract.state.sendSafely()?.asset ?: return null
-        return getAssetName(assetContractAddress)
+        return getAsset(assetContractAddress)
     }
 
-    private fun getAssetNameViaPayoutManagerContract(contractAddress: String): String? {
+    private fun getAssetStateViaPayoutManagerContract(contractAddress: String): IAsset.AssetState? {
         val payoutManagerContract = IPayoutManager.load(
             contractAddress, web3j, readonlyTransactionManager, DefaultGasProvider()
         )
         val assetContractAddress = payoutManagerContract.state.sendSafely()?.asset ?: return null
-        return getAssetName(assetContractAddress)
+        return getAsset(assetContractAddress)
     }
 
-    private fun getAssetName(assetContractAddress: String): String? {
+    private fun getAsset(assetContractAddress: String): IAsset.AssetState? {
         val assetContract = IAsset.load(assetContractAddress, web3j, readonlyTransactionManager, DefaultGasProvider())
-        return assetContract.state.sendSafely()?.name
+        return assetContract.state.sendSafely()
     }
 }

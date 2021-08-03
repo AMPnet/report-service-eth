@@ -45,6 +45,7 @@ abstract class Transaction(transaction: TransactionInfo) {
     lateinit var translations: Translations
 
     var description: String? = transaction.asset
+    var assetTokenSymbol: String? = transaction.assetTokenSymbol
     var percentageInProject: String? = null
     var locale: Locale = Locale.ENGLISH
 

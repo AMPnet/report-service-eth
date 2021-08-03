@@ -13,12 +13,13 @@ data class TransactionInfo(
     val tokenAmount: BigInteger?,
     val timestamp: LocalDateTime,
     val txHash: String,
-    val asset: String?
+    val asset: String?,
+    val assetTokenSymbol: String?
 ) {
     constructor(
         event: TransactionEvents.InvestEventResponse,
         txRecipient: TransactionReceipt,
-        asset: String?
+        asset: IAsset.AssetState?
     ) : this(
         TransactionType.RESERVE_INVESTMENT,
         event.investor,
@@ -27,13 +28,14 @@ data class TransactionInfo(
         event.tokenAmount,
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
-        asset
+        asset?.name,
+        asset?.symbol
     )
 
     constructor(
         event: TransactionEvents.CancelInvestmentEventResponse,
         txRecipient: TransactionReceipt,
-        asset: String?
+        asset: IAsset.AssetState?
     ) : this(
         TransactionType.CANCEL_INVESTMENT,
         event.investor,
@@ -42,13 +44,14 @@ data class TransactionInfo(
         event.tokenAmount,
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
-        asset
+        asset?.name,
+        asset?.symbol
     )
 
     constructor(
         event: TransactionEvents.ClaimEventResponse,
         txRecipient: TransactionReceipt,
-        asset: String?
+        asset: IAsset.AssetState?
     ) : this(
         TransactionType.COMPLETED_INVESTMENT,
         event.investor,
@@ -57,13 +60,14 @@ data class TransactionInfo(
         event.tokenAmount,
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
-        asset
+        asset?.name,
+        asset?.symbol
     )
 
     constructor(
         event: TransactionEvents.CreatePayoutEventResponse,
         txRecipient: TransactionReceipt,
-        asset: String?
+        asset: IAsset.AssetState?
     ) : this(
         TransactionType.REVENUE_SHARE,
         event.creator,
@@ -72,6 +76,7 @@ data class TransactionInfo(
         null,
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
-        asset
+        asset?.name,
+        asset?.symbol
     )
 }

@@ -21,10 +21,10 @@
                     <td th:utext="${data.transaction.description != null} ? ${data.transaction.description} : ''"
                         class="table-no-bottom-border text-left table-border-right">Asset name
                     </td>
-                    <td th:utext="${data.transaction.txStatus.name() == 'PAID_IN'} ? ('$' + ${data.transaction.valueInDollar} + '<br/>' + ${data.transaction.amountInEther} + ' ERC-20 Tokens') : ''"
+                    <td th:utext="${data.transaction.txStatus.name() == 'PAID_IN'} ? ('$' + ${data.transaction.valueInDollar} + '<br/>' + ${data.transaction.amountInEther} + ' ' + ${data.transaction.assetTokenSymbol}) : ''"
                         class="table-no-bottom-border table-border-right">Amount
                     </td>
-                    <td th:utext="${data.transaction.txStatus.name() == 'PAID_OUT'} ? ('$' + ${data.transaction.valueInDollar} + '<br/>' + ${data.transaction.amountInEther} + ' ERC-20 Tokens') : ''"
+                    <td th:utext="${data.transaction.txStatus.name() == 'PAID_OUT'} ? ('$' + ${data.transaction.valueInDollar} + '<br/>' + ${data.transaction.amountInEther} + ' ' + ${data.transaction.assetTokenSymbol}) : ''"
                         class="table-no-bottom-border table-border-right">Amount
                     </td>
                 </tr>
