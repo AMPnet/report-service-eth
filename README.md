@@ -5,6 +5,14 @@
 
 Report service is a part of the AMPnet crowdfunding project on Ethereum blockchain.
 
+Service must have running and initialized database. Default database url is `locahost:5432`.
+To change database url set configuration: `spring.datasource.url` in file `application.properties`.
+To initialize database run script in the project root folder:
+
+```sh
+./initialize-local-database.sh
+```
+
 ## Start
 
 Application is running on port: `8137`. To change default port set configuration: `server.port`.
