@@ -93,7 +93,7 @@ class BlockchainServiceImpl(private val applicationProperties: ApplicationProper
         logger.debug { "Get whitelisted accounts for issuer: $issuer" }
         val contract = IIssuer.load(issuer, web3j, readonlyTransactionManager, DefaultGasProvider())
         return try {
-            val addresses = contract.walletRecords.send() as List<IIssuer.WalletRecord>
+            val addresses = contract.walletRecords.send().filterIsInstance<IIssuer.WalletRecord>()
             addresses.filter { it.whitelisted }.map { it.wallet }
         } catch (ex: Exception) {
             throw InternalException(
