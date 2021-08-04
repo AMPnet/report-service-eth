@@ -17,7 +17,7 @@ import java.time.LocalDate
 
 class AdminControllerTest : ControllerTestBase() {
 
-    private val userAccountsSummaryPath = "/admin/$coop/report"
+    private val userAccountsSummaryPath = "/admin/$issuer/report"
 
     private lateinit var testContext: TestContext
 
@@ -33,7 +33,7 @@ class AdminControllerTest : ControllerTestBase() {
             val user = createUserResponse(userAddress)
             val secondUser = createUserResponse(secondUserAddress)
             val thirdUser = createUserResponse(thirdUserAddress)
-            Mockito.`when`(userService.getUsersForIssuer(coop))
+            Mockito.`when`(userService.getUsersForIssuer(issuer))
                 .thenReturn(listOf(user, secondUser, thirdUser))
         }
         suppose("Blockchain service will return transactions for wallets") {
@@ -45,7 +45,7 @@ class AdminControllerTest : ControllerTestBase() {
                 .thenReturn(emptyList())
         }
         suppose("Blockchain service will return issuer owner address") {
-            Mockito.`when`(blockchainService.getIssuerOwner(coop))
+            Mockito.`when`(blockchainService.getIssuerOwner(issuer))
                 .thenReturn(userAddress)
         }
 
@@ -68,7 +68,7 @@ class AdminControllerTest : ControllerTestBase() {
     @WithMockCrowdfundUser
     fun mustNotBeAbleToGetReportForOtherIssuer() {
         suppose("Blockchain service will return issuer owner address") {
-            Mockito.`when`(blockchainService.getIssuerOwner(coop))
+            Mockito.`when`(blockchainService.getIssuerOwner(issuer))
                 .thenReturn(secondUserAddress)
         }
 
@@ -92,11 +92,11 @@ class AdminControllerTest : ControllerTestBase() {
             val secondUser = createUserResponse(secondUserAddress)
             val thirdUser = createUserResponse(thirdUserAddress)
             testContext.users = listOf(user, secondUser, thirdUser)
-            Mockito.`when`(userService.getUsersForIssuer(coop))
+            Mockito.`when`(userService.getUsersForIssuer(issuer))
                 .thenReturn(listOf(user, secondUser, thirdUser))
         }
         suppose("Blockchain service will return issuer owner address") {
-            Mockito.`when`(blockchainService.getIssuerOwner(coop))
+            Mockito.`when`(blockchainService.getIssuerOwner(issuer))
                 .thenReturn(userAddress)
         }
 
@@ -126,7 +126,7 @@ class AdminControllerTest : ControllerTestBase() {
     @WithMockCrowdfundUser
     fun mustNotBeAbleToGetXlsxReportForOtherIssuer() {
         suppose("Blockchain service will return issuer owner address") {
-            Mockito.`when`(blockchainService.getIssuerOwner(coop))
+            Mockito.`when`(blockchainService.getIssuerOwner(issuer))
                 .thenReturn(secondUserAddress)
         }
 

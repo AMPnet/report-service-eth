@@ -43,7 +43,7 @@ abstract class ControllerTestBase : TestBase() {
     protected val projectWallet: String = "0xFeC646017105fA2A4FFDc773e9c539Eda5af724a"
     protected val txHash = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
     protected val logo = "https://ampnet.io/assets/images/logo-amp.png"
-    protected val coop = "ampnet-test"
+    protected val issuer = "issuer-contract-address"
 
     @Autowired
     protected lateinit var objectMapper: ObjectMapper
