@@ -5,6 +5,7 @@ import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.service.XlsxService
+import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.data.millisecondsToLocalDateTime
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.Row
@@ -28,10 +29,10 @@ class XlsxServiceImpl(private val userService: UserService) : XlsxService {
     private lateinit var sheet: XSSFSheet
 
     @Throws(InternalException::class)
-    override fun generateXlsx(issuer: String): ByteArray {
+    override fun generateXlsx(issuerRequest: IssuerRequest): ByteArray {
         try {
             workbook = XSSFWorkbook()
-            val users = userService.getUsersForIssuer(issuer)
+            val users = userService.getUsersForIssuer(issuerRequest)
             writeHeaderLine()
             writeDataLines(users)
             val outputStream = ByteArrayOutputStream()

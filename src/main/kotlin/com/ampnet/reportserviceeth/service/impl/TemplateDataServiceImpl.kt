@@ -10,6 +10,7 @@ import com.ampnet.reportserviceeth.exception.ResourceNotFoundException
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.service.TemplateDataService
 import com.ampnet.reportserviceeth.service.TranslationService
+import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.data.SingleTransactionSummary
 import com.ampnet.reportserviceeth.service.data.Transaction
 import com.ampnet.reportserviceeth.service.data.TransactionCancelInvestment
@@ -33,8 +34,12 @@ class TemplateDataServiceImpl(
 
     companion object : KLogging()
 
-    override fun getUserTransactionsData(address: String, periodRequest: PeriodServiceRequest): TransactionsSummary {
-        val transactions = blockchainService.getTransactions(address)
+    override fun getUserTransactionsData(
+        address: String,
+        chainId: Long,
+        periodRequest: PeriodServiceRequest
+    ): TransactionsSummary {
+        val transactions = blockchainService.getTransactions(address, chainId)
             .filter { inTimePeriod(periodRequest, it.timestamp) }
         val translations = translationService.getTranslations()
         val user = UserInfo(userService.getUser(address))
@@ -44,7 +49,7 @@ class TemplateDataServiceImpl(
     }
 
     override fun getUserTransactionData(request: TransactionServiceRequest): SingleTransactionSummary {
-        val transaction = blockchainService.getTransactionInfo(request.txHash)
+        val transaction = blockchainService.getTransactionInfo(request.txHash, request.chainId)
         validateTransactionBelongsToUser(transaction, request.address)
         val userWithInfo = UserInfo(userService.getUser(request.address))
         val translations = translationService.getTranslations(userWithInfo.language)
@@ -59,13 +64,16 @@ class TemplateDataServiceImpl(
     }
 
     override fun getAllActiveUsersSummaryData(
-        issuer: String,
+        issuerRequest: IssuerRequest,
         periodRequest: PeriodServiceRequest
     ): UsersAccountsSummary {
-        val users = userService.getUsersForIssuer(issuer)
+        val users = userService.getUsersForIssuer(issuerRequest)
         val userTransactions = users.parallelStream().asSequence().associateBy(
             { it.address },
-            { blockchainService.getTransactions(it.address).filter { tx -> inTimePeriod(periodRequest, tx.timestamp) } }
+            {
+                blockchainService.getTransactions(it.address, issuerRequest.chainId)
+                    .filter { tx -> inTimePeriod(periodRequest, tx.timestamp) }
+            }
         )
         if (userTransactions.values.all { it.isEmpty() })
             throw ResourceNotFoundException(

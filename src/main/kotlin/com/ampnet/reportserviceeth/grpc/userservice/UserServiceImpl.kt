@@ -8,6 +8,7 @@ import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.GrpcException
 import com.ampnet.reportserviceeth.exception.InvalidRequestException
+import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import io.grpc.StatusRuntimeException
 import mu.KLogging
 import net.devh.boot.grpc.client.channelfactory.GrpcChannelFactory
@@ -51,8 +52,8 @@ class UserServiceImpl(
     }
 
     @Throws(GrpcException::class)
-    override fun getUsersForIssuer(issuer: String): List<UserResponse> {
-        val addresses = blockchainService.getWhitelistedAddress(issuer)
+    override fun getUsersForIssuer(issuerRequest: IssuerRequest): List<UserResponse> {
+        val addresses = blockchainService.getWhitelistedAddress(issuerRequest)
         return getUsers(addresses.toSet())
     }
 

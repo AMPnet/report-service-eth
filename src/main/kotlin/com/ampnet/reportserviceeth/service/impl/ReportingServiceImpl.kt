@@ -6,6 +6,7 @@ import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.service.ReportingService
 import com.ampnet.reportserviceeth.service.TemplateService
+import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
 import mu.KLogging
 import org.springframework.stereotype.Service
@@ -23,8 +24,12 @@ class ReportingServiceImpl(
 
     private val rootTemplate = "templates/root.htm"
 
-    override fun generatePdfReportForUserTransactions(address: String, periodRequest: PeriodServiceRequest): ByteArray {
-        val template = templateService.generateTemplateForUserTransactions(address, periodRequest)
+    override fun generatePdfReportForUserTransactions(
+        address: String,
+        chainId: Long,
+        periodRequest: PeriodServiceRequest
+    ): ByteArray {
+        val template = templateService.generateTemplateForUserTransactions(address, chainId, periodRequest)
         return generateFromTemplateToByteArray(template)
     }
 
@@ -35,9 +40,10 @@ class ReportingServiceImpl(
 
     override fun generatePdfReportForAllActiveUsers(
         address: String,
+        chainId: Long,
         periodRequest: PeriodServiceRequest
     ): ByteArray {
-        val template = templateService.generateTemplateForAllActiveUsers(address, periodRequest)
+        val template = templateService.generateTemplateForAllActiveUsers(IssuerRequest(address, chainId), periodRequest)
         return generateFromTemplateToByteArray(template)
     }
 

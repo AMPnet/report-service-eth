@@ -6,6 +6,9 @@ enum class ErrorCode(val categoryCode: String, var specificCode: String, var mes
     USER_MISSING_INFO("03", "07", "No user with info on the platform"),
     USER_NOT_ISSUER("03", "02", "User is not the issuer owner"),
 
+    // Blockchain: 04
+    BLOCKCHAIN_ID("04", "01", "Blockchain id not supported"),
+
     // Internal: 08
     INT_JSON_RPC_BLOCKCHAIN("08", "03", "Failed JSON-RPC call to blockchain"),
     INT_GRPC_USER("08", "04", "Failed gRPC call to user service"),
@@ -13,7 +16,4 @@ enum class ErrorCode(val categoryCode: String, var specificCode: String, var mes
     INT_GENERATING_PDF("08", "10", "Could not generate pdf from data"),
     INT_UNSUPPORTED_TX("08", "11", "Unsupported transaction"),
     INT_GENERATING_XLSX("08", "14", "Could not generate xlsx file"),
-
-    // Middleware: 11
-    MIDDLEWARE("11", "00", "Undefined")
 }

@@ -1,30 +1,31 @@
 package com.ampnet.reportserviceeth.blockchain
 
+import IAsset
+import ICfManagerSoftcap
+import IIssuer
+import IPayoutManager
 import TransactionEvents
+import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesHandler
+import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesWithServices
 import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
+import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.sendSafely
 import com.ampnet.reportserviceeth.service.unwrap
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
-import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.methods.response.TransactionReceipt
-import org.web3j.protocol.http.HttpService
-import org.web3j.tx.ReadonlyTransactionManager
 import org.web3j.tx.gas.DefaultGasProvider
 
 private val logger = KotlinLogging.logger {}
 
 @Service
-class BlockchainServiceImpl(private val applicationProperties: ApplicationProperties) : BlockchainService {
+class BlockchainServiceImpl(applicationProperties: ApplicationProperties) : BlockchainService {
 
-    private val web3j by lazy { Web3j.build(HttpService(applicationProperties.provider.blockchainApi)) }
-    private val readonlyTransactionManager = ReadonlyTransactionManager(
-        web3j, applicationProperties.smartContract.walletAddress
-    )
+    private val chainHandler by lazy { ChainPropertiesHandler(applicationProperties) }
 
-    override fun getTransactions(wallet: String): List<TransactionInfo> {
+    override fun getTransactions(wallet: String, chainId: Long): List<TransactionInfo> {
         logger.debug { "Get transactions for wallet address: $wallet" }
         if (wallet.isBlank()) return emptyList()
         TODO("Not implemented")
@@ -40,18 +41,25 @@ class BlockchainServiceImpl(private val applicationProperties: ApplicationProper
      * If transaction receipt not found for the txHash or doesn't contain any events returns InternalException.
      *
      * @param txHash String hash of the transaction
+     * @param chainId Long id of the wanted chain
      * @return [TransactionInfo] object
      */
     @Suppress("ReturnCount")
-    override fun getTransactionInfo(txHash: String): TransactionInfo {
+    override fun getTransactionInfo(txHash: String, chainId: Long): TransactionInfo {
         logger.debug { "Get info for transaction with hash: $txHash" }
-        val txReceipt: TransactionReceipt = web3j.ethGetTransactionReceipt(txHash)
+        val chainProperties = chainHandler.getBlockchainProperties(chainId)
+        val txReceipt: TransactionReceipt = chainProperties.web3j.ethGetTransactionReceipt(txHash)
             .sendSafely()?.transactionReceipt?.unwrap() ?: throw InternalException(
             ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
             "Failed to fetch transaction info for txHash: $txHash"
         )
-        val contract = TransactionEvents.load(txReceipt.to, web3j, readonlyTransactionManager, DefaultGasProvider())
-        val asset = getAssetStateViaCfManagerContract(txReceipt.to)
+        val contract = TransactionEvents.load(
+            txReceipt.to,
+            chainProperties.web3j,
+            chainProperties.transactionManager,
+            DefaultGasProvider()
+        )
+        val asset = getAssetStateViaCfManagerContract(txReceipt.to, chainProperties)
         getEvents { contract.getInvestEvents(txReceipt) }?.firstOrNull()?.let {
             logger.debug { "Fetched reserve investment even for hash: $txHash" }
             return TransactionInfo(it, txReceipt, asset)
@@ -65,40 +73,48 @@ class BlockchainServiceImpl(private val applicationProperties: ApplicationProper
             return TransactionInfo(it, txReceipt, asset)
         }
         val payoutManagerContract = TransactionEvents.load(
-            txReceipt.from, web3j, readonlyTransactionManager, DefaultGasProvider()
+            txReceipt.from, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
         getEvents { payoutManagerContract.getCreatePayoutEvents(txReceipt) }?.firstOrNull()?.let {
             logger.debug { "Fetched revenue share payout even for hash: $txHash" }
-            return TransactionInfo(it, txReceipt, getAssetStateViaPayoutManagerContract(txReceipt.from))
+            return TransactionInfo(
+                it, txReceipt, getAssetStateViaPayoutManagerContract(txReceipt.from, chainProperties)
+            )
         }
         throw InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "Failed to map transaction info for txHash: $txHash")
     }
 
     @Suppress("TooGenericExceptionCaught")
-    override fun getIssuerOwner(issuer: String): String {
-        logger.debug { "Get owner of issuer: $issuer" }
-        val contract = IIssuer.load(issuer, web3j, readonlyTransactionManager, DefaultGasProvider())
+    override fun getIssuerOwner(issuerRequest: IssuerRequest): String {
+        logger.debug { "Get owner of issuer: $issuerRequest" }
+        val chainProperties = chainHandler.getBlockchainProperties(issuerRequest.chainId)
+        val contract = IIssuer.load(
+            issuerRequest.address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
+        )
         return try {
             contract.state.send().owner
         } catch (ex: Exception) {
             throw InternalException(
                 ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-                "Failed to fetch issuer owner address for contract address: $issuer", ex
+                "Failed to fetch issuer owner address for contract address: $issuerRequest", ex
             )
         }
     }
 
     @Suppress("TooGenericExceptionCaught")
-    override fun getWhitelistedAddress(issuer: String): List<String> {
-        logger.debug { "Get whitelisted accounts for issuer: $issuer" }
-        val contract = IIssuer.load(issuer, web3j, readonlyTransactionManager, DefaultGasProvider())
+    override fun getWhitelistedAddress(issuerRequest: IssuerRequest): List<String> {
+        logger.debug { "Get whitelisted accounts for issuer: $issuerRequest" }
+        val chainProperties = chainHandler.getBlockchainProperties(issuerRequest.chainId)
+        val contract = IIssuer.load(
+            issuerRequest.address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
+        )
         return try {
             val addresses = contract.walletRecords.send().filterIsInstance<IIssuer.WalletRecord>()
             addresses.filter { it.whitelisted }.map { it.wallet }
         } catch (ex: Exception) {
             throw InternalException(
                 ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-                "Failed to fetch whitelisted addresses for issuer contract address: $issuer", ex
+                "Failed to fetch whitelisted addresses for issuer contract address: $issuerRequest", ex
             )
         }
     }
@@ -113,24 +129,32 @@ class BlockchainServiceImpl(private val applicationProperties: ApplicationProper
         }
     }
 
-    private fun getAssetStateViaCfManagerContract(contractAddress: String): IAsset.AssetState? {
+    private fun getAssetStateViaCfManagerContract(
+        contractAddress: String,
+        chainProperties: ChainPropertiesWithServices
+    ): IAsset.AssetState? {
         val cfManagerContract = ICfManagerSoftcap.load(
-            contractAddress, web3j, readonlyTransactionManager, DefaultGasProvider()
+            contractAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
         val assetContractAddress = cfManagerContract.state.sendSafely()?.asset ?: return null
-        return getAsset(assetContractAddress)
+        return getAsset(assetContractAddress, chainProperties)
     }
 
-    private fun getAssetStateViaPayoutManagerContract(contractAddress: String): IAsset.AssetState? {
+    private fun getAssetStateViaPayoutManagerContract(
+        contractAddress: String,
+        chainProperties: ChainPropertiesWithServices
+    ): IAsset.AssetState? {
         val payoutManagerContract = IPayoutManager.load(
-            contractAddress, web3j, readonlyTransactionManager, DefaultGasProvider()
+            contractAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
         val assetContractAddress = payoutManagerContract.state.sendSafely()?.asset ?: return null
-        return getAsset(assetContractAddress)
+        return getAsset(assetContractAddress, chainProperties)
     }
 
-    private fun getAsset(assetContractAddress: String): IAsset.AssetState? {
-        val assetContract = IAsset.load(assetContractAddress, web3j, readonlyTransactionManager, DefaultGasProvider())
+    private fun getAsset(contractAddress: String, chainProperties: ChainPropertiesWithServices): IAsset.AssetState? {
+        val assetContract = IAsset.load(
+            contractAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
+        )
         return assetContract.state.sendSafely()
     }
 }
