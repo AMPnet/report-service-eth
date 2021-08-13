@@ -15,6 +15,7 @@ Source code is available on https://github.com/AMPnet/report-service[Github].
 
 == Reporting API
 All requests need header: `Authorization: Bearer JWT`.
+Chain ID must be provided in the request path, e.g. 80001.
 
 === Get user transactions report
 Query parameters `from` and `to` are both optional.
@@ -32,6 +33,7 @@ Response is a PDF file data.
 
 == Admin Reporting API
 All requests need header: `Authorization: Bearer JWT`. Only owner of the issuer contract can access this API.
+Chain ID must be provided in the request path, e.g. 80001.
 
 === Get active users accounts summary report
 Query parameters `from` and `to` are both optional.

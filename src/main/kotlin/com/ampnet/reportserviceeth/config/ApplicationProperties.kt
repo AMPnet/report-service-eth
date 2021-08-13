@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration
 class ApplicationProperties {
     val jwt: JwtProperties = JwtProperties()
     var grpc: GrpcProperties = GrpcProperties()
-    val provider = ProviderProperties()
     val smartContract = SmartContractProperties()
+    lateinit var infuraId: String
 }
 
 class JwtProperties {
@@ -19,10 +19,6 @@ class JwtProperties {
 @Suppress("MagicNumber")
 class GrpcProperties {
     var identityServiceTimeout: Long = 10000
-}
-
-class ProviderProperties {
-    lateinit var blockchainApi: String
 }
 
 class SmartContractProperties {

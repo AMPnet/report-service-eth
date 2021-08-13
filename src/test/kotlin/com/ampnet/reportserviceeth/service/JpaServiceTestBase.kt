@@ -5,6 +5,7 @@ import com.ampnet.reportserviceeth.TestBase
 import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.TransactionInfo
 import com.ampnet.reportserviceeth.blockchain.TransactionType
+import com.ampnet.reportserviceeth.blockchain.properties.Chain
 import com.ampnet.reportserviceeth.config.JsonConfig
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.service.impl.TranslationServiceImpl
@@ -31,6 +32,7 @@ abstract class JpaServiceTestBase : TestBase() {
     protected val txHash = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
     protected val logo = "https://ampnet.io/assets/images/logo-amp.png"
     protected val issuer = "0x5013F6ce0f9Beb07Be528E408352D03f3FCa1857"
+    protected val chainId = Chain.MATIC_TESTNET_MUMBAI.id
 
     @Mock
     protected lateinit var blockchainService: BlockchainService

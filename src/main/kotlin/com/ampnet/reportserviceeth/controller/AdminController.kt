@@ -6,6 +6,7 @@ import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.service.ReportingService
 import com.ampnet.reportserviceeth.service.XlsxService
+import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import mu.KLogging
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpHeaders
@@ -27,8 +28,9 @@ class AdminController(
 
     companion object : KLogging()
 
-    @GetMapping("/admin/{issuer}/report/user")
+    @GetMapping("/admin/{chainId}/{issuer}/report/user")
     fun getActiveUsersReport(
+        @PathVariable chainId: Long,
         @PathVariable issuer: String,
         @RequestParam(name = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) from: LocalDate?,
         @RequestParam(name = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) to: LocalDate?
@@ -37,20 +39,21 @@ class AdminController(
         logger.info {
             "Received request to get users accounts summary for all the active users for issuer: $issuer"
         }
-        verifyUserIsIssuerOwner(user, issuer)
+        verifyUserIsIssuerOwner(user, issuer, chainId)
         val periodRequest = PeriodServiceRequest(from, to)
-        val pdfContents = reportingService.generatePdfReportForAllActiveUsers(issuer, periodRequest)
+        val pdfContents = reportingService.generatePdfReportForAllActiveUsers(issuer, chainId, periodRequest)
         return ResponseEntity(pdfContents, ControllerUtils.getHttpHeadersForPdf(), HttpStatus.OK)
     }
 
-    @GetMapping("/admin/{issuer}/report/xlsx")
+    @GetMapping("/admin/{chainId}/{issuer}/report/xlsx")
     fun getXlsxReport(
+        @PathVariable(name = "chainId") chainId: Long,
         @PathVariable issuer: String
     ): ResponseEntity<ByteArray> {
         val user = ControllerUtils.getAddressFromSecurityContext()
         logger.info { "Received request to get users xlsx report for issuer: $issuer" }
-        verifyUserIsIssuerOwner(user, issuer)
-        val pdfContents = xlsxService.generateXlsx(issuer)
+        verifyUserIsIssuerOwner(user, issuer, chainId)
+        val pdfContents = xlsxService.generateXlsx(IssuerRequest(issuer, chainId))
         val httpHeaders = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_OCTET_STREAM
         }
@@ -58,8 +61,8 @@ class AdminController(
         return ResponseEntity(pdfContents, httpHeaders, HttpStatus.OK)
     }
 
-    private fun verifyUserIsIssuerOwner(address: String, issuer: String) {
-        val issuerOwner = blockchainService.getIssuerOwner(issuer)
+    private fun verifyUserIsIssuerOwner(address: String, issuer: String, chainId: Long) {
+        val issuerOwner = blockchainService.getIssuerOwner(IssuerRequest(issuer, chainId))
         if (address.lowercase() != issuerOwner.lowercase())
             throw InvalidRequestException(ErrorCode.USER_NOT_ISSUER, "Issuer owner is address: $issuerOwner")
     }

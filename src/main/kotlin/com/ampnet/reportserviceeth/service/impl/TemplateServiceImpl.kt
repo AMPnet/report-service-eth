@@ -6,6 +6,7 @@ import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.service.TemplateDataService
 import com.ampnet.reportserviceeth.service.TemplateService
+import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import mu.KLogging
 import org.springframework.stereotype.Service
 import org.thymeleaf.TemplateEngine
@@ -24,8 +25,12 @@ class TemplateServiceImpl(
     internal val userTransactionTemplate = "user-transaction-template"
     internal val usersAccountsSummaryTemplate = "users-accounts-summary-template"
 
-    override fun generateTemplateForUserTransactions(address: String, periodRequest: PeriodServiceRequest): String {
-        val transactions = templateDataService.getUserTransactionsData(address, periodRequest)
+    override fun generateTemplateForUserTransactions(
+        address: String,
+        chainId: Long,
+        periodRequest: PeriodServiceRequest
+    ): String {
+        val transactions = templateDataService.getUserTransactionsData(address, chainId, periodRequest)
         return processThymeleafTemplate(transactions, userTransactionsTemplate)
     }
 
@@ -34,8 +39,11 @@ class TemplateServiceImpl(
         return processThymeleafTemplate(transaction, userTransactionTemplate)
     }
 
-    override fun generateTemplateForAllActiveUsers(address: String, periodRequest: PeriodServiceRequest): String {
-        val activeUsersSummaryData = templateDataService.getAllActiveUsersSummaryData(address, periodRequest)
+    override fun generateTemplateForAllActiveUsers(
+        issuerRequest: IssuerRequest,
+        periodRequest: PeriodServiceRequest
+    ): String {
+        val activeUsersSummaryData = templateDataService.getAllActiveUsersSummaryData(issuerRequest, periodRequest)
         return processThymeleafTemplate(activeUsersSummaryData, usersAccountsSummaryTemplate)
     }
 

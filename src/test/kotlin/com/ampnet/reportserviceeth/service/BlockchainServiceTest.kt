@@ -2,8 +2,10 @@ package com.ampnet.reportserviceeth.service
 
 import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.BlockchainServiceImpl
+import com.ampnet.reportserviceeth.blockchain.properties.Chain
 import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.exception.InternalException
+import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -21,6 +23,7 @@ class BlockchainServiceTest {
     private val issuerContract = "0xac8211B25CdFE7edF0633a9c3A67d6888C784F1A"
     private val investTxHash = "0x9cfcb44d3516bfc5ecddc03a7c9089815893bd23473cd63833e33b639f7401b1"
     private val cancelInvestmentTxHash = "0xc98df31e24c43c5e5e8be776880c134d990b467ad31dd2e951ffd6f3d599848b"
+    private val chainId = Chain.MATIC_TESTNET_MUMBAI.id
 
     @Autowired
     private lateinit var applicationProperties: ApplicationProperties
@@ -31,32 +34,32 @@ class BlockchainServiceTest {
 
     @Test
     fun mustGetAllWhitelistedAddressesForIssuer() {
-        val addresses = service.getWhitelistedAddress(issuerContract)
+        val addresses = service.getWhitelistedAddress(IssuerRequest(issuerContract, chainId))
         assertThat(addresses).isNotEmpty
     }
 
     @Test
     fun mustGetIssuerOwner() {
-        val owner = service.getIssuerOwner(issuerContract)
+        val owner = service.getIssuerOwner(IssuerRequest(issuerContract, chainId))
         assertThat(owner).isNotNull
     }
 
     @Test
     fun mustBeAbleToGetInvestTransaction() {
-        val info = service.getTransactionInfo(investTxHash)
+        val info = service.getTransactionInfo(investTxHash, chainId)
         assertThat(info).isNotNull
     }
 
     @Test
     fun mustBeAbleToGetCancelInvestmentTransaction() {
-        val info = service.getTransactionInfo(cancelInvestmentTxHash)
+        val info = service.getTransactionInfo(cancelInvestmentTxHash, chainId)
         assertThat(info).isNotNull
     }
 
     @Test
     fun mustThrowExceptionForUnknownTxHash() {
         assertThrows<InternalException> {
-            service.getTransactionInfo("0xb98df31e24c43c5e5e8be776880c134d990b467ad31dd2e951ffd6f3d599848b")
+            service.getTransactionInfo("0xb98df31e24c43c5e5e8be776880c134d990b467ad31dd2e951ffd6f3d599848b", chainId)
         }
     }
 }
