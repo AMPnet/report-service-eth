@@ -2,6 +2,7 @@ package com.ampnet.reportserviceeth.repository
 
 import com.ampnet.reportserviceeth.TestBase
 import com.ampnet.reportserviceeth.blockchain.TransactionType
+import com.ampnet.reportserviceeth.blockchain.properties.Chain
 import com.ampnet.reportserviceeth.config.DatabaseCleanerService
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.persistence.model.Task
@@ -35,6 +36,7 @@ class RepositoryTest : TestBase() {
     private val txHash = "0xab059a62e22e230fe0f56d8555340a29b2e9532360368f810595453f6fdd213b"
     private val logIndex = 23L
     private val blockHash = "0x8243343df08b9751f5ca0c5f8c9c0460d8a9b6351066fae0acbd4d3e776de8bb"
+    private val chainId = Chain.MATIC_TESTNET_MUMBAI.id
 
     @BeforeEach
     fun init() {
@@ -55,11 +57,11 @@ class RepositoryTest : TestBase() {
 
     private fun createEvent(txHash: String = "txHash", logIndex: Long = 134L, blockHash: String = "blockHash") =
         Event(
-            UUID.randomUUID(), 5L, "addressFrom", "addressTo",
+            UUID.randomUUID(), chainId, "addressFrom", "addressTo",
             "contractAddress", txHash, TransactionType.RESERVE_INVESTMENT,
             logIndex, "asset_name", 500045L, blockHash,
             1628065107449L, BigInteger("500"), BigInteger("500"), 50L, BigInteger("500")
         )
 
-    private fun createTask() = Task(UUID.randomUUID(), 5075L, 1628065107449L)
+    private fun createTask() = Task(UUID.randomUUID(), chainId, 5075L, 1628065107449L)
 }

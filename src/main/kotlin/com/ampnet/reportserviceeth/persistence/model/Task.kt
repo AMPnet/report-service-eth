@@ -14,6 +14,9 @@ class Task(
     val uuid: UUID,
 
     @Column(nullable = false)
+    val chainId: Long,
+
+    @Column(nullable = false)
     val blockNumber: Long,
 
     @Column(nullable = false)
