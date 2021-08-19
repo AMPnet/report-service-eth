@@ -14,7 +14,7 @@ import java.time.LocalDate
 
 class ReportingControllerTest : ControllerTestBase() {
 
-    private val reportPath = "/report/$chainId/user/"
+    private val reportPath = "/report/$defaultChainId/user/"
     private val transaction = "transaction"
     private val transactions = "transactions"
 
@@ -38,7 +38,7 @@ class ReportingControllerTest : ControllerTestBase() {
         }
         suppose("Blockchain service will return transactions for wallet") {
             testContext.transactions = createTransactionsResponse()
-            Mockito.`when`(blockchainService.getTransactions(testContext.user.address, chainId))
+            Mockito.`when`(blockchainService.getTransactions(testContext.user.address, defaultChainId))
                 .thenReturn(testContext.transactions)
         }
 
@@ -72,7 +72,7 @@ class ReportingControllerTest : ControllerTestBase() {
                 userAddress,
                 "700"
             )
-            given(blockchainService.getTransactionInfo(txHash, chainId)).willReturn(testContext.transaction)
+            given(blockchainService.getTransactionInfo(txHash, defaultChainId)).willReturn(testContext.transaction)
         }
 
         verify("User can get pdf with single transaction") {
