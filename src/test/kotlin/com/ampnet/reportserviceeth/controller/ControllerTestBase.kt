@@ -6,6 +6,7 @@ import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.TransactionInfo
 import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.blockchain.properties.Chain
+import com.ampnet.reportserviceeth.config.DatabaseCleanerService
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.ErrorResponse
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
@@ -45,10 +46,13 @@ abstract class ControllerTestBase : TestBase() {
     protected val txHash = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
     protected val logo = "https://ampnet.io/assets/images/logo-amp.png"
     protected val issuer = "issuer-contract-address"
-    protected val chainId = Chain.MATIC_TESTNET_MUMBAI.id
+    protected val defaultChainId = Chain.MATIC_TESTNET_MUMBAI.id
 
     @Autowired
     protected lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    protected lateinit var databaseCleanerService: DatabaseCleanerService
 
     @MockBean
     protected lateinit var blockchainService: BlockchainService

@@ -13,6 +13,18 @@ This document contains generated documentation for `AMPnet report-service`. Repo
 for generating reports in PDF
 Source code is available on https://github.com/AMPnet/report-service[Github].
 
+== Transaction History API
+All requests need header: `Authorization: Bearer JWT`.
+Chain ID must be provided in the request path, e.g. 80001.
+
+=== Get transaction history
+Query parameters `from` and `to` are both optional.
+
+.Request
+include::{snippets}/TxHistoryControllerTest/mustBeAbleToGetTransactionForSpecificPeriod/http-request.adoc[]
+.Response
+include::{snippets}/TxHistoryControllerTest/mustBeAbleToGetTransactionForSpecificPeriod/http-response.adoc[]
+
 == Reporting API
 All requests need header: `Authorization: Bearer JWT`.
 Chain ID must be provided in the request path, e.g. 80001.
