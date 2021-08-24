@@ -91,14 +91,11 @@ class BlockchainServiceImpl(applicationProperties: ApplicationProperties) : Bloc
         val contract = IIssuer.load(
             issuerRequest.address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
-        return try {
-            contract.state.send().owner
-        } catch (ex: Exception) {
-            throw InternalException(
+        return contract.state.sendSafely()?.owner
+            ?: throw InternalException(
                 ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-                "Failed to fetch issuer owner address for contract address: $issuerRequest", ex
+                "Failed to fetch issuer owner address for contract address: $issuerRequest"
             )
-        }
     }
 
     @Suppress("TooGenericExceptionCaught")
@@ -108,15 +105,14 @@ class BlockchainServiceImpl(applicationProperties: ApplicationProperties) : Bloc
         val contract = IIssuer.load(
             issuerRequest.address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
-        return try {
-            val addresses = contract.walletRecords.send().filterIsInstance<IIssuer.WalletRecord>()
-            addresses.filter { it.whitelisted }.map { it.wallet }
-        } catch (ex: Exception) {
-            throw InternalException(
+        return contract.walletRecords.sendSafely()
+            ?.filterIsInstance<IIssuer.WalletRecord>()
+            ?.filter { it.whitelisted }
+            ?.map { it.wallet }
+            ?: throw InternalException(
                 ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-                "Failed to fetch whitelisted addresses for issuer contract address: $issuerRequest", ex
+                "Failed to fetch whitelisted addresses for issuer contract address: $issuerRequest"
             )
-        }
     }
 
     @Suppress("TooGenericExceptionCaught")

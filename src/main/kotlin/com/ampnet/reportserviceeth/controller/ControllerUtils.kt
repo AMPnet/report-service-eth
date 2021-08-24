@@ -10,9 +10,6 @@ internal object ControllerUtils {
         SecurityContextHolder.getContext().authentication.principal as? String
             ?: throw TokenException("SecurityContext authentication principal must be String")
 
-    fun getHttpHeadersForPdf(): HttpHeaders {
-        val httpHeaders = HttpHeaders()
-        httpHeaders.contentType = MediaType.APPLICATION_PDF
-        return httpHeaders
-    }
+    fun getHttpHeadersForPdf(): HttpHeaders =
+        HttpHeaders().apply { contentType = MediaType.APPLICATION_PDF }
 }

@@ -53,12 +53,12 @@ class AdminController(
         val user = ControllerUtils.getAddressFromSecurityContext()
         logger.info { "Received request to get users xlsx report for issuer: $issuer" }
         verifyUserIsIssuerOwner(user, issuer, chainId)
-        val pdfContents = xlsxService.generateXlsx(IssuerRequest(issuer, chainId))
+        val xlsxReport = xlsxService.generateXlsx(IssuerRequest(issuer, chainId))
         val httpHeaders = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_OCTET_STREAM
         }
         logger.info { "Successfully generate xlsx report" }
-        return ResponseEntity(pdfContents, httpHeaders, HttpStatus.OK)
+        return ResponseEntity(xlsxReport, httpHeaders, HttpStatus.OK)
     }
 
     private fun verifyUserIsIssuerOwner(address: String, issuer: String, chainId: Long) {

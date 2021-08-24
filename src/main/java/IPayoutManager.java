@@ -1,3 +1,20 @@
+import java.math.BigInteger;
+import java.util.Arrays;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.DynamicStruct;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.crypto.Credentials;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.RemoteCall;
+import org.web3j.protocol.core.RemoteFunctionCall;
+import org.web3j.tx.Contract;
+import org.web3j.tx.TransactionManager;
+import org.web3j.tx.gas.ContractGasProvider;
+
 /**
  * <p>Auto generated code.
  * <p><strong>Do not modify!</strong>
@@ -8,75 +25,118 @@
  * <p>Generated with web3j version 4.8.4.
  */
 @SuppressWarnings("rawtypes")
-public class IPayoutManager extends org.web3j.tx.Contract {
+public class IPayoutManager extends Contract {
     public static final String BINARY = "";
 
     public static final String FUNC_GETSTATE = "getState";
 
     @Deprecated
-    protected IPayoutManager(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
+    protected IPayoutManager(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
         super(BINARY, contractAddress, web3j, credentials, gasPrice, gasLimit);
     }
 
-    protected IPayoutManager(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
+    protected IPayoutManager(String contractAddress, Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, credentials, contractGasProvider);
     }
 
     @Deprecated
-    protected IPayoutManager(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
+    protected IPayoutManager(String contractAddress, Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
         super(BINARY, contractAddress, web3j, transactionManager, gasPrice, gasLimit);
     }
 
-    protected IPayoutManager(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
+    protected IPayoutManager(String contractAddress, Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
-    public org.web3j.protocol.core.RemoteFunctionCall<IPayoutManager.PayoutManagerState> getState() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETSTATE,
-                java.util.Arrays.<org.web3j.abi.datatypes.Type>asList(),
-                java.util.Arrays.<org.web3j.abi.TypeReference<?>>asList(new org.web3j.abi.TypeReference<IPayoutManager.PayoutManagerState>() {
-                }));
-        return executeRemoteCallSingleValueReturn(function, IPayoutManager.PayoutManagerState.class);
+    public RemoteFunctionCall<PayoutManagerState> getState() {
+        final Function function = new Function(FUNC_GETSTATE, 
+                Arrays.<Type>asList(), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<PayoutManagerState>() {}));
+        return executeRemoteCallSingleValueReturn(function, PayoutManagerState.class);
     }
 
-    public static IPayoutManager load(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
+    @Deprecated
+    public static IPayoutManager load(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
+        return new IPayoutManager(contractAddress, web3j, credentials, gasPrice, gasLimit);
+    }
+
+    @Deprecated
+    public static IPayoutManager load(String contractAddress, Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
+        return new IPayoutManager(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
+    }
+
+    public static IPayoutManager load(String contractAddress, Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
         return new IPayoutManager(contractAddress, web3j, credentials, contractGasProvider);
     }
 
-    public static IPayoutManager load(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
+    public static IPayoutManager load(String contractAddress, Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
         return new IPayoutManager(contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
-    public static org.web3j.protocol.core.RemoteCall<IPayoutManager> deploy(org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
+    public static RemoteCall<IPayoutManager> deploy(Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
         return deployRemoteCall(IPayoutManager.class, web3j, credentials, contractGasProvider, BINARY, "");
     }
 
-    public static org.web3j.protocol.core.RemoteCall<IPayoutManager> deploy(org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
+    @Deprecated
+    public static RemoteCall<IPayoutManager> deploy(Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
+        return deployRemoteCall(IPayoutManager.class, web3j, credentials, gasPrice, gasLimit, BINARY, "");
+    }
+
+    public static RemoteCall<IPayoutManager> deploy(Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
         return deployRemoteCall(IPayoutManager.class, web3j, transactionManager, contractGasProvider, BINARY, "");
     }
 
-    public static class PayoutManagerState extends org.web3j.abi.datatypes.DynamicStruct {
-        public java.math.BigInteger id;
+    @Deprecated
+    public static RemoteCall<IPayoutManager> deploy(Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
+        return deployRemoteCall(IPayoutManager.class, web3j, transactionManager, gasPrice, gasLimit, BINARY, "");
+    }
+
+    public static class PayoutManagerState extends DynamicStruct {
+        public BigInteger id;
+
+        public String contractAddress;
+
+        public String ansName;
+
+        public BigInteger ansId;
+
+        public String createdBy;
 
         public String owner;
 
         public String asset;
 
+        public BigInteger totalPayoutsCreated;
+
+        public BigInteger totalPayoutsAmount;
+
         public String info;
 
-        public PayoutManagerState(java.math.BigInteger id, String owner, String asset, String info) {
-            super(new org.web3j.abi.datatypes.generated.Uint256(id),new org.web3j.abi.datatypes.Address(owner),new org.web3j.abi.datatypes.Address(asset),new org.web3j.abi.datatypes.Utf8String(info));
+        public PayoutManagerState(BigInteger id, String contractAddress, String ansName, BigInteger ansId, String createdBy, String owner, String asset, BigInteger totalPayoutsCreated, BigInteger totalPayoutsAmount, String info) {
+            super(new Uint256(id),new Address(contractAddress),new Utf8String(ansName),new Uint256(ansId),new Address(createdBy),new Address(owner),new Address(asset),new Uint256(totalPayoutsCreated),new Uint256(totalPayoutsAmount),new Utf8String(info));
             this.id = id;
+            this.contractAddress = contractAddress;
+            this.ansName = ansName;
+            this.ansId = ansId;
+            this.createdBy = createdBy;
             this.owner = owner;
             this.asset = asset;
+            this.totalPayoutsCreated = totalPayoutsCreated;
+            this.totalPayoutsAmount = totalPayoutsAmount;
             this.info = info;
         }
 
-        public PayoutManagerState(org.web3j.abi.datatypes.generated.Uint256 id, org.web3j.abi.datatypes.Address owner, org.web3j.abi.datatypes.Address asset, org.web3j.abi.datatypes.Utf8String info) {
-            super(id,owner,asset,info);
+        public PayoutManagerState(Uint256 id, Address contractAddress, Utf8String ansName, Uint256 ansId, Address createdBy, Address owner, Address asset, Uint256 totalPayoutsCreated, Uint256 totalPayoutsAmount, Utf8String info) {
+            super(id,contractAddress,ansName,ansId,createdBy,owner,asset,totalPayoutsCreated,totalPayoutsAmount,info);
             this.id = id.getValue();
+            this.contractAddress = contractAddress.getValue();
+            this.ansName = ansName.getValue();
+            this.ansId = ansId.getValue();
+            this.createdBy = createdBy.getValue();
             this.owner = owner.getValue();
             this.asset = asset.getValue();
+            this.totalPayoutsCreated = totalPayoutsCreated.getValue();
+            this.totalPayoutsAmount = totalPayoutsAmount.getValue();
             this.info = info.getValue();
         }
     }

@@ -20,9 +20,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @Disabled("Not for automated testing")
 class BlockchainServiceTest {
 
-    private val issuerContract = "0xac8211B25CdFE7edF0633a9c3A67d6888C784F1A"
-    private val investTxHash = "0x9cfcb44d3516bfc5ecddc03a7c9089815893bd23473cd63833e33b639f7401b1"
-    private val cancelInvestmentTxHash = "0xc98df31e24c43c5e5e8be776880c134d990b467ad31dd2e951ffd6f3d599848b"
+    private val issuerContract = "0x521b0200138cef507769f6d8e8d4999f60b6b319"
+    private val investTxHash = "0xc63f303d54f23e09d1c191ebd05cecb94c817b5a88582dff14b3817bac43e577"
+    private val cancelInvestmentTxHash = "0x179ed82cb4de6ca88711f637576b8cddc7da5fcd75ee368fb61d74880f8a1b56"
     private val chainId = Chain.MATIC_TESTNET_MUMBAI.id
 
     @Autowired
