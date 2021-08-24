@@ -17,6 +17,7 @@ import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.gas.DefaultGasProvider
+import kotlin.jvm.Throws
 
 private val logger = KotlinLogging.logger {}
 
@@ -84,7 +85,7 @@ class BlockchainServiceImpl(applicationProperties: ApplicationProperties) : Bloc
         throw InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "Failed to map transaction info for txHash: $txHash")
     }
 
-    @Suppress("TooGenericExceptionCaught")
+    @Throws(InternalException::class)
     override fun getIssuerOwner(issuerRequest: IssuerRequest): String {
         logger.debug { "Get owner of issuer: $issuerRequest" }
         val chainProperties = chainHandler.getBlockchainProperties(issuerRequest.chainId)
@@ -98,7 +99,7 @@ class BlockchainServiceImpl(applicationProperties: ApplicationProperties) : Bloc
             )
     }
 
-    @Suppress("TooGenericExceptionCaught")
+    @Throws(InternalException::class)
     override fun getWhitelistedAddress(issuerRequest: IssuerRequest): List<String> {
         logger.debug { "Get whitelisted accounts for issuer: $issuerRequest" }
         val chainProperties = chainHandler.getBlockchainProperties(issuerRequest.chainId)
