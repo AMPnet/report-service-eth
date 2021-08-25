@@ -149,7 +149,11 @@ tasks.jacocoTestReport {
 tasks.jacocoTestCoverageVerification {
     classDirectories.setFrom(
         sourceSets.main.get().output.asFileTree.matching {
-            exclude("com/ampnet/*/proto/**", "com/ampnet/reportservice/grpc/**")
+            exclude(
+                "com/ampnet/*/proto/**",
+                "com/ampnet/reportserviceeth/grpc/**",
+                "com/ampnet/reportserviceeth/blockchain/*"
+            )
         }
     )
     violationRules {

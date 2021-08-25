@@ -1,3 +1,21 @@
+import java.math.BigInteger;
+import java.util.Arrays;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.DynamicStruct;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.crypto.Credentials;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.RemoteCall;
+import org.web3j.protocol.core.RemoteFunctionCall;
+import org.web3j.tx.Contract;
+import org.web3j.tx.TransactionManager;
+import org.web3j.tx.gas.ContractGasProvider;
+
 /**
  * <p>Auto generated code.
  * <p><strong>Do not modify!</strong>
@@ -8,53 +26,96 @@
  * <p>Generated with web3j version 4.8.4.
  */
 @SuppressWarnings("rawtypes")
-public class ICfManagerSoftcap extends org.web3j.tx.Contract {
+public class ICfManagerSoftcap extends Contract {
     public static final String BINARY = "";
 
     public static final String FUNC_GETSTATE = "getState";
 
-    protected ICfManagerSoftcap(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
+    @Deprecated
+    protected ICfManagerSoftcap(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
+        super(BINARY, contractAddress, web3j, credentials, gasPrice, gasLimit);
+    }
+
+    protected ICfManagerSoftcap(String contractAddress, Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, credentials, contractGasProvider);
     }
 
-    protected ICfManagerSoftcap(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
+    @Deprecated
+    protected ICfManagerSoftcap(String contractAddress, Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
+        super(BINARY, contractAddress, web3j, transactionManager, gasPrice, gasLimit);
+    }
+
+    protected ICfManagerSoftcap(String contractAddress, Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
-    public org.web3j.protocol.core.RemoteFunctionCall<ICfManagerSoftcap.CfManagerSoftcapState> getState() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETSTATE,
-                java.util.Arrays.<org.web3j.abi.datatypes.Type>asList(),
-                java.util.Arrays.<org.web3j.abi.TypeReference<?>>asList(new org.web3j.abi.TypeReference<ICfManagerSoftcap.CfManagerSoftcapState>() {
-                }));
-        return executeRemoteCallSingleValueReturn(function, ICfManagerSoftcap.CfManagerSoftcapState.class);
+    public RemoteFunctionCall<CfManagerSoftcapState> getState() {
+        final Function function = new Function(FUNC_GETSTATE, 
+                Arrays.<Type>asList(), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<CfManagerSoftcapState>() {}));
+        return executeRemoteCallSingleValueReturn(function, CfManagerSoftcapState.class);
     }
 
-    public static ICfManagerSoftcap load(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
+    @Deprecated
+    public static ICfManagerSoftcap load(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
+        return new ICfManagerSoftcap(contractAddress, web3j, credentials, gasPrice, gasLimit);
+    }
+
+    @Deprecated
+    public static ICfManagerSoftcap load(String contractAddress, Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
+        return new ICfManagerSoftcap(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
+    }
+
+    public static ICfManagerSoftcap load(String contractAddress, Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
         return new ICfManagerSoftcap(contractAddress, web3j, credentials, contractGasProvider);
     }
 
-    public static ICfManagerSoftcap load(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
+    public static ICfManagerSoftcap load(String contractAddress, Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
         return new ICfManagerSoftcap(contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
-    public static org.web3j.protocol.core.RemoteCall<ICfManagerSoftcap> deploy(org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
+    public static RemoteCall<ICfManagerSoftcap> deploy(Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
         return deployRemoteCall(ICfManagerSoftcap.class, web3j, credentials, contractGasProvider, BINARY, "");
     }
 
-    public static org.web3j.protocol.core.RemoteCall<ICfManagerSoftcap> deploy(org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
+    @Deprecated
+    public static RemoteCall<ICfManagerSoftcap> deploy(Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
+        return deployRemoteCall(ICfManagerSoftcap.class, web3j, credentials, gasPrice, gasLimit, BINARY, "");
+    }
+
+    public static RemoteCall<ICfManagerSoftcap> deploy(Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
         return deployRemoteCall(ICfManagerSoftcap.class, web3j, transactionManager, contractGasProvider, BINARY, "");
     }
 
-    public static class CfManagerSoftcapState extends org.web3j.abi.datatypes.DynamicStruct {
-        public java.math.BigInteger id;
+    @Deprecated
+    public static RemoteCall<ICfManagerSoftcap> deploy(Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
+        return deployRemoteCall(ICfManagerSoftcap.class, web3j, transactionManager, gasPrice, gasLimit, BINARY, "");
+    }
+
+    public static class CfManagerSoftcapState extends DynamicStruct {
+        public BigInteger id;
+
+        public String contractAddress;
+
+        public String ansName;
+
+        public BigInteger ansId;
+
+        public String createdBy;
 
         public String owner;
 
         public String asset;
 
-        public java.math.BigInteger tokenPrice;
+        public String issuer;
 
-        public java.math.BigInteger softCap;
+        public BigInteger tokenPrice;
+
+        public BigInteger softCap;
+
+        public BigInteger minInvestment;
+
+        public BigInteger maxInvestment;
 
         public Boolean whitelistRequired;
 
@@ -62,23 +123,34 @@ public class ICfManagerSoftcap extends org.web3j.tx.Contract {
 
         public Boolean cancelled;
 
-        public java.math.BigInteger totalClaimableTokens;
+        public BigInteger totalClaimableTokens;
 
-        public java.math.BigInteger totalInvestorsCount;
+        public BigInteger totalInvestorsCount;
 
-        public java.math.BigInteger totalClaimsCount;
+        public BigInteger totalClaimsCount;
 
-        public java.math.BigInteger totalFundsRaised;
+        public BigInteger totalFundsRaised;
+
+        public BigInteger totalTokensSold;
+
+        public BigInteger totalTokensBalance;
 
         public String info;
 
-        public CfManagerSoftcapState(java.math.BigInteger id, String owner, String asset, java.math.BigInteger tokenPrice, java.math.BigInteger softCap, Boolean whitelistRequired, Boolean finalized, Boolean cancelled, java.math.BigInteger totalClaimableTokens, java.math.BigInteger totalInvestorsCount, java.math.BigInteger totalClaimsCount, java.math.BigInteger totalFundsRaised, String info) {
-            super(new org.web3j.abi.datatypes.generated.Uint256(id),new org.web3j.abi.datatypes.Address(owner),new org.web3j.abi.datatypes.Address(asset),new org.web3j.abi.datatypes.generated.Uint256(tokenPrice),new org.web3j.abi.datatypes.generated.Uint256(softCap),new org.web3j.abi.datatypes.Bool(whitelistRequired),new org.web3j.abi.datatypes.Bool(finalized),new org.web3j.abi.datatypes.Bool(cancelled),new org.web3j.abi.datatypes.generated.Uint256(totalClaimableTokens),new org.web3j.abi.datatypes.generated.Uint256(totalInvestorsCount),new org.web3j.abi.datatypes.generated.Uint256(totalClaimsCount),new org.web3j.abi.datatypes.generated.Uint256(totalFundsRaised),new org.web3j.abi.datatypes.Utf8String(info));
+        public CfManagerSoftcapState(BigInteger id, String contractAddress, String ansName, BigInteger ansId, String createdBy, String owner, String asset, String issuer, BigInteger tokenPrice, BigInteger softCap, BigInteger minInvestment, BigInteger maxInvestment, Boolean whitelistRequired, Boolean finalized, Boolean cancelled, BigInteger totalClaimableTokens, BigInteger totalInvestorsCount, BigInteger totalClaimsCount, BigInteger totalFundsRaised, BigInteger totalTokensSold, BigInteger totalTokensBalance, String info) {
+            super(new Uint256(id),new Address(contractAddress),new Utf8String(ansName),new Uint256(ansId),new Address(createdBy),new Address(owner),new Address(asset),new Address(issuer),new Uint256(tokenPrice),new Uint256(softCap),new Uint256(minInvestment),new Uint256(maxInvestment),new Bool(whitelistRequired),new Bool(finalized),new Bool(cancelled),new Uint256(totalClaimableTokens),new Uint256(totalInvestorsCount),new Uint256(totalClaimsCount),new Uint256(totalFundsRaised),new Uint256(totalTokensSold),new Uint256(totalTokensBalance),new Utf8String(info));
             this.id = id;
+            this.contractAddress = contractAddress;
+            this.ansName = ansName;
+            this.ansId = ansId;
+            this.createdBy = createdBy;
             this.owner = owner;
             this.asset = asset;
+            this.issuer = issuer;
             this.tokenPrice = tokenPrice;
             this.softCap = softCap;
+            this.minInvestment = minInvestment;
+            this.maxInvestment = maxInvestment;
             this.whitelistRequired = whitelistRequired;
             this.finalized = finalized;
             this.cancelled = cancelled;
@@ -86,16 +158,25 @@ public class ICfManagerSoftcap extends org.web3j.tx.Contract {
             this.totalInvestorsCount = totalInvestorsCount;
             this.totalClaimsCount = totalClaimsCount;
             this.totalFundsRaised = totalFundsRaised;
+            this.totalTokensSold = totalTokensSold;
+            this.totalTokensBalance = totalTokensBalance;
             this.info = info;
         }
 
-        public CfManagerSoftcapState(org.web3j.abi.datatypes.generated.Uint256 id, org.web3j.abi.datatypes.Address owner, org.web3j.abi.datatypes.Address asset, org.web3j.abi.datatypes.generated.Uint256 tokenPrice, org.web3j.abi.datatypes.generated.Uint256 softCap, org.web3j.abi.datatypes.Bool whitelistRequired, org.web3j.abi.datatypes.Bool finalized, org.web3j.abi.datatypes.Bool cancelled, org.web3j.abi.datatypes.generated.Uint256 totalClaimableTokens, org.web3j.abi.datatypes.generated.Uint256 totalInvestorsCount, org.web3j.abi.datatypes.generated.Uint256 totalClaimsCount, org.web3j.abi.datatypes.generated.Uint256 totalFundsRaised, org.web3j.abi.datatypes.Utf8String info) {
-            super(id,owner,asset,tokenPrice,softCap,whitelistRequired,finalized,cancelled,totalClaimableTokens,totalInvestorsCount,totalClaimsCount,totalFundsRaised,info);
+        public CfManagerSoftcapState(Uint256 id, Address contractAddress, Utf8String ansName, Uint256 ansId, Address createdBy, Address owner, Address asset, Address issuer, Uint256 tokenPrice, Uint256 softCap, Uint256 minInvestment, Uint256 maxInvestment, Bool whitelistRequired, Bool finalized, Bool cancelled, Uint256 totalClaimableTokens, Uint256 totalInvestorsCount, Uint256 totalClaimsCount, Uint256 totalFundsRaised, Uint256 totalTokensSold, Uint256 totalTokensBalance, Utf8String info) {
+            super(id,contractAddress,ansName,ansId,createdBy,owner,asset,issuer,tokenPrice,softCap,minInvestment,maxInvestment,whitelistRequired,finalized,cancelled,totalClaimableTokens,totalInvestorsCount,totalClaimsCount,totalFundsRaised,totalTokensSold,totalTokensBalance,info);
             this.id = id.getValue();
+            this.contractAddress = contractAddress.getValue();
+            this.ansName = ansName.getValue();
+            this.ansId = ansId.getValue();
+            this.createdBy = createdBy.getValue();
             this.owner = owner.getValue();
             this.asset = asset.getValue();
+            this.issuer = issuer.getValue();
             this.tokenPrice = tokenPrice.getValue();
             this.softCap = softCap.getValue();
+            this.minInvestment = minInvestment.getValue();
+            this.maxInvestment = maxInvestment.getValue();
             this.whitelistRequired = whitelistRequired.getValue();
             this.finalized = finalized.getValue();
             this.cancelled = cancelled.getValue();
@@ -103,6 +184,8 @@ public class ICfManagerSoftcap extends org.web3j.tx.Contract {
             this.totalInvestorsCount = totalInvestorsCount.getValue();
             this.totalClaimsCount = totalClaimsCount.getValue();
             this.totalFundsRaised = totalFundsRaised.getValue();
+            this.totalTokensSold = totalTokensSold.getValue();
+            this.totalTokensBalance = totalTokensBalance.getValue();
             this.info = info.getValue();
         }
     }

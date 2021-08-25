@@ -17,6 +17,7 @@ import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.gas.DefaultGasProvider
+import kotlin.jvm.Throws
 
 private val logger = KotlinLogging.logger {}
 
@@ -84,39 +85,35 @@ class BlockchainServiceImpl(applicationProperties: ApplicationProperties) : Bloc
         throw InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "Failed to map transaction info for txHash: $txHash")
     }
 
-    @Suppress("TooGenericExceptionCaught")
+    @Throws(InternalException::class)
     override fun getIssuerOwner(issuerRequest: IssuerRequest): String {
         logger.debug { "Get owner of issuer: $issuerRequest" }
         val chainProperties = chainHandler.getBlockchainProperties(issuerRequest.chainId)
         val contract = IIssuer.load(
             issuerRequest.address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
-        return try {
-            contract.state.send().owner
-        } catch (ex: Exception) {
-            throw InternalException(
+        return contract.state.sendSafely()?.owner
+            ?: throw InternalException(
                 ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-                "Failed to fetch issuer owner address for contract address: $issuerRequest", ex
+                "Failed to fetch issuer owner address for contract address: $issuerRequest"
             )
-        }
     }
 
-    @Suppress("TooGenericExceptionCaught")
+    @Throws(InternalException::class)
     override fun getWhitelistedAddress(issuerRequest: IssuerRequest): List<String> {
         logger.debug { "Get whitelisted accounts for issuer: $issuerRequest" }
         val chainProperties = chainHandler.getBlockchainProperties(issuerRequest.chainId)
         val contract = IIssuer.load(
             issuerRequest.address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
-        return try {
-            val addresses = contract.walletRecords.send().filterIsInstance<IIssuer.WalletRecord>()
-            addresses.filter { it.whitelisted }.map { it.wallet }
-        } catch (ex: Exception) {
-            throw InternalException(
+        return contract.walletRecords.sendSafely()
+            ?.filterIsInstance<IIssuer.WalletRecord>()
+            ?.filter { it.whitelisted }
+            ?.map { it.wallet }
+            ?: throw InternalException(
                 ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-                "Failed to fetch whitelisted addresses for issuer contract address: $issuerRequest", ex
+                "Failed to fetch whitelisted addresses for issuer contract address: $issuerRequest"
             )
-        }
     }
 
     @Suppress("TooGenericExceptionCaught")

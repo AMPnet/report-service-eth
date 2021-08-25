@@ -11,7 +11,6 @@ interface IIssuer {
     // function getState() external view returns (Structs.IssuerState memory);
     function _define_struct_Auditor(Structs.WalletRecord memory auditor) external;
 
-    function setInfo(string memory info) external;
     function getState() external view returns (Structs.IssuerState memory);
     function isWalletApproved(address _wallet) external view returns (bool);
     function getWalletRecords() external view returns (Structs.WalletRecord[] memory);
