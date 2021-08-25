@@ -2,6 +2,7 @@ package com.ampnet.reportserviceeth.controller
 
 import com.ampnet.identityservice.proto.UserResponse
 import com.ampnet.reportserviceeth.exception.ErrorCode
+import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.security.WithMockCrowdfundUser
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.impl.toDateString
@@ -10,6 +11,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -138,6 +140,24 @@ class AdminControllerTest : ControllerTestBase() {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest)
                 .andReturn()
             verifyResponseErrorCode(result, ErrorCode.USER_NOT_ISSUER)
+        }
+    }
+
+    @Test
+    @WithMockCrowdfundUser
+    fun mustHandleExceptionFromBlockchainService() {
+        suppose("Blockchain service will return issuer owner address") {
+            given(blockchainService.getIssuerOwner(IssuerRequest(issuer, defaultChainId)))
+                .willThrow(InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "Failed"))
+        }
+
+        verify("Platform manager can get pdf with all user accounts summary") {
+            val result = mockMvc.perform(
+                MockMvcRequestBuilders.get("$userAccountsSummaryPath/xlsx")
+            )
+                .andExpect(MockMvcResultMatchers.status().isBadGateway)
+                .andReturn()
+            verifyResponseErrorCode(result, ErrorCode.INT_JSON_RPC_BLOCKCHAIN)
         }
     }
 
