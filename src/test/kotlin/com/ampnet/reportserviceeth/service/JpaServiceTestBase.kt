@@ -2,6 +2,7 @@ package com.ampnet.reportserviceeth.service
 
 import com.ampnet.identityservice.proto.UserResponse
 import com.ampnet.reportserviceeth.TestBase
+import com.ampnet.reportserviceeth.blockchain.BlockchainEventService
 import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.TransactionInfo
 import com.ampnet.reportserviceeth.blockchain.TransactionType
@@ -36,6 +37,9 @@ abstract class JpaServiceTestBase : TestBase() {
 
     @Mock
     protected lateinit var blockchainService: BlockchainService
+
+    @Mock
+    protected lateinit var blockchainEventService: BlockchainEventService
 
     @Mock
     protected lateinit var userService: UserService

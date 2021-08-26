@@ -1,7 +1,11 @@
-package com.ampnet.reportserviceeth.blockchain
+package com.ampnet.reportserviceeth.service.impl
 
+import com.ampnet.reportserviceeth.blockchain.BlockchainEventService
+import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.properties.Chain
+import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesHandler
 import com.ampnet.reportserviceeth.config.ApplicationProperties
+import com.ampnet.reportserviceeth.config.ChainProperties
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.persistence.model.Task
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
@@ -14,11 +18,13 @@ import java.util.concurrent.TimeUnit
 private val logger = KotlinLogging.logger {}
 
 @Service
-class BlockchainQueueServiceImpl(
+class EventQueueServiceImpl(
     private val applicationProperties: ApplicationProperties,
     private val taskRepository: TaskRepository,
     private val eventRepository: EventRepository,
-    private val blockchainService: BlockchainService
+    private val blockchainService: BlockchainService,
+    private val blockchainEventService: BlockchainEventService,
+    private val chainPropertiesHandler: ChainPropertiesHandler
 ) {
 
     private val executorService = Executors.newSingleThreadScheduledExecutor()
@@ -32,14 +38,16 @@ class BlockchainQueueServiceImpl(
         )
     }
 
-    private fun processTasks() {
-        val chainId = Chain.MATIC_MAIN.id
+    private fun processTasks(chainId: Long = Chain.MATIC_TESTNET_MUMBAI.id) {
+        val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
         val startBlockNumber = taskRepository.findFirstByOrderByBlockNumberDesc()?.let { it.blockNumber + 1 }
-            ?: applicationProperties.queue.startBlockNumber
+            ?: chainProperties.chain.startBlockNumber
         try {
             val latestBlockNumber = blockchainService.getBlockNumber(chainId)
-            val endBlockNumber = calculateEndBlockNumber(startBlockNumber, latestBlockNumber.toLong())
-            val events = blockchainService.getAllEvents(startBlockNumber, endBlockNumber, chainId)
+            val endBlockNumber = calculateEndBlockNumber(
+                startBlockNumber, latestBlockNumber.toLong(), chainProperties.chain
+            )
+            val events = blockchainEventService.getAllEvents(startBlockNumber, endBlockNumber, chainId)
             eventRepository.saveAll(events)
             taskRepository.save(Task(chainId, endBlockNumber))
         } catch (ex: InternalException) {
@@ -48,14 +56,17 @@ class BlockchainQueueServiceImpl(
         }
     }
 
-    private fun calculateEndBlockNumber(startBlockNumber: Long, latestBlockNumber: Long): Long {
-        return if (
-            (latestBlockNumber - applicationProperties.queue.numOfConfirmations - startBlockNumber)
-        > applicationProperties.queue.maxBlocks
+    private fun calculateEndBlockNumber(
+        startBlockNumber: Long,
+        latestBlockNumber: Long,
+        chainProperties: ChainProperties
+    ): Long =
+        if (
+            (latestBlockNumber - chainProperties.numOfConfirmations - startBlockNumber)
+        > chainProperties.maxBlocks
         ) {
-            startBlockNumber + applicationProperties.queue.maxBlocks
+            startBlockNumber + chainProperties.maxBlocks
         } else {
-            latestBlockNumber - applicationProperties.queue.numOfConfirmations
+            latestBlockNumber - chainProperties.numOfConfirmations
         }
-    }
 }

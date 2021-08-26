@@ -8,6 +8,7 @@ enum class ErrorCode(val categoryCode: String, var specificCode: String, var mes
 
     // Blockchain: 04
     BLOCKCHAIN_ID("04", "01", "Blockchain id not supported"),
+    BLOCKCHAIN_CONFIG_MISSING("04", "02", "Blockchain data is not provided"),
 
     // Internal: 08
     INT_JSON_RPC_BLOCKCHAIN("08", "03", "Failed JSON-RPC call to blockchain"),
