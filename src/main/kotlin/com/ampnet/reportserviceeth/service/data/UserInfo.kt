@@ -21,7 +21,7 @@ data class UserInfo(
         user.address,
         user.firstName,
         user.lastName,
-        user.createdAt.millisecondsToLocalDateTime(),
+        user.createdAt.secondsToLocalDateTime(),
         user.language,
         user.dateOfBirth,
         user.documentNumber,
@@ -31,5 +31,5 @@ data class UserInfo(
     )
 }
 
-fun Long.millisecondsToLocalDateTime(): LocalDateTime =
-    Instant.ofEpochMilli(this).atZone(ZoneOffset.UTC).toLocalDateTime()
+fun Long.secondsToLocalDateTime(): LocalDateTime =
+    Instant.ofEpochSecond(this).atZone(ZoneOffset.UTC).toLocalDateTime()

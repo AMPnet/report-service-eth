@@ -6,7 +6,7 @@ import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.service.XlsxService
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
-import com.ampnet.reportserviceeth.service.data.millisecondsToLocalDateTime
+import com.ampnet.reportserviceeth.service.data.secondsToLocalDateTime
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.xssf.usermodel.XSSFSheet
@@ -89,4 +89,4 @@ class XlsxServiceImpl(private val userService: UserService) : XlsxService {
 }
 
 fun Long.toDateString(): String =
-    millisecondsToLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+    secondsToLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
