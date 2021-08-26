@@ -57,7 +57,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.github.microutils:kotlin-logging:2.0.5")
 
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     runtimeOnly("org.postgresql:postgresql")
