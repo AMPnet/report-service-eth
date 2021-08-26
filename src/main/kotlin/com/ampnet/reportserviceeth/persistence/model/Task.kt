@@ -1,5 +1,6 @@
 package com.ampnet.reportserviceeth.persistence.model
 
+import java.time.Instant
 import java.util.UUID
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -21,4 +22,11 @@ class Task(
 
     @Column(nullable = false)
     val timestamp: Long
-)
+) {
+    constructor(chainId: Long, blockNumber: Long) : this(
+        UUID.randomUUID(),
+        chainId,
+        blockNumber,
+        Instant.now().toEpochMilli()
+    )
+}

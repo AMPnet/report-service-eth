@@ -10,21 +10,30 @@ import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesWithServ
 import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
+import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.sendSafely
 import com.ampnet.reportserviceeth.service.unwrap
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
+import org.web3j.protocol.core.DefaultBlockParameter
+import org.web3j.protocol.core.methods.request.EthFilter
+import org.web3j.protocol.core.methods.response.BaseEventResponse
+import org.web3j.protocol.core.methods.response.EthLog
+import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.gas.DefaultGasProvider
+import java.math.BigInteger
 import kotlin.jvm.Throws
 
 private val logger = KotlinLogging.logger {}
 
 @Service
-class BlockchainServiceImpl(applicationProperties: ApplicationProperties) : BlockchainService {
-
-    private val chainHandler by lazy { ChainPropertiesHandler(applicationProperties) }
+@Suppress("TooManyFunctions")
+class BlockchainServiceImpl(
+    private val applicationProperties: ApplicationProperties,
+    private val chainPropertiesHandler: ChainPropertiesHandler
+) : BlockchainService {
 
     override fun getTransactions(wallet: String, chainId: Long): List<TransactionInfo> {
         logger.debug { "Get transactions for wallet address: $wallet" }
@@ -48,7 +57,7 @@ class BlockchainServiceImpl(applicationProperties: ApplicationProperties) : Bloc
     @Suppress("ReturnCount")
     override fun getTransactionInfo(txHash: String, chainId: Long): TransactionInfo {
         logger.debug { "Get info for transaction with hash: $txHash" }
-        val chainProperties = chainHandler.getBlockchainProperties(chainId)
+        val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
         val txReceipt: TransactionReceipt = chainProperties.web3j.ethGetTransactionReceipt(txHash)
             .sendSafely()?.transactionReceipt?.unwrap() ?: throw InternalException(
             ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
@@ -62,22 +71,22 @@ class BlockchainServiceImpl(applicationProperties: ApplicationProperties) : Bloc
         )
         val asset = getAssetStateViaCfManagerContract(txReceipt.to, chainProperties)
         getEvents { contract.getInvestEvents(txReceipt) }?.firstOrNull()?.let {
-            logger.debug { "Fetched reserve investment even for hash: $txHash" }
+            logger.debug { "Fetched reserve investment event for hash: $txHash" }
             return TransactionInfo(it, txReceipt, asset)
         }
         getEvents { contract.getCancelInvestmentEvents(txReceipt) }?.firstOrNull()?.let {
-            logger.debug { "Fetched cancel investment even for hash: $txHash" }
+            logger.debug { "Fetched cancel investment event for hash: $txHash" }
             return TransactionInfo(it, txReceipt, asset)
         }
         getEvents { contract.getClaimEvents(txReceipt) }?.firstOrNull()?.let {
-            logger.debug { "Fetched investment completed even for hash: $txHash" }
+            logger.debug { "Fetched investment completed event for hash: $txHash" }
             return TransactionInfo(it, txReceipt, asset)
         }
         val payoutManagerContract = TransactionEvents.load(
             txReceipt.from, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
         getEvents { payoutManagerContract.getCreatePayoutEvents(txReceipt) }?.firstOrNull()?.let {
-            logger.debug { "Fetched revenue share payout even for hash: $txHash" }
+            logger.debug { "Fetched revenue share payout event for hash: $txHash" }
             return TransactionInfo(
                 it, txReceipt, getAssetStateViaPayoutManagerContract(txReceipt.from, chainProperties)
             )
@@ -88,7 +97,7 @@ class BlockchainServiceImpl(applicationProperties: ApplicationProperties) : Bloc
     @Throws(InternalException::class)
     override fun getIssuerOwner(issuerRequest: IssuerRequest): String {
         logger.debug { "Get owner of issuer: $issuerRequest" }
-        val chainProperties = chainHandler.getBlockchainProperties(issuerRequest.chainId)
+        val chainProperties = chainPropertiesHandler.getBlockchainProperties(issuerRequest.chainId)
         val contract = IIssuer.load(
             issuerRequest.address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
@@ -102,7 +111,7 @@ class BlockchainServiceImpl(applicationProperties: ApplicationProperties) : Bloc
     @Throws(InternalException::class)
     override fun getWhitelistedAddress(issuerRequest: IssuerRequest): List<String> {
         logger.debug { "Get whitelisted accounts for issuer: $issuerRequest" }
-        val chainProperties = chainHandler.getBlockchainProperties(issuerRequest.chainId)
+        val chainProperties = chainPropertiesHandler.getBlockchainProperties(issuerRequest.chainId)
         val contract = IIssuer.load(
             issuerRequest.address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
@@ -114,6 +123,31 @@ class BlockchainServiceImpl(applicationProperties: ApplicationProperties) : Bloc
                 ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
                 "Failed to fetch whitelisted addresses for issuer contract address: $issuerRequest"
             )
+    }
+
+    @Throws(InternalException::class)
+    override fun getAllEvents(startBlockNumber: Long, endBlockNumber: Long, chainId: Long): List<Event> {
+        val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
+        val deployedContracts = getDeployedContractsForFetchingEvents(chainProperties)
+        val ethFilter = EthFilter(
+            DefaultBlockParameter.valueOf(BigInteger.valueOf(startBlockNumber)),
+            DefaultBlockParameter.valueOf(BigInteger.valueOf(endBlockNumber)),
+            deployedContracts.keys.toList()
+        )
+        val ethLog: EthLog = chainProperties.web3j.ethGetLogs(ethFilter).sendSafely()
+            ?: throw InternalException(
+                ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
+                "Failed to fetch events from $startBlockNumber to $endBlockNumber block, " +
+                    "for contracts ${deployedContracts.keys.joinToString()}"
+            )
+        val logs = ethLog.logs.mapNotNull { it.get() as? EthLog.LogObject }
+        return generateEvents(logs, deployedContracts, chainProperties, chainId)
+    }
+
+    override fun getBlockNumber(chainId: Long): BigInteger {
+        val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
+        return chainProperties.web3j.ethBlockNumber().sendSafely()?.blockNumber
+            ?: throw InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "Failed to fetch latest block number")
     }
 
     @Suppress("TooGenericExceptionCaught")
@@ -154,4 +188,107 @@ class BlockchainServiceImpl(applicationProperties: ApplicationProperties) : Bloc
         )
         return assetContract.state.sendSafely()
     }
+
+    @Suppress("ThrowsCount")
+    private fun getDeployedContractsForFetchingEvents(
+        chainProperties: ChainPropertiesWithServices
+    ): Map<String, IAsset.AssetState> {
+        val cfManagerFactoryContract = ICfManagerSoftcapFactory.load(
+            applicationProperties.smartContract.cfManagerFactoryAddress,
+            chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
+        )
+        val payoutManagerFactoryContract = IPayoutManagerFactory.load(
+            applicationProperties.smartContract.payoutManagerFactoryAddress,
+            chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
+        )
+        val cfManagerInstances = cfManagerFactoryContract.instances.sendSafely()?.associate {
+            val contractAddress = it as String
+            val assetState = getAssetStateViaCfManagerContract(contractAddress, chainProperties)
+                ?: throw InternalException(
+                    ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
+                    "Failed to fetch assetState for cfManagerContract: $contractAddress"
+                )
+            contractAddress to assetState
+        } ?: run {
+            logger.debug {
+                "There are no contracts deployed for the cfManagerFactory at: " +
+                    applicationProperties.smartContract.cfManagerFactoryAddress
+            }
+            mapOf()
+        }
+        val payoutManagerInstances = payoutManagerFactoryContract.instances
+            .sendSafely()?.associate {
+                val contractAddress = it as String
+                val assetState = getAssetStateViaPayoutManagerContract(contractAddress, chainProperties)
+                    ?: throw InternalException(
+                        ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
+                        "Failed to fetch assetState for payoutManagerContract: $contractAddress"
+                    )
+                contractAddress to assetState
+            } ?: run {
+            logger.debug {
+                "There are no contracts deployed for the payoutManagerFactory at: " +
+                    applicationProperties.smartContract.payoutManagerFactoryAddress
+            }
+            mapOf()
+        }
+        return cfManagerInstances.plus(payoutManagerInstances).ifEmpty {
+            throw InternalException(
+                ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
+                "There are no contracts deployed to fetch events"
+            )
+        }
+    }
+
+    private fun generateEvents(
+        logs: List<Log>,
+        deployedContracts: Map<String, IAsset.AssetState>,
+        chainProperties: ChainPropertiesWithServices,
+        chainId: Long
+    ): List<Event> {
+        val events = mutableListOf<Event>()
+        val txReceipt = TransactionReceipt().apply { this.logs = logs }
+        // The contract address is not important since it doesn't fetch anything from the blockchain.
+        // It is only used to map logs to events.
+        val contract = TransactionEvents.load(
+            applicationProperties.smartContract.payoutManagerFactoryAddress,
+            chainProperties.web3j,
+            chainProperties.transactionManager,
+            DefaultGasProvider()
+        )
+        val logsMap: Map<Log, Log> = logs.associateWith { it }
+        getEvents { contract.getInvestEvents(txReceipt) }?.forEach {
+            val log = getLog(logsMap, it)
+            val asset = getAsset(deployedContracts, log)
+            events.add(Event(it, chainId, log, asset))
+        }
+        getEvents { contract.getCancelInvestmentEvents(txReceipt) }?.forEach {
+            val log = getLog(logsMap, it)
+            val asset = getAsset(deployedContracts, log)
+            events.add(Event(it, chainId, log, asset))
+        }
+        getEvents { contract.getClaimEvents(txReceipt) }?.forEach {
+            val log = getLog(logsMap, it)
+            val asset = getAsset(deployedContracts, log)
+            events.add(Event(it, chainId, log, asset))
+        }
+        getEvents { contract.getCreatePayoutEvents(txReceipt) }?.forEach {
+            val log = getLog(logsMap, it)
+            val asset = getAsset(deployedContracts, log)
+            events.add(Event(it, chainId, log, asset))
+        }
+        return events
+    }
+
+    private fun getLog(logsMap: Map<Log, Log>, event: BaseEventResponse) =
+        logsMap[event.log] ?: throw InternalException(
+            ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
+            "Cannot find the log for contract address: ${event.log.address} inside the logsMap."
+        )
+
+    private fun getAsset(deployedContracts: Map<String, IAsset.AssetState>, log: Log) =
+        deployedContracts[log.address]?.name ?: throw InternalException(
+            ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
+            "Cannot find the asset for address: ${log.address} inside the deployedContracts."
+        )
 }

@@ -1,6 +1,7 @@
 package com.ampnet.reportserviceeth.persistence.model
 
 import com.ampnet.reportserviceeth.blockchain.TransactionType
+import org.web3j.protocol.core.methods.response.Log
 import java.math.BigInteger
 import java.util.UUID
 import javax.persistence.Column
@@ -62,4 +63,97 @@ class Event(
 
     @Column(nullable = true)
     var revenue: BigInteger?
-)
+) {
+    constructor(
+        event: TransactionEvents.InvestEventResponse,
+        chainId: Long,
+        log: Log,
+        asset: String
+    ) : this(
+        UUID.randomUUID(),
+        chainId,
+        event.investor,
+        log.address,
+        log.address,
+        log.transactionHash,
+        TransactionType.RESERVE_INVESTMENT,
+        log.logIndex.toLong(),
+        asset,
+        log.blockNumber.toLong(),
+        log.blockHash,
+        event.timestamp.toLong(), // Check if this is correct
+        event.tokenAmount,
+        event.tokenValue,
+        null,
+        null
+    )
+    constructor(
+        event: TransactionEvents.CancelInvestmentEventResponse,
+        chainId: Long,
+        log: Log,
+        asset: String
+    ) : this(
+        UUID.randomUUID(),
+        chainId,
+        event.investor,
+        log.address,
+        log.address,
+        log.transactionHash,
+        TransactionType.CANCEL_INVESTMENT,
+        log.logIndex.toLong(),
+        asset,
+        log.blockNumber.toLong(),
+        log.blockHash,
+        event.timestamp.toLong(), // Check if this is correct
+        event.tokenAmount,
+        event.tokenValue,
+        null,
+        null
+    )
+    constructor(
+        event: TransactionEvents.ClaimEventResponse,
+        chainId: Long,
+        log: Log,
+        asset: String
+    ) : this(
+        UUID.randomUUID(),
+        chainId,
+        event.investor,
+        log.address,
+        log.address,
+        log.transactionHash,
+        TransactionType.COMPLETED_INVESTMENT,
+        log.logIndex.toLong(),
+        asset,
+        log.blockNumber.toLong(),
+        log.blockHash,
+        event.timestamp.toLong(), // Check if this is correct
+        event.tokenAmount,
+        event.tokenValue,
+        null,
+        null
+    )
+    constructor(
+        event: TransactionEvents.CreatePayoutEventResponse,
+        chainId: Long,
+        log: Log,
+        asset: String
+    ) : this(
+        UUID.randomUUID(),
+        chainId,
+        log.address,
+        event.creator,
+        log.address,
+        log.transactionHash,
+        TransactionType.CANCEL_INVESTMENT,
+        log.logIndex.toLong(),
+        asset,
+        log.blockNumber.toLong(),
+        log.blockHash,
+        event.timestamp.toLong(), // Check if this is correct
+        null,
+        event.amount,
+        event.payoutId.toLong(),
+        event.amount // check if this is actually the revenue
+    )
+}

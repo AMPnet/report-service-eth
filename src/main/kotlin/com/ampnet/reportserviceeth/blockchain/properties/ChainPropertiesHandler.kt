@@ -3,10 +3,12 @@ package com.ampnet.reportserviceeth.blockchain.properties
 import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InvalidRequestException
+import org.springframework.stereotype.Service
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.ReadonlyTransactionManager
 
+@Service
 class ChainPropertiesHandler(private val applicationProperties: ApplicationProperties) {
 
     private val blockchainPropertiesMap = mutableMapOf<Long, ChainPropertiesWithServices>()

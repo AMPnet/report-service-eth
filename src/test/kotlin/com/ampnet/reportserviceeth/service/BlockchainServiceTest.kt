@@ -3,6 +3,7 @@ package com.ampnet.reportserviceeth.service
 import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.BlockchainServiceImpl
 import com.ampnet.reportserviceeth.blockchain.properties.Chain
+import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesHandler
 import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
@@ -28,8 +29,11 @@ class BlockchainServiceTest {
     @Autowired
     private lateinit var applicationProperties: ApplicationProperties
 
+    @Autowired
+    private lateinit var chainPropertiesHandler: ChainPropertiesHandler
+
     private val service: BlockchainService by lazy {
-        BlockchainServiceImpl(applicationProperties)
+        BlockchainServiceImpl(applicationProperties, chainPropertiesHandler)
     }
 
     @Test
@@ -61,5 +65,16 @@ class BlockchainServiceTest {
         assertThrows<InternalException> {
             service.getTransactionInfo("0xb98df31e24c43c5e5e8be776880c134d990b467ad31dd2e951ffd6f3d599848b", chainId)
         }
+    }
+
+    @Test
+    fun mustBeAbleToGetAllEvents() {
+        applicationProperties.queue.maxBlocks = 99_999
+        val startBlockNumber = 17345957L
+        val events = service.getAllEvents(
+            startBlockNumber, startBlockNumber + applicationProperties.queue.maxBlocks,
+            Chain.MATIC_TESTNET_MUMBAI.id
+        )
+        assertThat(events).isNotEmpty
     }
 }
