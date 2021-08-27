@@ -39,14 +39,21 @@ class EventQueueServiceImpl(
     }
 
     private fun processTasks(chainId: Long) {
+        logger.debug { "Processing tasks for chainId: $chainId" }
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
         val startBlockNumber = taskRepository.findFirstByOrderByBlockNumberDesc()?.let { it.blockNumber + 1 }
             ?: chainProperties.chain.startBlockNumber
+        logger.debug { "Start block number: $startBlockNumber" }
         try {
             val latestBlockNumber = blockchainService.getBlockNumber(chainId)
             val endBlockNumber = calculateEndBlockNumber(
                 startBlockNumber, latestBlockNumber.toLong(), chainProperties.chain
             )
+            logger.debug { "End block number: $endBlockNumber" }
+            if (startBlockNumber >= endBlockNumber) {
+                logger.warn { "End block number: $endBlockNumber is bigger than start block number: $startBlockNumber" }
+                return
+            }
             val events = blockchainEventService.getAllEvents(startBlockNumber, endBlockNumber, chainId)
             eventRepository.saveAll(events)
             taskRepository.save(Task(chainId, endBlockNumber))

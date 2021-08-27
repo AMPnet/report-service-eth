@@ -18,7 +18,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
+import org.mockito.Mockito
+import org.mockito.kotlin.any
 import org.mockito.kotlin.given
+import org.mockito.kotlin.timeout
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -57,6 +60,9 @@ class EventQueueServiceTest : TestBase() {
         testContext = TestContext()
         databaseCleanerService.deleteAllTasks()
         databaseCleanerService.deleteAllEvents()
+        Mockito.clearInvocations(blockchainEventService)
+        given(blockchainService.getBlockNumber(chainId)).willReturn(BigInteger.valueOf(-1))
+        given(blockchainEventService.getAllEvents(any(), any(), any())).willReturn(emptyList())
     }
 
     @AfterEach
@@ -70,9 +76,6 @@ class EventQueueServiceTest : TestBase() {
         suppose("There is an existing task") {
             testContext.task = taskRepository.save(Task(chainId, startBlockNumber))
         }
-        suppose("Blockchain service will return latest block number") {
-            given(blockchainService.getBlockNumber(chainId)).willReturn(BigInteger.valueOf(lastBlockNumber))
-        }
         suppose("Blockchain service will return two events") {
             testContext.investEvent = createEvent(TransactionType.RESERVE_INVESTMENT, "blockHash1")
             testContext.cancelInvestmentEvent = createEvent(TransactionType.CANCEL_INVESTMENT, "blockHash2")
@@ -82,6 +85,9 @@ class EventQueueServiceTest : TestBase() {
                     lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations, chainId
                 )
             ).willReturn(listOf(testContext.investEvent, testContext.cancelInvestmentEvent))
+        }
+        suppose("Blockchain service will return latest block number") {
+            given(blockchainService.getBlockNumber(chainId)).willReturn(BigInteger.valueOf(lastBlockNumber))
         }
 
         verify("Service will save events and create a second task") {
@@ -130,7 +136,13 @@ class EventQueueServiceTest : TestBase() {
     }
 
     private fun waitUntilTasksAreProcessed() {
-        Thread.sleep(applicationProperties.queue.initialDelay)
+        Mockito.verify(blockchainEventService, timeout(10000).atLeastOnce())
+            .getAllEvents(
+                startBlockNumber + 1,
+                lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations,
+                chainId
+            )
+        Thread.sleep(applicationProperties.queue.polling / 2)
     }
 
     private fun createEvent(transactionType: TransactionType, blockHash: String) =
