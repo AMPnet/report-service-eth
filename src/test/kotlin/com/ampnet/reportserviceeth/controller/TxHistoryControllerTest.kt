@@ -109,8 +109,8 @@ class TxHistoryControllerTest : ControllerTestBase() {
         val event = Event(
             UUID.randomUUID(),
             chainId,
-            from,
-            to,
+            from.lowercase(),
+            to.lowercase(),
             "0xcontract-address",
             UUID.randomUUID().toString(),
             type,
