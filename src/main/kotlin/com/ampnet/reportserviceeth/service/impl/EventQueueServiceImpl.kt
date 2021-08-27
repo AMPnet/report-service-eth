@@ -51,7 +51,7 @@ class EventQueueServiceImpl(
             )
             logger.debug { "End block number: $endBlockNumber" }
             if (startBlockNumber >= endBlockNumber) {
-                logger.warn { "End block number: $endBlockNumber is smaller than start block number: $startBlockNumber" }
+                logger.warn { "End block: $endBlockNumber is smaller than start block: $startBlockNumber" }
                 return
             }
             val events = blockchainEventService.getAllEvents(startBlockNumber, endBlockNumber, chainId)
