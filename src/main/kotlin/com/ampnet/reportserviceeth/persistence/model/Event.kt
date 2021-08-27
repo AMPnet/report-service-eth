@@ -64,6 +64,10 @@ class Event(
     @Column(nullable = true)
     var revenue: BigInteger?
 ) {
+    /*
+     * from - address of the wallet that reserved invested in the asset.
+     * to - address of the CfManagerSoftcap contract
+     */
     constructor(
         event: TransactionEvents.InvestEventResponse,
         chainId: Long,
@@ -87,6 +91,11 @@ class Event(
         null,
         null
     )
+
+    /*
+     * from - address of the wallet that canceled investment in the asset.
+     * to - address of the CfManagerSoftcap contract
+     */
     constructor(
         event: TransactionEvents.CancelInvestmentEventResponse,
         chainId: Long,
@@ -110,6 +119,11 @@ class Event(
         null,
         null
     )
+
+    /*
+     * from - address of the wallet that completed investment in the asset.
+     * to - address of the CfManagerSoftcap contract
+     */
     constructor(
         event: TransactionEvents.ClaimEventResponse,
         chainId: Long,
@@ -133,6 +147,11 @@ class Event(
         null,
         null
     )
+
+    /*
+     * from - address of the payout manager's wallet which created the PayoutManager contract.
+     * to - address of the PayoutManager contract.
+     */
     constructor(
         event: TransactionEvents.CreatePayoutEventResponse,
         chainId: Long,
