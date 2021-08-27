@@ -16,6 +16,10 @@ data class TransactionInfo(
     val asset: String?,
     val assetTokenSymbol: String?
 ) {
+    /**
+     * from - address of the wallet that reserved invested in the asset.
+     * to - address of the CfManagerSoftcap contract
+     */
     constructor(
         event: TransactionEvents.InvestEventResponse,
         txRecipient: TransactionReceipt,
@@ -32,6 +36,10 @@ data class TransactionInfo(
         asset?.symbol
     )
 
+    /**
+     * from - address of the wallet that canceled investment in the asset.
+     * to - address of the CfManagerSoftcap contract
+     */
     constructor(
         event: TransactionEvents.CancelInvestmentEventResponse,
         txRecipient: TransactionReceipt,
@@ -48,6 +56,10 @@ data class TransactionInfo(
         asset?.symbol
     )
 
+    /**
+     * from - address of the wallet that completed investment in the asset.
+     * to - address of the CfManagerSoftcap contract
+     */
     constructor(
         event: TransactionEvents.ClaimEventResponse,
         txRecipient: TransactionReceipt,
@@ -64,6 +76,10 @@ data class TransactionInfo(
         asset?.symbol
     )
 
+    /**
+     * from - address of the payout manager's wallet which created the PayoutManager contract.
+     * to - address of the PayoutManager contract.
+     */
     constructor(
         event: TransactionEvents.CreatePayoutEventResponse,
         txRecipient: TransactionReceipt,

@@ -1,7 +1,5 @@
-package com.ampnet.reportserviceeth.service
+package com.ampnet.reportserviceeth.blockchain
 
-import com.ampnet.reportserviceeth.blockchain.BlockchainEventService
-import com.ampnet.reportserviceeth.blockchain.BlockchainEventServiceImpl
 import com.ampnet.reportserviceeth.blockchain.properties.Chain
 import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesHandler
 import com.ampnet.reportserviceeth.config.ApplicationProperties

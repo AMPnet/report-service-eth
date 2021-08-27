@@ -4,6 +4,7 @@ import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesHandler
 import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesWithServices
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
+import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.sendSafely
 import com.ampnet.reportserviceeth.service.unwrap
@@ -30,7 +31,7 @@ class BlockchainEventServiceImpl(
      * Transaction receipt is fetched for the txHash and it contains `to` and `from` variables
      * and list of all the events.
      * In case of INVEST, CANCEL_INVESTMENT, CLAIM_TOKENS events `to` is the address of CfManagerSoftcap contract.
-     * In case of REVENUE_SHARE event `from` is the address of PayoutManager contract.
+     * In case of REVENUE_SHARE event `to` is the address of PayoutManager contract.
      * Both of these contracts contain state pointing to Asset contract which is used to fetch the asset name.
      * Returns transactionInfo object which is mapped from the type of events available.
      * If transaction receipt not found for the txHash or doesn't contain any events returns InternalException.
@@ -40,6 +41,7 @@ class BlockchainEventServiceImpl(
      * @return [TransactionInfo] object
      */
     @Suppress("ReturnCount")
+    @Throws(InternalException::class, InvalidRequestException::class)
     override fun getTransactionInfo(txHash: String, chainId: Long): TransactionInfo {
         logger.debug { "Get info for transaction with hash: $txHash" }
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
@@ -48,6 +50,9 @@ class BlockchainEventServiceImpl(
             ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
             "Failed to fetch transaction info for txHash: $txHash"
         )
+        if (txReceipt.to == null) throw InvalidRequestException(
+            ErrorCode.BLOCKCHAIN_TX_NOT_A_CONTRACT_CALL, "$txHash is a contract creation transaction"
+        )
         val contract = TransactionEvents.load(
             txReceipt.to,
             chainProperties.web3j,
@@ -55,25 +60,22 @@ class BlockchainEventServiceImpl(
             DefaultGasProvider()
         )
         val asset = getAssetStateViaCfManagerContract(txReceipt.to, chainProperties)
-        getEvents { contract.getInvestEvents(txReceipt) }?.firstOrNull()?.let {
+        skipException { contract.getInvestEvents(txReceipt) }?.firstOrNull()?.let {
             logger.debug { "Fetched reserve investment event for hash: $txHash" }
             return TransactionInfo(it, txReceipt, asset)
         }
-        getEvents { contract.getCancelInvestmentEvents(txReceipt) }?.firstOrNull()?.let {
+        skipException { contract.getCancelInvestmentEvents(txReceipt) }?.firstOrNull()?.let {
             logger.debug { "Fetched cancel investment event for hash: $txHash" }
             return TransactionInfo(it, txReceipt, asset)
         }
-        getEvents { contract.getClaimEvents(txReceipt) }?.firstOrNull()?.let {
+        skipException { contract.getClaimEvents(txReceipt) }?.firstOrNull()?.let {
             logger.debug { "Fetched investment completed event for hash: $txHash" }
             return TransactionInfo(it, txReceipt, asset)
         }
-        val payoutManagerContract = TransactionEvents.load(
-            txReceipt.from, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
-        )
-        getEvents { payoutManagerContract.getCreatePayoutEvents(txReceipt) }?.firstOrNull()?.let {
+        skipException { contract.getCreatePayoutEvents(txReceipt) }?.firstOrNull()?.let {
             logger.debug { "Fetched revenue share payout event for hash: $txHash" }
             return TransactionInfo(
-                it, txReceipt, getAssetStateViaPayoutManagerContract(txReceipt.from, chainProperties)
+                it, txReceipt, getAssetStateViaPayoutManagerContract(txReceipt.to, chainProperties)
             )
         }
         throw InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "Failed to map transaction info for txHash: $txHash")
@@ -123,7 +125,7 @@ class BlockchainEventServiceImpl(
                 "There are no contracts deployed for the cfManagerFactory at: " +
                     chainProperties.chain.cfManagerFactoryAddress
             }
-            mapOf()
+            emptyMap()
         }
         val payoutManagerInstances = payoutManagerFactoryContract.instances
             .sendSafely()?.associate {
@@ -139,7 +141,7 @@ class BlockchainEventServiceImpl(
                 "There are no contracts deployed for the payoutManagerFactory at: " +
                     chainProperties.chain.payoutManagerFactoryAddress
             }
-            mapOf()
+            emptyMap()
         }
         return cfManagerInstances.plus(payoutManagerInstances).ifEmpty {
             throw InternalException(
@@ -149,12 +151,11 @@ class BlockchainEventServiceImpl(
         }
     }
 
-    @Suppress("TooGenericExceptionCaught")
-    private fun <T> getEvents(action: () -> T): T? {
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
+    private fun <T> skipException(action: () -> T): T? {
         return try {
             action()
         } catch (ex: Exception) {
-            logger.info("Failed to fetch events", ex)
             null
         }
     }
@@ -205,22 +206,22 @@ class BlockchainEventServiceImpl(
             DefaultGasProvider()
         )
         val logsMap: Map<Log, Log> = logs.associateWith { it }
-        getEvents { contract.getInvestEvents(txReceipt) }?.forEach {
+        skipException { contract.getInvestEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
             val asset = getAsset(deployedContracts, log)
             events.add(Event(it, chainId, log, asset))
         }
-        getEvents { contract.getCancelInvestmentEvents(txReceipt) }?.forEach {
+        skipException { contract.getCancelInvestmentEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
             val asset = getAsset(deployedContracts, log)
             events.add(Event(it, chainId, log, asset))
         }
-        getEvents { contract.getClaimEvents(txReceipt) }?.forEach {
+        skipException { contract.getClaimEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
             val asset = getAsset(deployedContracts, log)
             events.add(Event(it, chainId, log, asset))
         }
-        getEvents { contract.getCreatePayoutEvents(txReceipt) }?.forEach {
+        skipException { contract.getCreatePayoutEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
             val asset = getAsset(deployedContracts, log)
             events.add(Event(it, chainId, log, asset))

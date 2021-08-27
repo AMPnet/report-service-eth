@@ -19,7 +19,7 @@ private val logger = KotlinLogging.logger {}
 
 @Service
 class EventQueueServiceImpl(
-    private val applicationProperties: ApplicationProperties,
+    applicationProperties: ApplicationProperties,
     private val taskRepository: TaskRepository,
     private val eventRepository: EventRepository,
     private val blockchainService: BlockchainService,
@@ -31,14 +31,14 @@ class EventQueueServiceImpl(
 
     init {
         executorService.scheduleAtFixedRate(
-            { processTasks() },
+            { processTasks(Chain.MATIC_TESTNET_MUMBAI.id) },
             applicationProperties.queue.initialDelay,
             applicationProperties.queue.polling,
             TimeUnit.MILLISECONDS
         )
     }
 
-    private fun processTasks(chainId: Long = Chain.MATIC_TESTNET_MUMBAI.id) {
+    private fun processTasks(chainId: Long) {
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
         val startBlockNumber = taskRepository.findFirstByOrderByBlockNumberDesc()?.let { it.blockNumber + 1 }
             ?: chainProperties.chain.startBlockNumber
@@ -62,8 +62,7 @@ class EventQueueServiceImpl(
         chainProperties: ChainProperties
     ): Long =
         if (
-            (latestBlockNumber - chainProperties.numOfConfirmations - startBlockNumber)
-        > chainProperties.maxBlocks
+            (latestBlockNumber - chainProperties.numOfConfirmations - startBlockNumber) > chainProperties.maxBlocks
         ) {
             startBlockNumber + chainProperties.maxBlocks
         } else {

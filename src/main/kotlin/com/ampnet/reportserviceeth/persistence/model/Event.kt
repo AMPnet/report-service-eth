@@ -81,7 +81,7 @@ class Event(
         asset,
         log.blockNumber.toLong(),
         log.blockHash,
-        event.timestamp.toLong(), // Check if this is correct
+        event.timestamp.toLong(),
         event.tokenAmount,
         event.tokenValue,
         null,
@@ -104,7 +104,7 @@ class Event(
         asset,
         log.blockNumber.toLong(),
         log.blockHash,
-        event.timestamp.toLong(), // Check if this is correct
+        event.timestamp.toLong(),
         event.tokenAmount,
         event.tokenValue,
         null,
@@ -127,7 +127,7 @@ class Event(
         asset,
         log.blockNumber.toLong(),
         log.blockHash,
-        event.timestamp.toLong(), // Check if this is correct
+        event.timestamp.toLong(),
         event.tokenAmount,
         event.tokenValue,
         null,
@@ -141,8 +141,8 @@ class Event(
     ) : this(
         UUID.randomUUID(),
         chainId,
-        log.address,
         event.creator,
+        log.address,
         log.address,
         log.transactionHash,
         TransactionType.CANCEL_INVESTMENT,
@@ -150,10 +150,10 @@ class Event(
         asset,
         log.blockNumber.toLong(),
         log.blockHash,
-        event.timestamp.toLong(), // Check if this is correct
+        event.timestamp.toLong(),
         null,
         event.amount,
         event.payoutId.toLong(),
-        event.amount // check if this is actually the revenue
+        event.amount
     )
 }

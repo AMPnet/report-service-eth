@@ -27,7 +27,7 @@ import java.time.Instant
 import java.util.UUID
 
 @SpringBootTest
-class BlockchainQueueServiceTest : TestBase() {
+class EventQueueServiceTest : TestBase() {
 
     private val chainId = Chain.MATIC_TESTNET_MUMBAI.id
     private val startBlockNumber: Long = 100
@@ -87,7 +87,6 @@ class BlockchainQueueServiceTest : TestBase() {
         verify("Service will save events and create a second task") {
             waitUntilTasksAreProcessed()
             val tasks = taskRepository.findAll()
-            val events = eventRepository.findAll()
             val lastTask = taskRepository.findFirstByOrderByBlockNumberDesc() ?: fail("Cannot find task")
             assertThat(tasks).hasSize(2)
             assertThat(lastTask.chainId).isEqualTo(chainId)
@@ -95,6 +94,7 @@ class BlockchainQueueServiceTest : TestBase() {
                 lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations
             )
 
+            val events = eventRepository.findAll()
             assertThat(events).hasSize(2)
         }
     }
@@ -121,16 +121,16 @@ class BlockchainQueueServiceTest : TestBase() {
             waitUntilTasksAreProcessed()
             val tasks = taskRepository.findAll()
             val task = tasks.first()
-            val events = eventRepository.findAll()
             assertThat(task.chainId).isEqualTo(chainId)
             assertThat(task.blockNumber).isEqualTo(startBlockNumber)
 
+            val events = eventRepository.findAll()
             assertThat(events).isEmpty()
         }
     }
 
     private fun waitUntilTasksAreProcessed() {
-        Thread.sleep(applicationProperties.queue.initialDelay * 2)
+        Thread.sleep(applicationProperties.queue.initialDelay)
     }
 
     private fun createEvent(transactionType: TransactionType, blockHash: String) =
