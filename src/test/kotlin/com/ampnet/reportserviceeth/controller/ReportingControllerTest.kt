@@ -72,7 +72,7 @@ class ReportingControllerTest : ControllerTestBase() {
                 userAddress,
                 "700"
             )
-            given(blockchainService.getTransactionInfo(txHash, defaultChainId)).willReturn(testContext.transaction)
+            given(blockchainEventService.getTransactionInfo(txHash, defaultChainId)).willReturn(testContext.transaction)
         }
 
         verify("User can get pdf with single transaction") {

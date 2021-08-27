@@ -2,6 +2,7 @@ package com.ampnet.reportserviceeth.controller
 
 import com.ampnet.identityservice.proto.UserResponse
 import com.ampnet.reportserviceeth.TestBase
+import com.ampnet.reportserviceeth.blockchain.BlockchainEventService
 import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.TransactionInfo
 import com.ampnet.reportserviceeth.blockchain.TransactionType
@@ -56,6 +57,9 @@ abstract class ControllerTestBase : TestBase() {
 
     @MockBean
     protected lateinit var blockchainService: BlockchainService
+
+    @MockBean
+    protected lateinit var blockchainEventService: BlockchainEventService
 
     @MockBean
     protected lateinit var userService: UserService

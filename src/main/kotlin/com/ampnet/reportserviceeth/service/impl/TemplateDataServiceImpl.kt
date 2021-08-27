@@ -1,5 +1,6 @@
 package com.ampnet.reportserviceeth.service.impl
 
+import com.ampnet.reportserviceeth.blockchain.BlockchainEventService
 import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.TransactionInfo
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
@@ -28,6 +29,7 @@ import kotlin.streams.asSequence
 @Service
 class TemplateDataServiceImpl(
     private val blockchainService: BlockchainService,
+    private val blockchainEventService: BlockchainEventService,
     private val userService: UserService,
     private val translationService: TranslationService
 ) : TemplateDataService {
@@ -49,7 +51,7 @@ class TemplateDataServiceImpl(
     }
 
     override fun getUserTransactionData(request: TransactionServiceRequest): SingleTransactionSummary {
-        val transaction = blockchainService.getTransactionInfo(request.txHash, request.chainId)
+        val transaction = blockchainEventService.getTransactionInfo(request.txHash, request.chainId)
         validateTransactionBelongsToUser(transaction, request.address)
         val userWithInfo = UserInfo(userService.getUser(request.address))
         val translations = translationService.getTranslations(userWithInfo.language)

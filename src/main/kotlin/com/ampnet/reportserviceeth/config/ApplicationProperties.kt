@@ -8,7 +8,11 @@ import org.springframework.context.annotation.Configuration
 class ApplicationProperties {
     val jwt: JwtProperties = JwtProperties()
     var grpc: GrpcProperties = GrpcProperties()
-    val smartContract = SmartContractProperties()
+    val queue = QueueProperties()
+    val chainEthereum = ChainProperties()
+    val chainMatic = ChainProperties()
+    val chainMumbai = ChainProperties()
+    val chainHardhatTestnet = ChainProperties()
     lateinit var infuraId: String
 }
 
@@ -21,6 +25,18 @@ class GrpcProperties {
     var identityServiceTimeout: Long = 10000
 }
 
-class SmartContractProperties {
-    lateinit var walletAddress: String
+@Suppress("MagicNumber")
+class QueueProperties {
+    var polling: Long = 3 * 60 * 1000
+    var initialDelay: Long = 15_000
+}
+
+@Suppress("MagicNumber")
+class ChainProperties {
+    var walletApproverServiceAddress: String = ""
+    var cfManagerFactoryAddress: String = ""
+    var payoutManagerFactoryAddress: String = ""
+    var startBlockNumber: Long = 18_306_544
+    var numOfConfirmations: Long = 10
+    var maxBlocks: Long = 1000
 }

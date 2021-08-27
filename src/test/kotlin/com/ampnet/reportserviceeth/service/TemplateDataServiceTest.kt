@@ -30,7 +30,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
     private lateinit var testContext: TestContext
 
     private val templateDataService: TemplateDataService by lazy {
-        TemplateDataServiceImpl(blockchainService, userService, translationService)
+        TemplateDataServiceImpl(blockchainService, blockchainEventService, userService, translationService)
     }
 
     @BeforeEach
@@ -147,7 +147,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
                 userAddress, projectWallet, testContext.reserveInvestment.toString(),
                 TransactionType.RESERVE_INVESTMENT, txHash = txHash
             )
-            Mockito.`when`(blockchainService.getTransactionInfo(txHash, chainId))
+            Mockito.`when`(blockchainEventService.getTransactionInfo(txHash, chainId))
                 .thenReturn(testContext.transaction)
         }
         suppose("User service will return userWithInfo") {
@@ -184,7 +184,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
                 testContext.reserveInvestment.toString(),
                 TransactionType.RESERVE_INVESTMENT
             )
-            Mockito.`when`(blockchainService.getTransactionInfo(txHash, chainId))
+            Mockito.`when`(blockchainEventService.getTransactionInfo(txHash, chainId))
                 .thenReturn(testContext.transaction)
         }
 
@@ -203,7 +203,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             testContext.transaction = createTransaction(
                 userAddress, projectWallet, testContext.reserveInvestment.toString(), TransactionType.RESERVE_INVESTMENT
             )
-            Mockito.`when`(blockchainService.getTransactionInfo(txHash, chainId))
+            Mockito.`when`(blockchainEventService.getTransactionInfo(txHash, chainId))
                 .thenReturn(testContext.transaction)
         }
         suppose("User service will return userWithInfo with invalid language") {

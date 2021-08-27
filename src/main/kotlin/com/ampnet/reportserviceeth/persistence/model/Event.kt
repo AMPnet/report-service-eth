@@ -1,6 +1,7 @@
 package com.ampnet.reportserviceeth.persistence.model
 
 import com.ampnet.reportserviceeth.blockchain.TransactionType
+import org.web3j.protocol.core.methods.response.Log
 import java.math.BigInteger
 import java.util.UUID
 import javax.persistence.Column
@@ -62,4 +63,116 @@ class Event(
 
     @Column(nullable = true)
     var revenue: BigInteger?
-)
+) {
+    /*
+     * from - address of the wallet that reserved invested in the asset.
+     * to - address of the CfManagerSoftcap contract
+     */
+    constructor(
+        event: TransactionEvents.InvestEventResponse,
+        chainId: Long,
+        log: Log,
+        asset: String
+    ) : this(
+        UUID.randomUUID(),
+        chainId,
+        event.investor,
+        log.address,
+        log.address,
+        log.transactionHash,
+        TransactionType.RESERVE_INVESTMENT,
+        log.logIndex.toLong(),
+        asset,
+        log.blockNumber.toLong(),
+        log.blockHash,
+        event.timestamp.toLong(),
+        event.tokenAmount,
+        event.tokenValue,
+        null,
+        null
+    )
+
+    /*
+     * from - address of the wallet that canceled investment in the asset.
+     * to - address of the CfManagerSoftcap contract
+     */
+    constructor(
+        event: TransactionEvents.CancelInvestmentEventResponse,
+        chainId: Long,
+        log: Log,
+        asset: String
+    ) : this(
+        UUID.randomUUID(),
+        chainId,
+        event.investor,
+        log.address,
+        log.address,
+        log.transactionHash,
+        TransactionType.CANCEL_INVESTMENT,
+        log.logIndex.toLong(),
+        asset,
+        log.blockNumber.toLong(),
+        log.blockHash,
+        event.timestamp.toLong(),
+        event.tokenAmount,
+        event.tokenValue,
+        null,
+        null
+    )
+
+    /*
+     * from - address of the wallet that completed investment in the asset.
+     * to - address of the CfManagerSoftcap contract
+     */
+    constructor(
+        event: TransactionEvents.ClaimEventResponse,
+        chainId: Long,
+        log: Log,
+        asset: String
+    ) : this(
+        UUID.randomUUID(),
+        chainId,
+        event.investor,
+        log.address,
+        log.address,
+        log.transactionHash,
+        TransactionType.COMPLETED_INVESTMENT,
+        log.logIndex.toLong(),
+        asset,
+        log.blockNumber.toLong(),
+        log.blockHash,
+        event.timestamp.toLong(),
+        event.tokenAmount,
+        event.tokenValue,
+        null,
+        null
+    )
+
+    /*
+     * from - address of the payout manager's wallet which created the PayoutManager contract.
+     * to - address of the PayoutManager contract.
+     */
+    constructor(
+        event: TransactionEvents.CreatePayoutEventResponse,
+        chainId: Long,
+        log: Log,
+        asset: String
+    ) : this(
+        UUID.randomUUID(),
+        chainId,
+        event.creator,
+        log.address,
+        log.address,
+        log.transactionHash,
+        TransactionType.CANCEL_INVESTMENT,
+        log.logIndex.toLong(),
+        asset,
+        log.blockNumber.toLong(),
+        log.blockHash,
+        event.timestamp.toLong(),
+        null,
+        event.amount,
+        event.payoutId.toLong(),
+        event.amount
+    )
+}
