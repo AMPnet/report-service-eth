@@ -11,7 +11,8 @@ interface EventRepository : JpaRepository<Event, UUID> {
             "WHERE (event.fromAddress = :address OR event.toAddress = :address) " +
             "AND event.chainId = :chainId " +
             "AND (:from IS NULL OR :from < event.timestamp) " +
-            "AND (:to IS NULL OR :to > event.timestamp)"
+            "AND (:to IS NULL OR :to > event.timestamp)" +
+            "ORDER BY event.timestamp DESC"
     )
     fun findForAddressInPeriod(address: String, chainId: Long, from: Long?, to: Long?): List<Event>
 }
