@@ -14,7 +14,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@Disabled("Not for automated testing")
+//@Disabled("Not for automated testing")
 class BlockchainServiceTest {
 
     private val issuerContract = "0x521b0200138cef507769f6d8e8d4999f60b6b319"
