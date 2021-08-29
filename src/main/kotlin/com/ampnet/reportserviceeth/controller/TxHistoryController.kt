@@ -21,9 +21,10 @@ class TxHistoryController(private val eventService: EventService) {
 
     companion object : KLogging()
 
-    @GetMapping("/tx_history/{chainId}")
+    @GetMapping("/tx_history/{chainId}/{issuer}")
     fun getTransactionForChain(
         @PathVariable chainId: Long,
+        @PathVariable issuer: String,
         @RequestParam(name = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) from: LocalDate?,
         @RequestParam(name = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) to: LocalDate?
     ): ResponseEntity<TxHistoryResponse> {
@@ -31,8 +32,10 @@ class TxHistoryController(private val eventService: EventService) {
             throw InvalidRequestException(ErrorCode.BLOCKCHAIN_ID, "Invalid blockchain id: $chainId")
         }
         val address = ControllerUtils.getAddressFromSecurityContext()
-        logger.debug { "Received request to get transactions for address: $address on chain: $chainId" }
-        val request = TxHistoryRequest(address, chainId, PeriodServiceRequest(from, to))
+        logger.debug {
+            "Received request to get transactions for address: $address on chain: $chainId for issuer: $issuer"
+        }
+        val request = TxHistoryRequest(address, chainId, issuer, PeriodServiceRequest(from, to))
         val events = eventService.getTransactions(request)
         return ResponseEntity.ok(TxHistoryResponse(events))
     }

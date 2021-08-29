@@ -15,7 +15,7 @@ Source code is available on https://github.com/AMPnet/report-service-eth[Github]
 
 == Transaction History API
 All requests need header: `Authorization: Bearer JWT`.
-Chain ID must be provided in the request path, e.g. 80001.
+Chain ID (e.g. 80001) and issuer address must be provided in the request path, .
 
 === Get transaction history
 Query parameters `from` and `to` are both optional.
