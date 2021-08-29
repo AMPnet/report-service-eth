@@ -13,7 +13,8 @@ class EventServiceImpl(private val eventRepository: EventRepository) : EventServ
     override fun getTransactions(request: TxHistoryRequest): List<EventServiceResponse> {
         val from = request.period.from?.toEpochSecond(ZoneOffset.UTC)
         val to = request.period.to?.toEpochSecond(ZoneOffset.UTC)
-        val events = eventRepository.findForAddressInPeriod(request.address.lowercase(), request.chainId, from, to)
+        val events = eventRepository
+            .findForAddressInPeriod(request.address.lowercase(), request.chainId, request.issuer, from, to)
         return events.map { EventServiceResponse(it) }
     }
 }

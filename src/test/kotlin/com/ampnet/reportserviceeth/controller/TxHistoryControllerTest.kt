@@ -28,6 +28,7 @@ class TxHistoryControllerTest : ControllerTestBase() {
     private lateinit var eventRepository: EventRepository
 
     private val path = "/tx_history"
+    private val defaultIssuerAddress = "0xissuer-address"
     private lateinit var testContext: TestContext
 
     @BeforeEach
@@ -44,10 +45,13 @@ class TxHistoryControllerTest : ControllerTestBase() {
             testContext.events.add(createEvent(thirdUserAddress, userAddress, type = TransactionType.TRANSFER_TOKEN))
             createEvent(userAddress, secondUserAddress, chainId = Chain.ETHEREUM_MAIN.id)
         }
+        suppose("There is event for other issuer") {
+            createEvent(userAddress, defaultIssuerAddress, "0xother-issuer")
+        }
 
         verify("User can get his transaction history") {
             val result = mockMvc.perform(
-                get("$path/$defaultChainId")
+                get("$path/$defaultChainId/$defaultIssuerAddress")
             )
                 .andExpect(status().isOk)
                 .andReturn()
@@ -70,10 +74,13 @@ class TxHistoryControllerTest : ControllerTestBase() {
             createEvent(timestamp = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
             createEvent(timestamp = LocalDateTime.now().minusDays(10).toEpochSecond(ZoneOffset.UTC))
         }
+        suppose("There is event for other issuer") {
+            createEvent(userAddress, defaultIssuerAddress, "0xother-issuer")
+        }
 
         verify("User will get transaction history only for specified period") {
             val result = mockMvc.perform(
-                get("$path/$defaultChainId")
+                get("$path/$defaultChainId/$defaultIssuerAddress")
                     .param("from", LocalDate.now().minusDays(5).toString())
                     .param("to", LocalDate.now().minusDays(1).toString())
             )
@@ -91,7 +98,7 @@ class TxHistoryControllerTest : ControllerTestBase() {
     fun mustReturnErrorForInvalidChainId() {
         verify("Controller will return bad request") {
             val result = mockMvc.perform(
-                get("$path/-1")
+                get("$path/-1/$defaultIssuerAddress")
             )
                 .andExpect(status().isBadRequest)
                 .andReturn()
@@ -102,6 +109,7 @@ class TxHistoryControllerTest : ControllerTestBase() {
     private fun createEvent(
         from: String = userAddress,
         to: String = secondUserAddress,
+        issuer: String = defaultIssuerAddress,
         timestamp: Long = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC),
         chainId: Long = defaultChainId,
         type: TransactionType = TransactionType.COMPLETED_INVESTMENT
@@ -111,7 +119,7 @@ class TxHistoryControllerTest : ControllerTestBase() {
             chainId,
             from.lowercase(),
             to.lowercase(),
-            "0xcontract-address",
+            issuer,
             UUID.randomUUID().toString(),
             type,
             Random.nextLong(),
