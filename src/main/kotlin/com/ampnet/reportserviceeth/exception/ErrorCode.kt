@@ -12,6 +12,7 @@ enum class ErrorCode(val categoryCode: String, var specificCode: String, var mes
     BLOCKCHAIN_TX_NOT_A_CONTRACT_CALL(
         "04", "03", "Transaction is not a contract function call"
     ),
+    BLOCKCHAIN_TX_MISSING("04", "04", "Transaction is missing"),
 
     // Internal: 08
     INT_JSON_RPC_BLOCKCHAIN("08", "03", "Failed JSON-RPC call to blockchain"),

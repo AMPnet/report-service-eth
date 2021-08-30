@@ -5,10 +5,12 @@ import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.TransactionInfo
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
 import com.ampnet.reportserviceeth.controller.pojo.TransactionServiceRequest
+import com.ampnet.reportserviceeth.controller.pojo.TransactionsServiceRequest
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.exception.ResourceNotFoundException
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
+import com.ampnet.reportserviceeth.service.EventService
 import com.ampnet.reportserviceeth.service.TemplateDataService
 import com.ampnet.reportserviceeth.service.TranslationService
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
@@ -29,30 +31,26 @@ import kotlin.streams.asSequence
 @Service
 class TemplateDataServiceImpl(
     private val blockchainService: BlockchainService,
-    private val blockchainEventService: BlockchainEventService,
     private val userService: UserService,
-    private val translationService: TranslationService
+    private val translationService: TranslationService,
+    private val eventService: EventService
 ) : TemplateDataService {
 
     companion object : KLogging()
 
-    override fun getUserTransactionsData(
-        address: String,
-        chainId: Long,
-        periodRequest: PeriodServiceRequest
-    ): TransactionsSummary {
-        val transactions = blockchainService.getTransactions(address, chainId)
-            .filter { inTimePeriod(periodRequest, it.timestamp) }
+    override fun getUserTransactionsData(request: TransactionsServiceRequest): TransactionsSummary {
+        val transactions = eventService.getTransactionsForIssuer(request)
+            .map { TransactionInfo(it) }
         val translations = translationService.getTranslations()
-        val user = UserInfo(userService.getUser(address))
+        val user = UserInfo(userService.getUser(request.address))
         val transactionsWithNames =
             generateTransactionReportData(transactions, user.language, translations)
-        return TransactionsSummary(transactionsWithNames, user, periodRequest, translations)
+        return TransactionsSummary(transactionsWithNames, user, request.periodRequest, translations)
     }
 
     override fun getUserTransactionData(request: TransactionServiceRequest): SingleTransactionSummary {
-        val transaction = blockchainEventService.getTransactionInfo(request.txHash, request.chainId)
-        validateTransactionBelongsToUser(transaction, request.address)
+        val transaction = eventService.getTransaction(request)?.let { TransactionInfo(it) }
+            ?: throw ResourceNotFoundException(ErrorCode.BLOCKCHAIN_TX_MISSING, "Transaction missing for: $request")
         val userWithInfo = UserInfo(userService.getUser(request.address))
         val translations = translationService.getTranslations(userWithInfo.language)
         val mappedTransaction =
@@ -120,11 +118,6 @@ class TemplateDataServiceImpl(
     private fun inTimePeriod(periodRequest: PeriodServiceRequest, dateTime: LocalDateTime): Boolean =
         periodRequest.to?.let { dateTime.isBefore(it) } ?: true &&
             periodRequest.from?.let { dateTime.isAfter(it) } ?: true
-
-    private fun validateTransactionBelongsToUser(transactionInfo: TransactionInfo, address: String) {
-        if (transactionInfo.from != address && transactionInfo.to != address)
-            throw InvalidRequestException(ErrorCode.INT_REQUEST, "Transaction doesn't belong to user wallet: $address")
-    }
 
     private fun getTransactions(
         userTransactions: Map<String, List<TransactionInfo>>,

@@ -46,5 +46,8 @@ fun <T> RemoteFunctionCall<T>.sendSafely(): T? {
 fun BigInteger.toLocalDateTime(): LocalDateTime =
     LocalDateTime.ofInstant(Instant.ofEpochSecond(this.toLong()), TimeZone.getDefault().toZoneId())
 
+fun Long.toLocalDateTime(): LocalDateTime =
+    LocalDateTime.ofInstant(Instant.ofEpochSecond(this), TimeZone.getDefault().toZoneId())
+
 fun BigInteger.toEther(): String = DecimalFormat("#,##0.00")
     .format(this / BigInteger.valueOf(DECIMALS_PRECISION))

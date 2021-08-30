@@ -52,11 +52,11 @@ class Event(
     @Column(nullable = false)
     var timestamp: Long,
 
-    @Column(nullable = true)
-    var tokenAmount: BigInteger?,
+    @Column(nullable = false)
+    var tokenValue: BigInteger,
 
     @Column(nullable = true)
-    var tokenValue: BigInteger?,
+    var tokenAmount: BigInteger?,
 
     @Column(nullable = true)
     var payoutId: Long?,
@@ -86,8 +86,8 @@ class Event(
         log.blockNumber.toLong(),
         log.blockHash,
         event.timestamp.toLong(),
-        event.tokenAmount,
         event.tokenValue,
+        event.tokenAmount,
         null,
         null
     )
@@ -114,8 +114,8 @@ class Event(
         log.blockNumber.toLong(),
         log.blockHash,
         event.timestamp.toLong(),
-        event.tokenAmount,
         event.tokenValue,
+        event.tokenAmount,
         null,
         null
     )
@@ -142,8 +142,8 @@ class Event(
         log.blockNumber.toLong(),
         log.blockHash,
         event.timestamp.toLong(),
-        event.tokenAmount,
         event.tokenValue,
+        event.tokenAmount,
         null,
         null
     )
@@ -170,8 +170,8 @@ class Event(
         log.blockNumber.toLong(),
         log.blockHash,
         event.timestamp.toLong(),
-        null,
         event.amount,
+        null,
         event.payoutId.toLong(),
         event.amount
     )

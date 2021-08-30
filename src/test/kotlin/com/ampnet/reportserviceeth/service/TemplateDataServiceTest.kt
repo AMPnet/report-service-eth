@@ -5,9 +5,11 @@ import com.ampnet.reportserviceeth.blockchain.TransactionInfo
 import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
 import com.ampnet.reportserviceeth.controller.pojo.TransactionServiceRequest
+import com.ampnet.reportserviceeth.controller.pojo.TransactionsServiceRequest
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.exception.ResourceNotFoundException
+import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.data.DATE_FORMAT
 import com.ampnet.reportserviceeth.service.data.DEFAULT_LOGO
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
@@ -21,8 +23,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import java.math.BigInteger
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 class TemplateDataServiceTest : JpaServiceTestBase() {
@@ -30,7 +35,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
     private lateinit var testContext: TestContext
 
     private val templateDataService: TemplateDataService by lazy {
-        TemplateDataServiceImpl(blockchainService, blockchainEventService, userService, translationService)
+        TemplateDataServiceImpl(blockchainService, userService, translationService, eventService)
     }
 
     @BeforeEach
@@ -45,28 +50,30 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             Mockito.`when`(userService.getUser(userAddress))
                 .thenReturn(testContext.user)
         }
-        suppose("Blockchain service will return transactions for wallet") {
-            testContext.transactions = listOf(
-                createTransaction(
-                    userAddress, projectWallet, testContext.reserveInvestment.toString(),
-                    TransactionType.RESERVE_INVESTMENT
+        suppose("Event service will return transactions for wallet") {
+            testContext.events = listOf(
+                createEvent(
+                    from = userAddress, to = projectWallet, type = TransactionType.RESERVE_INVESTMENT,
+                    amount = testContext.reserveInvestment.toString()
                 ),
-                createTransaction(
-                    projectWallet, userAddress, testContext.cancelInvestment.toString(),
-                    TransactionType.CANCEL_INVESTMENT
+                createEvent(
+                    from = projectWallet, to = userAddress, type = TransactionType.CANCEL_INVESTMENT,
+                    amount = testContext.cancelInvestment.toString()
                 ),
-                createTransaction(
-                    projectWallet, userAddress, testContext.completeInvestment.toString(),
-                    TransactionType.COMPLETED_INVESTMENT
+                createEvent(
+                    from = projectWallet, to = userAddress, txHash = "Ox23", type = TransactionType.COMPLETED_INVESTMENT,
+                    amount = testContext.completeInvestment.toString()
                 ),
             )
-            Mockito.`when`(blockchainService.getTransactions(testContext.user.address, chainId))
-                .thenReturn(testContext.transactions)
+            testContext.transactionsRequest = TransactionsServiceRequest(
+                userAddress, chainId, issuer, PeriodServiceRequest(null, null)
+            )
+            Mockito.`when`(eventService.getTransactionsForIssuer(testContext.transactionsRequest))
+                .thenReturn(testContext.events)
         }
 
         verify("Template data service can get user transactions") {
-            val periodRequest = PeriodServiceRequest(null, null)
-            val txSummary = templateDataService.getUserTransactionsData(userAddress, chainId, periodRequest)
+            val txSummary = templateDataService.getUserTransactionsData(testContext.transactionsRequest)
             assertThat(txSummary.investments)
                 .isEqualTo(BigInteger.valueOf(testContext.reserveInvestment - testContext.cancelInvestment).toEther())
             assertThat(txSummary.revenueShare).isEqualTo(BigInteger.valueOf(testContext.sharePayout).toEther())
@@ -95,60 +102,65 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         }
     }
 
-    @Test
-    fun mustNotIncludeTransactionsOutsideOfSelectedPeriod() {
-        suppose("gRPC user service will return required data") {
-            testContext.user = createUserResponse(userAddress)
-            Mockito.`when`(userService.getUser(userAddress))
-                .thenReturn(testContext.user)
-        }
-        suppose("Blockchain service will return transactions for wallet") {
-            testContext.transactions = listOf(
-                createTransaction(
-                    userAddress, projectWallet, testContext.reserveInvestment.toString(),
-                    TransactionType.RESERVE_INVESTMENT,
-                    LocalDateTime.of(2020, 9, 1, 1, 0, 0, 0)
-                ),
-                createTransaction(
-                    userAddress, projectWallet, testContext.reserveInvestment.toString(),
-                    TransactionType.RESERVE_INVESTMENT,
-                    LocalDateTime.of(2020, 8, 1, 1, 0, 0, 0)
-                ),
-                createTransaction(
-                    userAddress, projectWallet, testContext.reserveInvestment.toString(),
-                    TransactionType.RESERVE_INVESTMENT,
-                    LocalDateTime.of(2020, 7, 1, 1, 0, 0, 0)
-                ),
-                createTransaction(
-                    userAddress, projectWallet, testContext.reserveInvestment.toString(),
-                    TransactionType.RESERVE_INVESTMENT,
-                    LocalDateTime.of(2020, 6, 1, 1, 0, 0, 0)
-                )
-            )
-            Mockito.`when`(blockchainService.getTransactions(testContext.user.address, chainId))
-                .thenReturn(testContext.transactions)
-        }
-
-        verify("Template data service can get user transactions in selected period") {
-            val periodRequest = PeriodServiceRequest(
-                LocalDate.of(2020, 7, 1),
-                LocalDate.of(2020, 9, 1)
-            )
-            val txSummary = templateDataService.getUserTransactionsData(userAddress, chainId, periodRequest)
-            assertThat(txSummary.transactions).hasSize(3)
-            assertThat(txSummary.dateOfFinish).isEqualTo(formatToYearMonthDay(periodRequest.to))
-        }
-    }
-
+//    @Test
+//    fun mustNotIncludeTransactionsOutsideOfSelectedPeriod() {
+//        suppose("gRPC user service will return required data") {
+//            testContext.user = createUserResponse(userAddress)
+//            Mockito.`when`(userService.getUser(userAddress))
+//                .thenReturn(testContext.user)
+//        }
+//        suppose("Event service will return transactions for wallet") {
+//            testContext.events = listOf(
+//                createEvent(
+//                    from = userAddress, to = projectWallet, type = TransactionType.RESERVE_INVESTMENT,
+//                    timestamp = LocalDateTime.of(2020, 9, 1, 1, 0, 0, 0),
+//                    amount = testContext.reserveInvestment.toString()
+//                ),
+//                createEvent(
+//                    from = userAddress, to = projectWallet, type = TransactionType.RESERVE_INVESTMENT,
+//                    timestamp = LocalDateTime.of(2020, 8, 1, 1, 0, 0, 0),
+//                    amount = testContext.reserveInvestment.toString()
+//                ),
+//                createEvent(
+//                    from = userAddress, to = projectWallet, txHash = "Ox23", type = TransactionType.RESERVE_INVESTMENT,
+//                    timestamp = LocalDateTime.of(2020, 7, 1, 1, 0, 0, 0),
+//                    amount = testContext.reserveInvestment.toString()
+//                ),
+//                createEvent(
+//                    from = userAddress, to = projectWallet, txHash = "Ox23", type = TransactionType.RESERVE_INVESTMENT,
+//                    timestamp = LocalDateTime.of(2020, 6, 1, 1, 0, 0, 0),
+//                    amount = testContext.reserveInvestment.toString()
+//                )
+//            )
+//            testContext.transactionsRequest = TransactionsServiceRequest(
+//                userAddress, chainId, issuer,
+//                PeriodServiceRequest(
+//                    LocalDate.of(2020, 7, 1), LocalDate.of(2020, 9, 1)
+//                )
+//            )
+//            Mockito.`when`(eventService.getTransactionsForIssuer(testContext.transactionsRequest))
+//                .thenReturn(testContext.events)
+//        }
+//
+//        verify("Template data service can get user transactions in selected period") {
+//            val txSummary = templateDataService.getUserTransactionsData(testContext.transactionsRequest)
+//            assertThat(txSummary.transactions).hasSize(3)
+//            assertThat(txSummary.dateOfFinish).isEqualTo(formatToYearMonthDay(
+//                testContext.transactionsRequest.periodRequest.to)
+//            )
+//        }
+//    }
+//
     @Test
     fun mustGenerateCorrectSingleTransactionSummary() {
-        suppose("Blockchain service will return transaction info for txHash, fromTxHash and toTxHash") {
-            testContext.transaction = createTransaction(
-                userAddress, projectWallet, testContext.reserveInvestment.toString(),
-                TransactionType.RESERVE_INVESTMENT, txHash = txHash
-            )
-            Mockito.`when`(blockchainEventService.getTransactionInfo(txHash, chainId))
-                .thenReturn(testContext.transaction)
+        suppose("Event service will return transaction info for txHash, fromTxHash and toTxHash") {
+            testContext.event = createEvent(
+                    from = userAddress, to = projectWallet, txHash = txHash, type = TransactionType.RESERVE_INVESTMENT,
+                    amount = testContext.reserveInvestment.toString()
+                )
+            testContext.transactionRequest = TransactionServiceRequest(userAddress, txHash, chainId, issuer)
+            Mockito.`when`(eventService.getTransaction(testContext.transactionRequest))
+                .thenReturn(testContext.event)
         }
         suppose("User service will return userWithInfo") {
             testContext.user = createUserResponse(userAddress)
@@ -157,13 +169,13 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         }
 
         verify("Template data service can get user transaction") {
-            val transaction = testContext.transaction
-            val transactionServiceRequest = TransactionServiceRequest(userAddress, txHash, chainId)
-            val singleTxSummary = templateDataService.getUserTransactionData(transactionServiceRequest)
+            val transaction = TransactionInfo(testContext.event)
+            val singleTxSummary = templateDataService.getUserTransactionData(testContext.transactionRequest)
             val tx = singleTxSummary.transaction
             val userInfo = singleTxSummary.userInfo
             assertThat(tx.amount).isEqualTo(transaction.tokenAmount)
             assertThat(tx.value).isEqualTo(transaction.tokenValue)
+            val now  = LocalDateTime.now()
             assertThat(tx.date).isBeforeOrEqualTo(LocalDateTime.now())
             assertThat(tx.type).isEqualTo(transaction.type)
             assertThat(tx.from).isEqualTo(transaction.from)
@@ -174,159 +186,159 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             assertThat(userInfo.address).isEqualTo(testContext.user.address)
         }
     }
-
-    @Test
-    fun mustThrowExceptionIfTransactionDoesNotBelongToUser() {
-        suppose("Blockchain service will return transaction for tx hash") {
-            testContext.transaction = createTransaction(
-                secondUserAddress,
-                projectWallet,
-                testContext.reserveInvestment.toString(),
-                TransactionType.RESERVE_INVESTMENT
-            )
-            Mockito.`when`(blockchainEventService.getTransactionInfo(txHash, chainId))
-                .thenReturn(testContext.transaction)
-        }
-
-        verify("Template data service will throw exception if tx doesn't belong to user wallet") {
-            val transactionServiceRequest = TransactionServiceRequest(userAddress, txHash, chainId)
-            val exception = assertThrows<InvalidRequestException> {
-                templateDataService.getUserTransactionData(transactionServiceRequest)
-            }
-            assertThat(exception.errorCode).isEqualTo(ErrorCode.INT_REQUEST)
-        }
-    }
-
-    @Test
-    fun mustGenerateSingleReportInEnglishOnInvalidLanguage() {
-        suppose("Blockchain service will return transaction info for txHash") {
-            testContext.transaction = createTransaction(
-                userAddress, projectWallet, testContext.reserveInvestment.toString(), TransactionType.RESERVE_INVESTMENT
-            )
-            Mockito.`when`(blockchainEventService.getTransactionInfo(txHash, chainId))
-                .thenReturn(testContext.transaction)
-        }
-        suppose("User service will return userWithInfo with invalid language") {
-            testContext.user = createUserResponse(userAddress, "invalid_language")
-            Mockito.`when`(userService.getUser(userAddress))
-                .thenReturn(testContext.user)
-        }
-
-        verify("Template data service can get user transaction") {
-            val transaction = testContext.transaction
-            val transactionServiceRequest = TransactionServiceRequest(userAddress, transaction.txHash, chainId)
-            val singleTxSummary = templateDataService.getUserTransactionData(transactionServiceRequest)
-            assertThat(singleTxSummary.translations.transactions).isEqualTo("Transactions")
-        }
-    }
-
-    @Test
-    fun mustGenerateTransactionsSummaryReportInEnglishOnInvalidLanguage() {
-        suppose("User service will return userWithInfo with invalid language") {
-            testContext.user = createUserResponse(userAddress, language = "invalid_language")
-            Mockito.`when`(userService.getUser(userAddress))
-                .thenReturn(testContext.user)
-        }
-        suppose("Blockchain service will return transactions for wallet") {
-            testContext.transactions = createUserTransactionFlow()
-            Mockito.`when`(blockchainService.getTransactions(testContext.user.address, chainId))
-                .thenReturn(testContext.transactions)
-        }
-
-        verify("Template data service can get user transactions") {
-            val periodRequest = PeriodServiceRequest(null, null)
-            val txSummary = templateDataService.getUserTransactionsData(userAddress, chainId, periodRequest)
-            assertThat(txSummary.transactions.first().name).isEqualTo(translationService.getTranslations().reserveInvestment)
-        }
-    }
-
-    @Test
-    fun mustGenerateCorrectUsersAccountsSummary() {
-        suppose("User service will return a list of users") {
-            testContext.user = createUserResponse(userAddress)
-            testContext.secondUser = createUserResponse(secondUserAddress)
-            testContext.thirdUser = createUserResponse(thirdUserAddress)
-            Mockito.`when`(userService.getUsersForIssuer(IssuerRequest(issuer, chainId)))
-                .thenReturn(listOf(testContext.user, testContext.secondUser, testContext.thirdUser))
-        }
-        suppose("Blockchain service will return transactions for wallets") {
-            Mockito.`when`(blockchainService.getTransactions(userAddress, chainId))
-                .thenReturn(createUserTransactionFlow())
-            Mockito.`when`(blockchainService.getTransactions(secondUserAddress, chainId))
-                .thenReturn(
-                    listOf(
-                        createTransaction(
-                            secondUserAddress, projectWallet, testContext.reserveInvestment.toString(),
-                            TransactionType.RESERVE_INVESTMENT
-                        )
-                    )
-                )
-            Mockito.`when`(blockchainService.getTransactions(thirdUserAddress, chainId))
-                .thenReturn(listOf())
-        }
-
-        verify("Template data service can get users accounts summary") {
-            val periodRequest = PeriodServiceRequest(null, null)
-            val usersAccountsSummary = templateDataService.getAllActiveUsersSummaryData(IssuerRequest(issuer, chainId), periodRequest)
-            val transactionsSummaryList = usersAccountsSummary.summaries
-            val logo = usersAccountsSummary.logo
-            assertThat(transactionsSummaryList).hasSize(3)
-            assertThat(logo).isEqualTo(DEFAULT_LOGO)
-            transactionsSummaryList.forEach {
-                when (it.userInfo.address) {
-                    userAddress -> {
-                        assertThat(it.investments).isEqualTo(
-                            (
-                                testContext.reserveInvestment.toString().toGwei() -
-                                    testContext.cancelInvestment.toString().toGwei()
-                                ).toEther()
-                        )
-                        assertThat(it.revenueShare).isEqualTo(testContext.sharePayout.toString().toGwei().toEther())
-                    }
-                    secondUserAddress -> assertThat(it.investments).isEqualTo(
-                        BigInteger.valueOf(testContext.reserveInvestment).toString().toGwei().toEther()
-                    )
-                    thirdUserAddress -> assertThat(it.transactions).isEmpty()
-                }
-            }
-        }
-    }
-
-    @Test
-    fun mustThrowExceptionIfNoUserWithInfoFound() {
-        suppose("User service will return empty list") {
-            Mockito.`when`(userService.getUsersForIssuer(IssuerRequest(issuer, chainId))).thenReturn(emptyList())
-        }
-
-        verify("Template data service can get users accounts summary") {
-            val periodRequest = PeriodServiceRequest(null, null)
-            val exception = assertThrows<ResourceNotFoundException> {
-                templateDataService.getAllActiveUsersSummaryData(IssuerRequest(issuer, chainId), periodRequest)
-            }
-            assertThat(exception.errorCode).isEqualTo(ErrorCode.USER_MISSING_INFO)
-        }
-    }
-
-    @Test
-    fun mustThrowExceptionForEmptyListTransaction() {
-        suppose("User service will return a user") {
-            testContext.user = createUserResponse(userAddress)
-            Mockito.`when`(userService.getUsersForIssuer(IssuerRequest(issuer, chainId)))
-                .thenReturn(listOf(testContext.user))
-        }
-        suppose("Blockchain service will return empty list") {
-            Mockito.`when`(blockchainService.getTransactions(testContext.user.address, chainId))
-                .thenReturn(emptyList())
-        }
-
-        verify("Template data service can get users accounts summary") {
-            val periodRequest = PeriodServiceRequest(null, null)
-            val exception = assertThrows<ResourceNotFoundException> {
-                templateDataService.getAllActiveUsersSummaryData(IssuerRequest(issuer, chainId), periodRequest)
-            }
-            assertThat(exception.errorCode).isEqualTo(ErrorCode.USER_MISSING_INFO)
-        }
-    }
+//
+//    @Test
+//    fun mustThrowExceptionIfTransactionDoesNotBelongToUser() {
+//        suppose("Blockchain service will return transaction for tx hash") {
+//            testContext.transaction = createTransaction(
+//                secondUserAddress,
+//                projectWallet,
+//                testContext.reserveInvestment.toString(),
+//                TransactionType.RESERVE_INVESTMENT
+//            )
+//            Mockito.`when`(blockchainEventService.getTransactionInfo(txHash, chainId))
+//                .thenReturn(testContext.transaction)
+//        }
+//
+//        verify("Template data service will throw exception if tx doesn't belong to user wallet") {
+//            val transactionServiceRequest = TransactionServiceRequest(userAddress, txHash, chainId)
+//            val exception = assertThrows<InvalidRequestException> {
+//                templateDataService.getUserTransactionData(transactionServiceRequest)
+//            }
+//            assertThat(exception.errorCode).isEqualTo(ErrorCode.INT_REQUEST)
+//        }
+//    }
+//
+//    @Test
+//    fun mustGenerateSingleReportInEnglishOnInvalidLanguage() {
+//        suppose("Blockchain service will return transaction info for txHash") {
+//            testContext.transaction = createTransaction(
+//                userAddress, projectWallet, testContext.reserveInvestment.toString(), TransactionType.RESERVE_INVESTMENT
+//            )
+//            Mockito.`when`(blockchainEventService.getTransactionInfo(txHash, chainId))
+//                .thenReturn(testContext.transaction)
+//        }
+//        suppose("User service will return userWithInfo with invalid language") {
+//            testContext.user = createUserResponse(userAddress, "invalid_language")
+//            Mockito.`when`(userService.getUser(userAddress))
+//                .thenReturn(testContext.user)
+//        }
+//
+//        verify("Template data service can get user transaction") {
+//            val transaction = testContext.transaction
+//            val transactionServiceRequest = TransactionServiceRequest(userAddress, transaction.txHash, chainId)
+//            val singleTxSummary = templateDataService.getUserTransactionData(transactionServiceRequest)
+//            assertThat(singleTxSummary.translations.transactions).isEqualTo("Transactions")
+//        }
+//    }
+//
+//    @Test
+//    fun mustGenerateTransactionsSummaryReportInEnglishOnInvalidLanguage() {
+//        suppose("User service will return userWithInfo with invalid language") {
+//            testContext.user = createUserResponse(userAddress, language = "invalid_language")
+//            Mockito.`when`(userService.getUser(userAddress))
+//                .thenReturn(testContext.user)
+//        }
+//        suppose("Blockchain service will return transactions for wallet") {
+//            testContext.transactions = createUserTransactionFlow()
+//            Mockito.`when`(blockchainService.getTransactions(testContext.user.address, chainId))
+//                .thenReturn(testContext.transactions)
+//        }
+//
+//        verify("Template data service can get user transactions") {
+//            val periodRequest = PeriodServiceRequest(null, null)
+//            val txSummary = templateDataService.getUserTransactionsData(userAddress, chainId, periodRequest)
+//            assertThat(txSummary.transactions.first().name).isEqualTo(translationService.getTranslations().reserveInvestment)
+//        }
+//    }
+//
+//    @Test
+//    fun mustGenerateCorrectUsersAccountsSummary() {
+//        suppose("User service will return a list of users") {
+//            testContext.user = createUserResponse(userAddress)
+//            testContext.secondUser = createUserResponse(secondUserAddress)
+//            testContext.thirdUser = createUserResponse(thirdUserAddress)
+//            Mockito.`when`(userService.getUsersForIssuer(IssuerRequest(issuer, chainId)))
+//                .thenReturn(listOf(testContext.user, testContext.secondUser, testContext.thirdUser))
+//        }
+//        suppose("Blockchain service will return transactions for wallets") {
+//            Mockito.`when`(blockchainService.getTransactions(userAddress, chainId))
+//                .thenReturn(createUserTransactionFlow())
+//            Mockito.`when`(blockchainService.getTransactions(secondUserAddress, chainId))
+//                .thenReturn(
+//                    listOf(
+//                        createTransaction(
+//                            secondUserAddress, projectWallet, testContext.reserveInvestment.toString(),
+//                            TransactionType.RESERVE_INVESTMENT
+//                        )
+//                    )
+//                )
+//            Mockito.`when`(blockchainService.getTransactions(thirdUserAddress, chainId))
+//                .thenReturn(listOf())
+//        }
+//
+//        verify("Template data service can get users accounts summary") {
+//            val periodRequest = PeriodServiceRequest(null, null)
+//            val usersAccountsSummary = templateDataService.getAllActiveUsersSummaryData(IssuerRequest(issuer, chainId), periodRequest)
+//            val transactionsSummaryList = usersAccountsSummary.summaries
+//            val logo = usersAccountsSummary.logo
+//            assertThat(transactionsSummaryList).hasSize(3)
+//            assertThat(logo).isEqualTo(DEFAULT_LOGO)
+//            transactionsSummaryList.forEach {
+//                when (it.userInfo.address) {
+//                    userAddress -> {
+//                        assertThat(it.investments).isEqualTo(
+//                            (
+//                                testContext.reserveInvestment.toString().toGwei() -
+//                                    testContext.cancelInvestment.toString().toGwei()
+//                                ).toEther()
+//                        )
+//                        assertThat(it.revenueShare).isEqualTo(testContext.sharePayout.toString().toGwei().toEther())
+//                    }
+//                    secondUserAddress -> assertThat(it.investments).isEqualTo(
+//                        BigInteger.valueOf(testContext.reserveInvestment).toString().toGwei().toEther()
+//                    )
+//                    thirdUserAddress -> assertThat(it.transactions).isEmpty()
+//                }
+//            }
+//        }
+//    }
+//
+//    @Test
+//    fun mustThrowExceptionIfNoUserWithInfoFound() {
+//        suppose("User service will return empty list") {
+//            Mockito.`when`(userService.getUsersForIssuer(IssuerRequest(issuer, chainId))).thenReturn(emptyList())
+//        }
+//
+//        verify("Template data service can get users accounts summary") {
+//            val periodRequest = PeriodServiceRequest(null, null)
+//            val exception = assertThrows<ResourceNotFoundException> {
+//                templateDataService.getAllActiveUsersSummaryData(IssuerRequest(issuer, chainId), periodRequest)
+//            }
+//            assertThat(exception.errorCode).isEqualTo(ErrorCode.USER_MISSING_INFO)
+//        }
+//    }
+//
+//    @Test
+//    fun mustThrowExceptionForEmptyListTransaction() {
+//        suppose("User service will return a user") {
+//            testContext.user = createUserResponse(userAddress)
+//            Mockito.`when`(userService.getUsersForIssuer(IssuerRequest(issuer, chainId)))
+//                .thenReturn(listOf(testContext.user))
+//        }
+//        suppose("Blockchain service will return empty list") {
+//            Mockito.`when`(blockchainService.getTransactions(testContext.user.address, chainId))
+//                .thenReturn(emptyList())
+//        }
+//
+//        verify("Template data service can get users accounts summary") {
+//            val periodRequest = PeriodServiceRequest(null, null)
+//            val exception = assertThrows<ResourceNotFoundException> {
+//                templateDataService.getAllActiveUsersSummaryData(IssuerRequest(issuer, chainId), periodRequest)
+//            }
+//            assertThat(exception.errorCode).isEqualTo(ErrorCode.USER_MISSING_INFO)
+//        }
+//    }
 
     private fun createUserTransactionFlow(): List<TransactionInfo> =
         listOf(
@@ -355,6 +367,10 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
 
     private class TestContext {
         lateinit var transactions: List<TransactionInfo>
+        lateinit var events: List<Event>
+        lateinit var event: Event
+        lateinit var transactionsRequest: TransactionsServiceRequest
+        lateinit var transactionRequest: TransactionServiceRequest
         lateinit var transaction: TransactionInfo
         lateinit var user: UserResponse
         lateinit var secondUser: UserResponse

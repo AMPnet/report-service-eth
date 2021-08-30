@@ -149,7 +149,7 @@ class EventQueueServiceTest : TestBase() {
         Event(
             UUID.randomUUID(), chainId, "fromAddress", "toAddress", "contractAddress",
             "txHash", transactionType, 10, "assetName", 100, blockHash,
-            Instant.now().toEpochMilli(), null, null, null, null
+            Instant.now().toEpochMilli(), BigInteger.valueOf(100), null, null, null
         )
 
     private class TestContext {

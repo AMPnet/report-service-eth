@@ -1,5 +1,7 @@
 package com.ampnet.reportserviceeth.blockchain
 
+import com.ampnet.reportserviceeth.persistence.model.Event
+import com.ampnet.reportserviceeth.service.data.EventServiceResponse
 import com.ampnet.reportserviceeth.service.toLocalDateTime
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import java.math.BigInteger
@@ -17,8 +19,8 @@ data class TransactionInfo(
     val assetTokenSymbol: String?
 ) {
     /*
-     * from - address of the wallet that reserved invested in the asset.
-     * to - address of the CfManagerSoftcap contract
+     * from - address of the wallet that reserved investment in the asset.
+     * to - address of the CfManagerSoftcap contract.
      */
     constructor(
         event: TransactionEvents.InvestEventResponse,
@@ -38,7 +40,7 @@ data class TransactionInfo(
 
     /*
      * from - address of the wallet that canceled investment in the asset.
-     * to - address of the CfManagerSoftcap contract
+     * to - address of the CfManagerSoftcap contract.
      */
     constructor(
         event: TransactionEvents.CancelInvestmentEventResponse,
@@ -58,7 +60,7 @@ data class TransactionInfo(
 
     /*
      * from - address of the wallet that completed investment in the asset.
-     * to - address of the CfManagerSoftcap contract
+     * to - address of the CfManagerSoftcap contract.
      */
     constructor(
         event: TransactionEvents.ClaimEventResponse,
@@ -94,5 +96,17 @@ data class TransactionInfo(
         txRecipient.transactionHash,
         asset?.name,
         asset?.symbol
+    )
+
+    constructor(event: Event) : this (
+        event.type,
+        event.fromAddress,
+        event.toAddress,
+        event.tokenValue,
+        event.tokenAmount,
+        event.timestamp.toLocalDateTime(),
+        event.hash,
+        event.asset,
+        null
     )
 }

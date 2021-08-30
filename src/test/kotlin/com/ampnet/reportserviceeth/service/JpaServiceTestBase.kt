@@ -9,9 +9,11 @@ import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.blockchain.properties.Chain
 import com.ampnet.reportserviceeth.config.JsonConfig
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
+import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.impl.TranslationServiceImpl
 import com.ampnet.reportserviceeth.toGwei
 import com.fasterxml.jackson.databind.ObjectMapper
+import java.math.BigInteger
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,7 +21,10 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import java.util.UUID
 
 @ExtendWith(SpringExtension::class)
 @Import(JsonConfig::class)
@@ -43,6 +48,9 @@ abstract class JpaServiceTestBase : TestBase() {
 
     @Mock
     protected lateinit var userService: UserService
+
+    @Mock
+    protected lateinit var eventService: EventService
 
     @Autowired
     @Qualifier("camelCaseObjectMapper")
@@ -77,4 +85,19 @@ abstract class JpaServiceTestBase : TestBase() {
             .setDocumentValidFrom("23.07.2021.")
             .setDocumentValidUntil("23.07.2031.")
             .build()
+
+    protected fun createEvent(
+        chain: Long = chainId, from: String = userAddress, to: String = secondUserAddress,
+        contractAddress: String = issuer, txHash: String = "txHash",
+        type: TransactionType = TransactionType.COMPLETED_INVESTMENT, logIndex: Long = 134L,
+        blockHash: String = "blockHash", timestamp: LocalDateTime = LocalDateTime.now(), amount: String
+    ) =
+        Event(
+            UUID.randomUUID(), chain, from, to,
+            contractAddress, txHash, type,
+            logIndex, "asset_name", 500045L, blockHash,
+            timestamp.toEpochSecond(ZoneOffset.UTC),
+            amount.toGwei(), amount.toGwei(), 50L, BigInteger("500")
+        )
+
 }

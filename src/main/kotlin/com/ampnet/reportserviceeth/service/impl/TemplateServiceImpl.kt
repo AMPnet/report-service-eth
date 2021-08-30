@@ -2,6 +2,7 @@ package com.ampnet.reportserviceeth.service.impl
 
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
 import com.ampnet.reportserviceeth.controller.pojo.TransactionServiceRequest
+import com.ampnet.reportserviceeth.controller.pojo.TransactionsServiceRequest
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.service.TemplateDataService
@@ -25,12 +26,8 @@ class TemplateServiceImpl(
     internal val userTransactionTemplate = "user-transaction-template"
     internal val usersAccountsSummaryTemplate = "users-accounts-summary-template"
 
-    override fun generateTemplateForUserTransactions(
-        address: String,
-        chainId: Long,
-        periodRequest: PeriodServiceRequest
-    ): String {
-        val transactions = templateDataService.getUserTransactionsData(address, chainId, periodRequest)
+    override fun generateTemplateForUserTransactions(request: TransactionsServiceRequest): String {
+        val transactions = templateDataService.getUserTransactionsData(request)
         return processThymeleafTemplate(transactions, userTransactionsTemplate)
     }
 
