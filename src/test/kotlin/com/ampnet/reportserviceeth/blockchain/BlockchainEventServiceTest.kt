@@ -18,8 +18,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @Disabled("Not for automated testing")
 class BlockchainEventServiceTest {
 
-    private val investTxHash = "0xc63f303d54f23e09d1c191ebd05cecb94c817b5a88582dff14b3817bac43e577"
-    private val cancelInvestmentTxHash = "0x179ed82cb4de6ca88711f637576b8cddc7da5fcd75ee368fb61d74880f8a1b56"
+    private val investTxHash = "0x1f7e1094499ffc4e0ba9f9d0c850f83d1401e6c7f9e836a442332456eba44f79"
+    private val cancelInvestmentTxHash = "0xb6b0c1f0fe79a3ed430bd70613394b32c30de277fa8062f76e5f53452998e9d4"
     private val chainId = Chain.MATIC_TESTNET_MUMBAI.id
 
     @Autowired
@@ -54,7 +54,7 @@ class BlockchainEventServiceTest {
     @Test
     fun mustBeAbleToGetAllEvents() {
         applicationProperties.chainMumbai.maxBlocks = 99_999
-        val startBlockNumber = 17345957L
+        val startBlockNumber = 18259390L
         val events = service.getAllEvents(
             startBlockNumber, startBlockNumber + applicationProperties.chainMumbai.maxBlocks,
             Chain.MATIC_TESTNET_MUMBAI.id

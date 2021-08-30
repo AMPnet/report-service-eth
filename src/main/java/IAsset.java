@@ -1,21 +1,3 @@
-import java.math.BigInteger;
-import java.util.Arrays;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Bool;
-import org.web3j.abi.datatypes.DynamicStruct;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Uint256;
-import org.web3j.crypto.Credentials;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.RemoteCall;
-import org.web3j.protocol.core.RemoteFunctionCall;
-import org.web3j.tx.Contract;
-import org.web3j.tx.TransactionManager;
-import org.web3j.tx.gas.ContractGasProvider;
-
 /**
  * <p>Auto generated code.
  * <p><strong>Do not modify!</strong>
@@ -26,86 +8,56 @@ import org.web3j.tx.gas.ContractGasProvider;
  * <p>Generated with web3j version 4.8.4.
  */
 @SuppressWarnings("rawtypes")
-public class IAsset extends Contract {
+public class IAsset extends org.web3j.tx.Contract {
     public static final String BINARY = "";
 
     public static final String FUNC_GETSTATE = "getState";
 
-    @Deprecated
-    protected IAsset(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
-        super(BINARY, contractAddress, web3j, credentials, gasPrice, gasLimit);
-    }
-
-    protected IAsset(String contractAddress, Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
+    protected IAsset(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, credentials, contractGasProvider);
     }
 
-    @Deprecated
-    protected IAsset(String contractAddress, Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-        super(BINARY, contractAddress, web3j, transactionManager, gasPrice, gasLimit);
-    }
-
-    protected IAsset(String contractAddress, Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+    protected IAsset(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
-    public RemoteFunctionCall<AssetState> getState() {
-        final Function function = new Function(FUNC_GETSTATE, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<AssetState>() {}));
-        return executeRemoteCallSingleValueReturn(function, AssetState.class);
+    public org.web3j.protocol.core.RemoteFunctionCall<IAsset.AssetState> getState() {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETSTATE,
+                java.util.Arrays.<org.web3j.abi.datatypes.Type>asList(),
+                java.util.Arrays.<org.web3j.abi.TypeReference<?>>asList(new org.web3j.abi.TypeReference<IAsset.AssetState>() {}));
+        return executeRemoteCallSingleValueReturn(function, IAsset.AssetState.class);
     }
 
-    @Deprecated
-    public static IAsset load(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
-        return new IAsset(contractAddress, web3j, credentials, gasPrice, gasLimit);
-    }
-
-    @Deprecated
-    public static IAsset load(String contractAddress, Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-        return new IAsset(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
-    }
-
-    public static IAsset load(String contractAddress, Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
+    public static IAsset load(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
         return new IAsset(contractAddress, web3j, credentials, contractGasProvider);
     }
 
-    public static IAsset load(String contractAddress, Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+    public static IAsset load(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
         return new IAsset(contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
-    public static RemoteCall<IAsset> deploy(Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
+    public static org.web3j.protocol.core.RemoteCall<IAsset> deploy(org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
         return deployRemoteCall(IAsset.class, web3j, credentials, contractGasProvider, BINARY, "");
     }
 
-    @Deprecated
-    public static RemoteCall<IAsset> deploy(Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
-        return deployRemoteCall(IAsset.class, web3j, credentials, gasPrice, gasLimit, BINARY, "");
-    }
-
-    public static RemoteCall<IAsset> deploy(Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+    public static org.web3j.protocol.core.RemoteCall<IAsset> deploy(org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
         return deployRemoteCall(IAsset.class, web3j, transactionManager, contractGasProvider, BINARY, "");
     }
 
-    @Deprecated
-    public static RemoteCall<IAsset> deploy(Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-        return deployRemoteCall(IAsset.class, web3j, transactionManager, gasPrice, gasLimit, BINARY, "");
-    }
-
-    public static class AssetState extends DynamicStruct {
-        public BigInteger id;
+    public static class AssetState extends org.web3j.abi.datatypes.DynamicStruct {
+        public java.math.BigInteger id;
 
         public String contractAddress;
 
         public String ansName;
 
-        public BigInteger ansId;
+        public java.math.BigInteger ansId;
 
         public String createdBy;
 
         public String owner;
 
-        public BigInteger initialTokenSupply;
+        public java.math.BigInteger initialTokenSupply;
 
         public Boolean whitelistRequiredForRevenueClaim;
 
@@ -115,32 +67,34 @@ public class IAsset extends Contract {
 
         public String issuer;
 
+        public String apxRegistry;
+
         public String info;
 
         public String name;
 
         public String symbol;
 
-        public BigInteger totalAmountRaised;
+        public java.math.BigInteger totalAmountRaised;
 
-        public BigInteger totalTokensSold;
+        public java.math.BigInteger totalTokensSold;
 
-        public BigInteger highestTokenSellPrice;
+        public java.math.BigInteger highestTokenSellPrice;
 
-        public BigInteger totalTokensLocked;
+        public java.math.BigInteger totalTokensLocked;
 
-        public BigInteger totalTokensLockedAndLiquidated;
+        public java.math.BigInteger totalTokensLockedAndLiquidated;
 
         public Boolean liquidated;
 
-        public BigInteger liquidationFundsTotal;
+        public java.math.BigInteger liquidationFundsTotal;
 
-        public BigInteger liquidationTimestamp;
+        public java.math.BigInteger liquidationTimestamp;
 
-        public BigInteger liquidationFundsClaimed;
+        public java.math.BigInteger liquidationFundsClaimed;
 
-        public AssetState(BigInteger id, String contractAddress, String ansName, BigInteger ansId, String createdBy, String owner, BigInteger initialTokenSupply, Boolean whitelistRequiredForRevenueClaim, Boolean whitelistRequiredForLiquidationClaim, Boolean assetApprovedByIssuer, String issuer, String info, String name, String symbol, BigInteger totalAmountRaised, BigInteger totalTokensSold, BigInteger highestTokenSellPrice, BigInteger totalTokensLocked, BigInteger totalTokensLockedAndLiquidated, Boolean liquidated, BigInteger liquidationFundsTotal, BigInteger liquidationTimestamp, BigInteger liquidationFundsClaimed) {
-            super(new Uint256(id),new Address(contractAddress),new Utf8String(ansName),new Uint256(ansId),new Address(createdBy),new Address(owner),new Uint256(initialTokenSupply),new Bool(whitelistRequiredForRevenueClaim),new Bool(whitelistRequiredForLiquidationClaim),new Bool(assetApprovedByIssuer),new Address(issuer),new Utf8String(info),new Utf8String(name),new Utf8String(symbol),new Uint256(totalAmountRaised),new Uint256(totalTokensSold),new Uint256(highestTokenSellPrice),new Uint256(totalTokensLocked),new Uint256(totalTokensLockedAndLiquidated),new Bool(liquidated),new Uint256(liquidationFundsTotal),new Uint256(liquidationTimestamp),new Uint256(liquidationFundsClaimed));
+        public AssetState(java.math.BigInteger id, String contractAddress, String ansName, java.math.BigInteger ansId, String createdBy, String owner, java.math.BigInteger initialTokenSupply, Boolean whitelistRequiredForRevenueClaim, Boolean whitelistRequiredForLiquidationClaim, Boolean assetApprovedByIssuer, String issuer, String apxRegistry, String info, String name, String symbol, java.math.BigInteger totalAmountRaised, java.math.BigInteger totalTokensSold, java.math.BigInteger highestTokenSellPrice, java.math.BigInteger totalTokensLocked, java.math.BigInteger totalTokensLockedAndLiquidated, Boolean liquidated, java.math.BigInteger liquidationFundsTotal, java.math.BigInteger liquidationTimestamp, java.math.BigInteger liquidationFundsClaimed) {
+            super(new org.web3j.abi.datatypes.generated.Uint256(id),new org.web3j.abi.datatypes.Address(contractAddress),new org.web3j.abi.datatypes.Utf8String(ansName),new org.web3j.abi.datatypes.generated.Uint256(ansId),new org.web3j.abi.datatypes.Address(createdBy),new org.web3j.abi.datatypes.Address(owner),new org.web3j.abi.datatypes.generated.Uint256(initialTokenSupply),new org.web3j.abi.datatypes.Bool(whitelistRequiredForRevenueClaim),new org.web3j.abi.datatypes.Bool(whitelistRequiredForLiquidationClaim),new org.web3j.abi.datatypes.Bool(assetApprovedByIssuer),new org.web3j.abi.datatypes.Address(issuer),new org.web3j.abi.datatypes.Address(apxRegistry),new org.web3j.abi.datatypes.Utf8String(info),new org.web3j.abi.datatypes.Utf8String(name),new org.web3j.abi.datatypes.Utf8String(symbol),new org.web3j.abi.datatypes.generated.Uint256(totalAmountRaised),new org.web3j.abi.datatypes.generated.Uint256(totalTokensSold),new org.web3j.abi.datatypes.generated.Uint256(highestTokenSellPrice),new org.web3j.abi.datatypes.generated.Uint256(totalTokensLocked),new org.web3j.abi.datatypes.generated.Uint256(totalTokensLockedAndLiquidated),new org.web3j.abi.datatypes.Bool(liquidated),new org.web3j.abi.datatypes.generated.Uint256(liquidationFundsTotal),new org.web3j.abi.datatypes.generated.Uint256(liquidationTimestamp),new org.web3j.abi.datatypes.generated.Uint256(liquidationFundsClaimed));
             this.id = id;
             this.contractAddress = contractAddress;
             this.ansName = ansName;
@@ -152,6 +106,7 @@ public class IAsset extends Contract {
             this.whitelistRequiredForLiquidationClaim = whitelistRequiredForLiquidationClaim;
             this.assetApprovedByIssuer = assetApprovedByIssuer;
             this.issuer = issuer;
+            this.apxRegistry = apxRegistry;
             this.info = info;
             this.name = name;
             this.symbol = symbol;
@@ -166,8 +121,8 @@ public class IAsset extends Contract {
             this.liquidationFundsClaimed = liquidationFundsClaimed;
         }
 
-        public AssetState(Uint256 id, Address contractAddress, Utf8String ansName, Uint256 ansId, Address createdBy, Address owner, Uint256 initialTokenSupply, Bool whitelistRequiredForRevenueClaim, Bool whitelistRequiredForLiquidationClaim, Bool assetApprovedByIssuer, Address issuer, Utf8String info, Utf8String name, Utf8String symbol, Uint256 totalAmountRaised, Uint256 totalTokensSold, Uint256 highestTokenSellPrice, Uint256 totalTokensLocked, Uint256 totalTokensLockedAndLiquidated, Bool liquidated, Uint256 liquidationFundsTotal, Uint256 liquidationTimestamp, Uint256 liquidationFundsClaimed) {
-            super(id,contractAddress,ansName,ansId,createdBy,owner,initialTokenSupply,whitelistRequiredForRevenueClaim,whitelistRequiredForLiquidationClaim,assetApprovedByIssuer,issuer,info,name,symbol,totalAmountRaised,totalTokensSold,highestTokenSellPrice,totalTokensLocked,totalTokensLockedAndLiquidated,liquidated,liquidationFundsTotal,liquidationTimestamp,liquidationFundsClaimed);
+        public AssetState(org.web3j.abi.datatypes.generated.Uint256 id, org.web3j.abi.datatypes.Address contractAddress, org.web3j.abi.datatypes.Utf8String ansName, org.web3j.abi.datatypes.generated.Uint256 ansId, org.web3j.abi.datatypes.Address createdBy, org.web3j.abi.datatypes.Address owner, org.web3j.abi.datatypes.generated.Uint256 initialTokenSupply, org.web3j.abi.datatypes.Bool whitelistRequiredForRevenueClaim, org.web3j.abi.datatypes.Bool whitelistRequiredForLiquidationClaim, org.web3j.abi.datatypes.Bool assetApprovedByIssuer, org.web3j.abi.datatypes.Address issuer, org.web3j.abi.datatypes.Address apxRegistry, org.web3j.abi.datatypes.Utf8String info, org.web3j.abi.datatypes.Utf8String name, org.web3j.abi.datatypes.Utf8String symbol, org.web3j.abi.datatypes.generated.Uint256 totalAmountRaised, org.web3j.abi.datatypes.generated.Uint256 totalTokensSold, org.web3j.abi.datatypes.generated.Uint256 highestTokenSellPrice, org.web3j.abi.datatypes.generated.Uint256 totalTokensLocked, org.web3j.abi.datatypes.generated.Uint256 totalTokensLockedAndLiquidated, org.web3j.abi.datatypes.Bool liquidated, org.web3j.abi.datatypes.generated.Uint256 liquidationFundsTotal, org.web3j.abi.datatypes.generated.Uint256 liquidationTimestamp, org.web3j.abi.datatypes.generated.Uint256 liquidationFundsClaimed) {
+            super(id,contractAddress,ansName,ansId,createdBy,owner,initialTokenSupply,whitelistRequiredForRevenueClaim,whitelistRequiredForLiquidationClaim,assetApprovedByIssuer,issuer,apxRegistry,info,name,symbol,totalAmountRaised,totalTokensSold,highestTokenSellPrice,totalTokensLocked,totalTokensLockedAndLiquidated,liquidated,liquidationFundsTotal,liquidationTimestamp,liquidationFundsClaimed);
             this.id = id.getValue();
             this.contractAddress = contractAddress.getValue();
             this.ansName = ansName.getValue();
@@ -179,6 +134,7 @@ public class IAsset extends Contract {
             this.whitelistRequiredForLiquidationClaim = whitelistRequiredForLiquidationClaim.getValue();
             this.assetApprovedByIssuer = assetApprovedByIssuer.getValue();
             this.issuer = issuer.getValue();
+            this.apxRegistry = apxRegistry.getValue();
             this.info = info.getValue();
             this.name = name.getValue();
             this.symbol = symbol.getValue();

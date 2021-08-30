@@ -13,18 +13,8 @@ public class IPayoutManagerFactory extends org.web3j.tx.Contract {
 
     public static final String FUNC_GETINSTANCES = "getInstances";
 
-    @Deprecated
-    protected IPayoutManagerFactory(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
-        super(BINARY, contractAddress, web3j, credentials, gasPrice, gasLimit);
-    }
-
     protected IPayoutManagerFactory(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, credentials, contractGasProvider);
-    }
-
-    @Deprecated
-    protected IPayoutManagerFactory(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
-        super(BINARY, contractAddress, web3j, transactionManager, gasPrice, gasLimit);
     }
 
     protected IPayoutManagerFactory(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
@@ -35,25 +25,11 @@ public class IPayoutManagerFactory extends org.web3j.tx.Contract {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETINSTANCES,
                 java.util.Arrays.<org.web3j.abi.datatypes.Type>asList(),
                 java.util.Arrays.<org.web3j.abi.TypeReference<?>>asList(new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.Address>>() {}));
-        return new org.web3j.protocol.core.RemoteFunctionCall<java.util.List>(function,
-                new java.util.concurrent.Callable<java.util.List>() {
-                    @Override
-                    @SuppressWarnings("unchecked")
-                    public java.util.List call() throws Exception {
-                        java.util.List<org.web3j.abi.datatypes.Type> result = (java.util.List<org.web3j.abi.datatypes.Type>) executeCallSingleValueReturn(function, java.util.List.class);
-                        return convertToNative(result);
-                    }
+        return new org.web3j.protocol.core.RemoteFunctionCall<>(function,
+                () -> {
+                    java.util.List<org.web3j.abi.datatypes.Type> result = (java.util.List<org.web3j.abi.datatypes.Type>) executeCallSingleValueReturn(function, java.util.List.class);
+                    return convertToNative(result);
                 });
-    }
-
-    @Deprecated
-    public static IPayoutManagerFactory load(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
-        return new IPayoutManagerFactory(contractAddress, web3j, credentials, gasPrice, gasLimit);
-    }
-
-    @Deprecated
-    public static IPayoutManagerFactory load(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
-        return new IPayoutManagerFactory(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
     }
 
     public static IPayoutManagerFactory load(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
@@ -68,17 +44,7 @@ public class IPayoutManagerFactory extends org.web3j.tx.Contract {
         return deployRemoteCall(IPayoutManagerFactory.class, web3j, credentials, contractGasProvider, BINARY, "");
     }
 
-    @Deprecated
-    public static org.web3j.protocol.core.RemoteCall<IPayoutManagerFactory> deploy(org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
-        return deployRemoteCall(IPayoutManagerFactory.class, web3j, credentials, gasPrice, gasLimit, BINARY, "");
-    }
-
     public static org.web3j.protocol.core.RemoteCall<IPayoutManagerFactory> deploy(org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
         return deployRemoteCall(IPayoutManagerFactory.class, web3j, transactionManager, contractGasProvider, BINARY, "");
-    }
-
-    @Deprecated
-    public static org.web3j.protocol.core.RemoteCall<IPayoutManagerFactory> deploy(org.web3j.protocol.Web3j web3j, org.web3j.tx.TransactionManager transactionManager, java.math.BigInteger gasPrice, java.math.BigInteger gasLimit) {
-        return deployRemoteCall(IPayoutManagerFactory.class, web3j, transactionManager, gasPrice, gasLimit, BINARY, "");
     }
 }
