@@ -2,7 +2,6 @@ package com.ampnet.reportserviceeth.blockchain
 
 import com.ampnet.reportserviceeth.blockchain.properties.Chain
 import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesHandler
-import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
@@ -17,11 +16,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @Disabled("Not for automated testing")
 class BlockchainServiceTest {
 
-    private val issuerContract = "0x521b0200138cef507769f6d8e8d4999f60b6b319"
+    private val issuerContract = "0xF9a13B61d15E4eB4046DA02d34473F5dc53e5f7c"
     private val chainId = Chain.MATIC_TESTNET_MUMBAI.id
-
-    @Autowired
-    private lateinit var applicationProperties: ApplicationProperties
 
     @Autowired
     private lateinit var chainPropertiesHandler: ChainPropertiesHandler

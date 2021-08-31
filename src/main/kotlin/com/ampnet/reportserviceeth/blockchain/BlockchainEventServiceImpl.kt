@@ -28,11 +28,10 @@ class BlockchainEventServiceImpl(
 ) : BlockchainEventService {
 
     /**
-     * Transaction receipt is fetched for the txHash and it contains `to` and `from` variables
+     * Transaction receipt is fetched for the txHash and it contains `to` and `from` variables, asset address
      * and list of all the events.
      * In case of INVEST, CANCEL_INVESTMENT, CLAIM_TOKENS events `to` is the address of CfManagerSoftcap contract.
      * In case of REVENUE_SHARE event `to` is the address of PayoutManager contract.
-     * Both of these contracts contain state pointing to Asset contract which is used to fetch the asset name.
      * Returns transactionInfo object which is mapped from the type of events available.
      * If transaction receipt not found for the txHash or doesn't contain any events returns InternalException.
      *
@@ -59,23 +58,22 @@ class BlockchainEventServiceImpl(
             chainProperties.transactionManager,
             DefaultGasProvider()
         )
-        val asset = getAssetStateViaCfManagerContract(txReceipt.to, chainProperties)
         skipException { contract.getInvestEvents(txReceipt) }?.firstOrNull()?.let {
             logger.debug { "Fetched reserve investment event for hash: $txHash" }
-            return TransactionInfo(it, txReceipt, asset)
+            return TransactionInfo(it, txReceipt, getAsset(it.asset, chainProperties))
         }
         skipException { contract.getCancelInvestmentEvents(txReceipt) }?.firstOrNull()?.let {
             logger.debug { "Fetched cancel investment event for hash: $txHash" }
-            return TransactionInfo(it, txReceipt, asset)
+            return TransactionInfo(it, txReceipt, getAsset(it.asset, chainProperties))
         }
         skipException { contract.getClaimEvents(txReceipt) }?.firstOrNull()?.let {
             logger.debug { "Fetched investment completed event for hash: $txHash" }
-            return TransactionInfo(it, txReceipt, asset)
+            return TransactionInfo(it, txReceipt, getAsset(it.asset, chainProperties))
         }
         skipException { contract.getCreatePayoutEvents(txReceipt) }?.firstOrNull()?.let {
             logger.debug { "Fetched revenue share payout event for hash: $txHash" }
             return TransactionInfo(
-                it, txReceipt, getAssetStateViaPayoutManagerContract(txReceipt.to, chainProperties)
+                it, txReceipt, getAsset(it.asset, chainProperties)
             )
         }
         throw InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "Failed to map transaction info for txHash: $txHash")
@@ -88,22 +86,22 @@ class BlockchainEventServiceImpl(
         val ethFilter = EthFilter(
             DefaultBlockParameter.valueOf(BigInteger.valueOf(startBlockNumber)),
             DefaultBlockParameter.valueOf(BigInteger.valueOf(endBlockNumber)),
-            deployedContracts.keys.toList()
+            deployedContracts
         )
         val ethLog: EthLog = chainProperties.web3j.ethGetLogs(ethFilter).sendSafely()
             ?: throw InternalException(
                 ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
                 "Failed to fetch events from $startBlockNumber to $endBlockNumber block, " +
-                    "for contracts ${deployedContracts.keys.joinToString()}"
+                    "for contracts ${deployedContracts.joinToString()}"
             )
         val logs = ethLog.logs.mapNotNull { it.get() as? EthLog.LogObject }
-        return generateEvents(logs, deployedContracts, chainProperties, chainId)
+        return generateEvents(logs, chainProperties, chainId)
     }
 
     @Suppress("ThrowsCount")
     private fun getDeployedContractsForFetchingEvents(
         chainProperties: ChainPropertiesWithServices
-    ): Map<String, IAsset.AssetState> {
+    ): List<String> {
         val cfManagerFactoryContract = ICfManagerSoftcapFactory.load(
             chainProperties.chain.cfManagerFactoryAddress,
             chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
@@ -112,37 +110,22 @@ class BlockchainEventServiceImpl(
             chainProperties.chain.payoutManagerFactoryAddress,
             chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
-        val cfManagerInstances = cfManagerFactoryContract.instances.sendSafely()?.associate {
-            val contractAddress = it as String
-            val assetState = getAssetStateViaCfManagerContract(contractAddress, chainProperties)
-                ?: throw InternalException(
-                    ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-                    "Failed to fetch assetState for cfManagerContract: $contractAddress"
-                )
-            contractAddress to assetState
-        } ?: run {
-            logger.debug {
-                "There are no contracts deployed for the cfManagerFactory at: " +
-                    chainProperties.chain.cfManagerFactoryAddress
+        val payoutManagerInstances = payoutManagerFactoryContract.instances.sendSafely()?.mapNotNull { it as? String }
+            ?: run {
+                logger.debug {
+                    "There are no contracts deployed for the payoutManagerFactory at: " +
+                        chainProperties.chain.payoutManagerFactoryAddress
+                }
+                emptyList()
             }
-            emptyMap()
-        }
-        val payoutManagerInstances = payoutManagerFactoryContract.instances
-            .sendSafely()?.associate {
-                val contractAddress = it as String
-                val assetState = getAssetStateViaPayoutManagerContract(contractAddress, chainProperties)
-                    ?: throw InternalException(
-                        ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-                        "Failed to fetch assetState for payoutManagerContract: $contractAddress"
-                    )
-                contractAddress to assetState
-            } ?: run {
-            logger.debug {
-                "There are no contracts deployed for the payoutManagerFactory at: " +
-                    chainProperties.chain.payoutManagerFactoryAddress
+        val cfManagerInstances = cfManagerFactoryContract.instances.sendSafely()?.mapNotNull { it as? String }
+            ?: run {
+                logger.debug {
+                    "There are no contracts deployed for the cfManagerFactory at: " +
+                        chainProperties.chain.cfManagerFactoryAddress
+                }
+                emptyList()
             }
-            emptyMap()
-        }
         return cfManagerInstances.plus(payoutManagerInstances).ifEmpty {
             throw InternalException(
                 ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
@@ -160,38 +143,18 @@ class BlockchainEventServiceImpl(
         }
     }
 
-    private fun getAssetStateViaCfManagerContract(
-        contractAddress: String,
-        chainProperties: ChainPropertiesWithServices
-    ): IAsset.AssetState? {
-        val cfManagerContract = ICfManagerSoftcap.load(
-            contractAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
-        )
-        val assetContractAddress = cfManagerContract.state.sendSafely()?.asset ?: return null
-        return getAsset(assetContractAddress, chainProperties)
-    }
-
-    private fun getAssetStateViaPayoutManagerContract(
-        contractAddress: String,
-        chainProperties: ChainPropertiesWithServices
-    ): IAsset.AssetState? {
-        val payoutManagerContract = IPayoutManager.load(
-            contractAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
-        )
-        val assetContractAddress = payoutManagerContract.state.sendSafely()?.asset ?: return null
-        return getAsset(assetContractAddress, chainProperties)
-    }
-
-    private fun getAsset(contractAddress: String, chainProperties: ChainPropertiesWithServices): IAsset.AssetState? {
+    private fun getAsset(contractAddress: String, chainProperties: ChainPropertiesWithServices): IAsset.AssetState {
         val assetContract = IAsset.load(
             contractAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
-        return assetContract.state.sendSafely()
+        return assetContract.state.sendSafely() ?: throw InternalException(
+            ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
+            "Cannot find the asset for address: $contractAddress"
+        )
     }
 
     private fun generateEvents(
         logs: List<Log>,
-        deployedContracts: Map<String, IAsset.AssetState>,
         chainProperties: ChainPropertiesWithServices,
         chainId: Long
     ): List<Event> {
@@ -208,22 +171,22 @@ class BlockchainEventServiceImpl(
         val logsMap: Map<Log, Log> = logs.associateWith { it }
         skipException { contract.getInvestEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(deployedContracts, log)
+            val asset = getAsset(it.asset, chainProperties).name
             events.add(Event(it, chainId, log, asset))
         }
         skipException { contract.getCancelInvestmentEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(deployedContracts, log)
+            val asset = getAsset(it.asset, chainProperties).name
             events.add(Event(it, chainId, log, asset))
         }
         skipException { contract.getClaimEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(deployedContracts, log)
+            val asset = getAsset(it.asset, chainProperties).name
             events.add(Event(it, chainId, log, asset))
         }
         skipException { contract.getCreatePayoutEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(deployedContracts, log)
+            val asset = getAsset(it.asset, chainProperties).name
             events.add(Event(it, chainId, log, asset))
         }
         return events
@@ -233,11 +196,5 @@ class BlockchainEventServiceImpl(
         logsMap[event.log] ?: throw InternalException(
             ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
             "Cannot find the log for contract address: ${event.log.address} inside the logsMap."
-        )
-
-    private fun getAsset(deployedContracts: Map<String, IAsset.AssetState>, log: Log) =
-        deployedContracts[log.address]?.name ?: throw InternalException(
-            ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-            "Cannot find the asset for address: ${log.address} inside the deployedContracts."
         )
 }

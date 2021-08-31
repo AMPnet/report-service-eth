@@ -12,6 +12,7 @@ import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.persistence.repository.TaskRepository
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -38,7 +39,8 @@ class EventQueueServiceImpl(
         )
     }
 
-    private fun processTasks(chainId: Long) {
+    @Transactional
+    fun processTasks(chainId: Long) {
         logger.debug { "Processing tasks for chainId: $chainId" }
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
         val startBlockNumber = taskRepository.findFirstByOrderByBlockNumberDesc()?.let { it.blockNumber + 1 }
