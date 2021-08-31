@@ -33,7 +33,7 @@ class QueueProperties {
 
 @Suppress("MagicNumber")
 class ChainProperties {
-    var walletApproverServiceAddress: String = ""
+    var callerAddress: String = "0x0000000000000000000000000000000000000000"
     var cfManagerFactoryAddress: String = ""
     var payoutManagerFactoryAddress: String = ""
     var startBlockNumber: Long = 18_306_544

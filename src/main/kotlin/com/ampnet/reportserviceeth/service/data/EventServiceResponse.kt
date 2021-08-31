@@ -2,11 +2,13 @@ package com.ampnet.reportserviceeth.service.data
 
 import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.persistence.model.Event
+import com.ampnet.reportserviceeth.service.toTimestamp
 import java.math.BigInteger
 
 data class EventServiceResponse(
     val fromAddress: String,
     val toAddress: String,
+    val contract: String,
     val chainId: Long,
     val hash: String,
     val type: TransactionType,
@@ -20,11 +22,12 @@ data class EventServiceResponse(
     constructor(event: Event) : this(
         event.fromAddress,
         event.toAddress,
+        event.contract,
         event.chainId,
         event.hash,
         event.type,
         event.asset,
-        event.timestamp,
+        event.timestamp.toTimestamp(),
         event.tokenValue,
         event.tokenAmount,
         event.payoutId,

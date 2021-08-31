@@ -28,7 +28,7 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
         val chainProperties = getChainProperties(chain)
         val web3j = Web3j.build(HttpService(getChainRpcUrl(chain)))
         return ChainPropertiesWithServices(
-            web3j, ReadonlyTransactionManager(web3j, chainProperties.walletApproverServiceAddress), chainProperties
+            web3j, ReadonlyTransactionManager(web3j, chainProperties.callerAddress), chainProperties
         )
     }
 
@@ -49,7 +49,7 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
             Chain.ETHEREUM_MAIN -> applicationProperties.chainEthereum
             Chain.HARDHAT_TESTNET -> applicationProperties.chainHardhatTestnet
         }
-        if (chainProperties.walletApproverServiceAddress.isBlank() ||
+        if (chainProperties.callerAddress.isBlank() ||
             chainProperties.cfManagerFactoryAddress.isBlank() ||
             chainProperties.payoutManagerFactoryAddress.isBlank()
         ) {

@@ -51,3 +51,6 @@ fun Long.toLocalDateTime(): LocalDateTime =
 
 fun BigInteger.toEther(): String = DecimalFormat("#,##0.00")
     .format(this / BigInteger.valueOf(DECIMALS_PRECISION))
+
+@Suppress("MagicNumber")
+fun Long.toTimestamp(): Long = this * 1000
