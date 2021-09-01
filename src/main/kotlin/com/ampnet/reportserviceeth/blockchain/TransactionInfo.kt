@@ -1,7 +1,6 @@
 package com.ampnet.reportserviceeth.blockchain
 
 import com.ampnet.reportserviceeth.persistence.model.Event
-import com.ampnet.reportserviceeth.service.data.EventServiceResponse
 import com.ampnet.reportserviceeth.service.toLocalDateTime
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import java.math.BigInteger
@@ -87,7 +86,7 @@ data class TransactionInfo(
         txRecipient: TransactionReceipt,
         asset: IAsset.AssetState?
     ) : this(
-        TransactionType.REVENUE_SHARE,
+        TransactionType.CREATE_PAYOUT,
         event.creator,
         txRecipient.to,
         event.amount,
@@ -98,7 +97,27 @@ data class TransactionInfo(
         asset?.symbol
     )
 
-    constructor(event: Event) : this (
+    /*
+     * from - address of the PayoutManager contract.
+     * to - address of the wallet which received revenue share payout.
+     */
+    constructor(
+        event: TransactionEvents.ReleaseEventResponse,
+        txRecipient: TransactionReceipt,
+        asset: IAsset.AssetState?
+    ) : this(
+        TransactionType.REVENUE_SHARE,
+        txRecipient.to,
+        event.investor,
+        event.amount,
+        null,
+        event.timestamp.toLocalDateTime(),
+        txRecipient.transactionHash,
+        asset?.name,
+        asset?.symbol
+    )
+
+    constructor(event: Event) : this(
         event.type,
         event.fromAddress,
         event.toAddress,

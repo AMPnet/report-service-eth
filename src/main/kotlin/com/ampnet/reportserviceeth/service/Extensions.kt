@@ -9,8 +9,8 @@ import java.math.BigInteger
 import java.text.DecimalFormat
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.Optional
-import java.util.TimeZone
 
 const val DECIMALS_PRECISION = 1_000_000_000_000_000_000
 
@@ -44,10 +44,10 @@ fun <T> RemoteFunctionCall<T>.sendSafely(): T? {
 }
 
 fun BigInteger.toLocalDateTime(): LocalDateTime =
-    LocalDateTime.ofInstant(Instant.ofEpochSecond(this.toLong()), TimeZone.getDefault().toZoneId())
+    LocalDateTime.ofInstant(Instant.ofEpochSecond(this.toLong()), ZoneId.systemDefault())
 
 fun Long.toLocalDateTime(): LocalDateTime =
-    LocalDateTime.ofInstant(Instant.ofEpochSecond(this), TimeZone.getDefault().toZoneId())
+    LocalDateTime.ofInstant(Instant.ofEpochSecond(this), ZoneId.systemDefault())
 
 fun BigInteger.toEther(): String = DecimalFormat("#,##0.00")
     .format(this / BigInteger.valueOf(DECIMALS_PRECISION))

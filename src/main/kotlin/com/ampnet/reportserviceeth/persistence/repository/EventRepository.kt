@@ -11,29 +11,17 @@ interface EventRepository : JpaRepository<Event, UUID> {
         "SELECT event FROM Event event " +
             "WHERE (event.fromAddress = :address OR event.toAddress = :address) " +
             "AND event.chainId = :chainId " +
-            "AND event.contract = :issuer " +
+            "AND event.issuer = :issuer " +
             "AND (:from IS NULL OR :from < event.timestamp) " +
             "AND (:to IS NULL OR :to > event.timestamp)" +
             "ORDER BY event.timestamp DESC"
     )
-    fun findForAddressInPeriod(address: String, chainId: Long, from: Long?, to: Long?): List<Event>
-
-    @Query(
-        "SELECT event FROM Event event " +
-            "WHERE event.contract = :issuer " +
-            "AND (event.fromAddress = :address OR event.toAddress = :address) " +
-            "AND event.chainId = :chainId " +
-            "AND (:from IS NULL OR :from < event.timestamp) " +
-            "AND (:to IS NULL OR :to > event.timestamp)"
-    )
-    fun findForAddressAndIssuerInPeriod(
-        issuer: String, address: String, chainId: Long, from: Long?, to: Long?
-    ): List<Event>
+    fun findForAddressInPeriod(address: String, chainId: Long, issuer: String, from: Long?, to: Long?): List<Event>
 
     @Query(
         "SELECT event FROM Event event " +
             "WHERE event.hash = :txHash " +
-            "AND event.contract = :issuer " +
+            "AND event.issuer = :issuer " +
             "AND (event.fromAddress = :address OR event.toAddress = :address) " +
             "AND event.chainId = :chainId"
     )

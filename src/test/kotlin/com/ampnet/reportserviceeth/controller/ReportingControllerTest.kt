@@ -1,12 +1,11 @@
 package com.ampnet.reportserviceeth.controller
 
 import com.ampnet.identityservice.proto.UserResponse
-import com.ampnet.reportserviceeth.blockchain.TransactionInfo
 import com.ampnet.reportserviceeth.blockchain.TransactionType
+import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.security.WithMockCrowdfundUser
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.given
 import org.mockito.Mockito
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -14,7 +13,7 @@ import java.time.LocalDate
 
 class ReportingControllerTest : ControllerTestBase() {
 
-    private val reportPath = "/report/$defaultChainId/user/"
+    private val reportPath = "/report/$defaultChainId/$issuer/user/"
     private val transaction = "transaction"
     private val transactions = "transactions"
 
@@ -25,6 +24,7 @@ class ReportingControllerTest : ControllerTestBase() {
 
     @BeforeEach
     fun init() {
+        databaseCleanerService.deleteAllEvents()
         testContext = TestContext()
     }
 
@@ -36,17 +36,17 @@ class ReportingControllerTest : ControllerTestBase() {
             Mockito.`when`(userService.getUser(userAddress))
                 .thenReturn(testContext.user)
         }
-        suppose("Blockchain service will return transactions for wallet") {
-            testContext.transactions = createTransactionsResponse()
-            Mockito.`when`(blockchainService.getTransactions(testContext.user.address, defaultChainId))
-                .thenReturn(testContext.transactions)
+        suppose("There are events for user wallet") {
+            testContext.events = createEventsResponse()
         }
 
         verify("User can get pdf with all transactions") {
+            val from = LocalDate.of(2019, 10, 10)
+            val to = LocalDate.now().plusDays(1)
             val result = mockMvc.perform(
                 get(userTransactionsPath)
-                    .param("from", "2019-10-10")
-                    .param("to", LocalDate.now().plusDays(1).toString())
+                    .param("from", from?.toString())
+                    .param("to", to?.toString())
             )
                 .andExpect(status().isOk)
                 .andReturn()
@@ -65,14 +65,11 @@ class ReportingControllerTest : ControllerTestBase() {
             Mockito.`when`(userService.getUser(userAddress))
                 .thenReturn(testContext.user)
         }
-        suppose("Blockchain service will return transaction info for txHash, fromTxHash and toTxHash") {
-            testContext.transaction = createTransaction(
-                TransactionType.RESERVE_INVESTMENT,
-                "0x316E89e5455DaD761f289Ead1F612Ab0b3bF32Bf",
-                userAddress,
-                "700"
+        suppose("There is an event") {
+            testContext.event = createEvent(
+                userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT,
+                "700", txHash = txHash
             )
-            given(blockchainEventService.getTransactionInfo(txHash, defaultChainId)).willReturn(testContext.transaction)
         }
 
         verify("User can get pdf with single transaction") {
@@ -90,8 +87,8 @@ class ReportingControllerTest : ControllerTestBase() {
     }
 
     private class TestContext {
-        lateinit var transactions: List<TransactionInfo>
-        lateinit var transaction: TransactionInfo
+        lateinit var events: List<Event>
+        lateinit var event: Event
         lateinit var user: UserResponse
     }
 }

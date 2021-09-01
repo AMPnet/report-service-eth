@@ -1,6 +1,5 @@
 package com.ampnet.reportserviceeth.service.impl
 
-import com.ampnet.reportserviceeth.blockchain.BlockchainEventService
 import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.TransactionInfo
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
@@ -39,18 +38,18 @@ class TemplateDataServiceImpl(
     companion object : KLogging()
 
     override fun getUserTransactionsData(request: TransactionsServiceRequest): TransactionsSummary {
-        val transactions = eventService.getTransactionsForIssuer(request)
+        val transactions = eventService.getTransactions(request)
             .map { TransactionInfo(it) }
         val translations = translationService.getTranslations()
         val user = UserInfo(userService.getUser(request.address))
         val transactionsWithNames =
             generateTransactionReportData(transactions, user.language, translations)
-        return TransactionsSummary(transactionsWithNames, user, request.periodRequest, translations)
+        return TransactionsSummary(transactionsWithNames, user, request.period, translations)
     }
 
     override fun getUserTransactionData(request: TransactionServiceRequest): SingleTransactionSummary {
         val transaction = eventService.getTransaction(request)?.let { TransactionInfo(it) }
-            ?: throw ResourceNotFoundException(ErrorCode.BLOCKCHAIN_TX_MISSING, "Transaction missing for: $request")
+            ?: throw InvalidRequestException(ErrorCode.BLOCKCHAIN_TX_MISSING, "Transaction missing for: $request")
         val userWithInfo = UserInfo(userService.getUser(request.address))
         val translations = translationService.getTranslations(userWithInfo.language)
         val mappedTransaction =

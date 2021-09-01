@@ -4,5 +4,5 @@ data class TransactionsServiceRequest(
     val address: String,
     val chainId: Long,
     val issuer: String,
-    val periodRequest: PeriodServiceRequest
+    val period: PeriodServiceRequest
 )

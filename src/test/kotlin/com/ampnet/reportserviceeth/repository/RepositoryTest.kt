@@ -8,20 +8,21 @@ import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.persistence.model.Task
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.persistence.repository.TaskRepository
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.fail
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.math.BigInteger
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.UUID
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.fail
 
 @ExtendWith(SpringExtension::class)
 @DataJpaTest
@@ -46,6 +47,7 @@ class RepositoryTest : TestBase() {
     private val userAddress = "0x8f52B0cC50967fc59C6289f8FDB3E356EdeEBD23"
     private val secondUserAddress = "0xd43e088622404A5A21267033EC200383d39C22ca"
     private val issuer = "0x5013F6ce0f9Beb07Be528E408352D03f3FCa1857"
+    private val projectWallet: String = "0xFeC646017105fA2A4FFDc773e9c539Eda5af724a"
 
     @BeforeEach
     fun init() {
@@ -56,34 +58,35 @@ class RepositoryTest : TestBase() {
 
     @Test
     fun mustNotBeAbleToSaveDuplicateEvent() {
-        eventRepository.saveAndFlush(createEvent(
-            txHash = txHash, logIndex = logIndex, blockHash = blockHash, save = false)
+        eventRepository.saveAndFlush(
+            createEvent(
+                txHash = txHash, logIndex = logIndex, blockHash = blockHash, save = false
+            )
         )
-        assertThrows<RuntimeException> { eventRepository.saveAndFlush(
-            createEvent(txHash = txHash, logIndex = logIndex, blockHash = blockHash, save = false)
-        ) }
+        assertThrows<RuntimeException> {
+            eventRepository.saveAndFlush(
+                createEvent(txHash = txHash, logIndex = logIndex, blockHash = blockHash, save = false)
+            )
+        }
     }
 
     @Test
     fun mustReturnEventsForIssuerChainIdAndAddressInSelectedPeriod() {
         suppose("There are events for issuer") {
             testContext.firstEvent = createEvent()
-            testContext.secondEvent = createEvent(type = TransactionType.CANCEL_INVESTMENT, txHash = "txHash2")
+            testContext.secondEvent = createEvent(type = TransactionType.CANCEL_INVESTMENT)
         }
         suppose("There are events from another issuer") {
-            createEvent(contractAddress = "Ox-another-issuer", txHash = "txHash3")
-            createEvent(contractAddress = "Ox-some-other-issuer", txHash = "txHash4")
+            createEvent(issuerAddress = "Ox-another-issuer")
+            createEvent(issuerAddress = "Ox-some-other-issuer")
         }
         suppose("There is event outside of selected period") {
-            createEvent(
-                timestamp = LocalDateTime.now().minusHours(50).toEpochSecond(ZoneOffset.UTC), txHash = "txHash5"
-            )
-
+            createEvent(localDateTime = LocalDateTime.now().minusHours(50))
         }
 
         verify("Repository returns correct events") {
-            val events = eventRepository.findForAddressAndIssuerInPeriod(
-                issuer, userAddress, chainId, LocalDateTime.now().minusDays(1).toEpochSecond(ZoneOffset.UTC), null
+            val events = eventRepository.findForAddressInPeriod(
+                userAddress, chainId, issuer, LocalDateTime.now().minusDays(1).toEpochSecond(ZoneOffset.UTC), null
             )
             assertThat(events).hasSize(2)
         }
@@ -96,13 +99,13 @@ class RepositoryTest : TestBase() {
             testContext.secondEvent = createEvent(type = TransactionType.CANCEL_INVESTMENT, txHash = txHash)
         }
         suppose("There are events from another issuer") {
-            createEvent(contractAddress = "Ox-another-issuer", txHash = txHash, blockHash = "535")
-            createEvent(contractAddress = "Ox-some-other-issuer", txHash = txHash,  blockHash = "536")
+            createEvent(issuerAddress = "Ox-another-issuer", txHash = txHash, blockHash = "535")
+            createEvent(issuerAddress = "Ox-some-other-issuer", txHash = txHash, blockHash = "536")
         }
 
         verify("Repository returns correct event") {
             val event = eventRepository.findForTxHash(txHash, issuer, userAddress, chainId)
-                ?: fail("Transaction missing")
+                ?: fail("event missing")
             assertThat(event.type).isEqualTo(TransactionType.CANCEL_INVESTMENT)
         }
     }
@@ -113,22 +116,28 @@ class RepositoryTest : TestBase() {
     }
 
     private fun createEvent(
-        chain: Long = chainId, from: String = userAddress, to: String = secondUserAddress,
-        contractAddress: String = issuer, txHash: String = "txHash",
-        type: TransactionType = TransactionType.COMPLETED_INVESTMENT, logIndex: Long = 134L,
-        blockHash: String = "blockHash", timestamp: Long = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC),
+        from: String = userAddress,
+        to: String = secondUserAddress,
+        contractAddress: String = projectWallet,
+        txHash: String = UUID.randomUUID().toString(),
+        issuerAddress: String = issuer,
+        type: TransactionType = TransactionType.COMPLETED_INVESTMENT,
+        chain: Long = chainId,
+        logIndex: Long = 134L,
+        blockHash: String = "blockHash",
+        localDateTime: LocalDateTime = LocalDateTime.now(),
         save: Boolean = true
     ): Event {
         val event = Event(
             UUID.randomUUID(), chain, from, to,
-            contractAddress, txHash, type,
+            contractAddress, issuerAddress, txHash, type,
             logIndex, "asset_name", 500045L, blockHash,
-            timestamp, BigInteger("500"), BigInteger("500"), 50L, BigInteger("500")
+            localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
+            BigInteger("500"), BigInteger("500"), 50L, BigInteger("500")
         )
         return if (save) eventRepository.save(event)
         else event
     }
-
 
     private fun createTask() = Task(UUID.randomUUID(), chainId, 5075L, 1628065107449L)
 

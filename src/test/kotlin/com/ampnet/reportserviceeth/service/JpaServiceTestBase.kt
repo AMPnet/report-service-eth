@@ -13,16 +13,15 @@ import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.impl.TranslationServiceImpl
 import com.ampnet.reportserviceeth.toGwei
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.math.BigInteger
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.math.BigInteger
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.util.UUID
 
@@ -87,17 +86,23 @@ abstract class JpaServiceTestBase : TestBase() {
             .build()
 
     protected fun createEvent(
-        chain: Long = chainId, from: String = userAddress, to: String = secondUserAddress,
-        contractAddress: String = issuer, txHash: String = "txHash",
-        type: TransactionType = TransactionType.COMPLETED_INVESTMENT, logIndex: Long = 134L,
-        blockHash: String = "blockHash", timestamp: LocalDateTime = LocalDateTime.now(), amount: String
+        from: String = userAddress,
+        to: String = projectWallet,
+        type: TransactionType = TransactionType.COMPLETED_INVESTMENT,
+        amount: String = "1000000",
+        txHash: String = "txHash",
+        chain: Long = chainId,
+        contractAddress: String = projectWallet,
+        issuerAddress: String = issuer,
+        logIndex: Long = 134L,
+        blockHash: String = "blockHash",
+        localDateTime: LocalDateTime = LocalDateTime.now(),
     ) =
         Event(
             UUID.randomUUID(), chain, from, to,
-            contractAddress, txHash, type,
+            contractAddress, issuerAddress, txHash, type,
             logIndex, "asset_name", 500045L, blockHash,
-            timestamp.toEpochSecond(ZoneOffset.UTC),
+            localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
             amount.toGwei(), amount.toGwei(), 50L, BigInteger("500")
         )
-
 }
