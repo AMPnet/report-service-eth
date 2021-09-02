@@ -126,6 +126,6 @@ data class TransactionInfo(
         event.timestamp.toLocalDateTime(),
         event.hash,
         event.asset,
-        null
+        event.tokenSymbol
     )
 }

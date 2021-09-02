@@ -148,7 +148,7 @@ class EventQueueServiceTest : TestBase() {
     private fun createEvent(transactionType: TransactionType, blockHash: String) =
         Event(
             UUID.randomUUID(), chainId, "fromAddress", "toAddress", "contractAddress",
-            "issuer", "txHash", transactionType, 10, "assetName", 100, blockHash,
+            "issuer", "txHash", transactionType, 10, "assetName", "symbol", 100, blockHash,
             Instant.now().toEpochMilli(), BigInteger.TEN, null, null, null
         )
 

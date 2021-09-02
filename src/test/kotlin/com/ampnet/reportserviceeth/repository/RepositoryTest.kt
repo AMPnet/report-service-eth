@@ -131,7 +131,7 @@ class RepositoryTest : TestBase() {
         val event = Event(
             UUID.randomUUID(), chain, from, to,
             contractAddress, issuerAddress, txHash, type,
-            logIndex, "asset_name", 500045L, blockHash,
+            logIndex, "asset_name", "symbol", 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
             BigInteger("500"), BigInteger("500"), 50L, BigInteger("500")
         )

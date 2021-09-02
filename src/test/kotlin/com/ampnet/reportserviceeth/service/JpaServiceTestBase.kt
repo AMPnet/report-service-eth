@@ -101,7 +101,7 @@ abstract class JpaServiceTestBase : TestBase() {
         Event(
             UUID.randomUUID(), chain, from, to,
             contractAddress, issuerAddress, txHash, type,
-            logIndex, "asset_name", 500045L, blockHash,
+            logIndex, "asset_name", "symbol", 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
             amount.toGwei(), amount.toGwei(), 50L, BigInteger("500")
         )

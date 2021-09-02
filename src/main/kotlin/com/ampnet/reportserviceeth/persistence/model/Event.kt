@@ -47,6 +47,9 @@ class Event(
     var asset: String,
 
     @Column(nullable = false)
+    var tokenSymbol: String,
+
+    @Column(nullable = false)
     var blockNumber: Long,
 
     @Column(nullable = false)
@@ -87,6 +90,7 @@ class Event(
         TransactionType.RESERVE_INVESTMENT,
         log.logIndex.toLong(),
         asset.name,
+        asset.symbol,
         log.blockNumber.toLong(),
         log.blockHash,
         event.timestamp.toLong(),
@@ -116,6 +120,7 @@ class Event(
         TransactionType.CANCEL_INVESTMENT,
         log.logIndex.toLong(),
         asset.name,
+        asset.symbol,
         log.blockNumber.toLong(),
         log.blockHash,
         event.timestamp.toLong(),
@@ -145,6 +150,7 @@ class Event(
         TransactionType.COMPLETED_INVESTMENT,
         log.logIndex.toLong(),
         asset.name,
+        asset.symbol,
         log.blockNumber.toLong(),
         log.blockHash,
         event.timestamp.toLong(),
@@ -174,6 +180,7 @@ class Event(
         TransactionType.CANCEL_INVESTMENT,
         log.logIndex.toLong(),
         asset.name,
+        asset.symbol,
         log.blockNumber.toLong(),
         log.blockHash,
         event.timestamp.toLong(),
@@ -203,6 +210,7 @@ class Event(
         TransactionType.CANCEL_INVESTMENT,
         log.logIndex.toLong(),
         asset.name,
+        asset.symbol,
         log.blockNumber.toLong(),
         log.blockHash,
         event.timestamp.toLong(),
