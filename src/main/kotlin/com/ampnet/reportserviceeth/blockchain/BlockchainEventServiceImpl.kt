@@ -70,7 +70,7 @@ class BlockchainEventServiceImpl(
             logger.debug { "Fetched investment completed event for hash: $txHash" }
             return TransactionInfo(it, txReceipt, getAsset(it.asset, chainProperties))
         }
-        skipException { contract.getCreatePayoutEvents(txReceipt) }?.firstOrNull()?.let {
+        skipException { contract.getReleaseEvents(txReceipt) }?.firstOrNull()?.let {
             logger.debug { "Fetched revenue share payout event for hash: $txHash" }
             return TransactionInfo(
                 it, txReceipt, getAsset(it.asset, chainProperties)
@@ -171,22 +171,27 @@ class BlockchainEventServiceImpl(
         val logsMap: Map<Log, Log> = logs.associateWith { it }
         skipException { contract.getInvestEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(it.asset, chainProperties).name
+            val asset = getAsset(it.asset, chainProperties)
             events.add(Event(it, chainId, log, asset))
         }
         skipException { contract.getCancelInvestmentEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(it.asset, chainProperties).name
+            val asset = getAsset(it.asset, chainProperties)
             events.add(Event(it, chainId, log, asset))
         }
         skipException { contract.getClaimEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(it.asset, chainProperties).name
+            val asset = getAsset(it.asset, chainProperties)
             events.add(Event(it, chainId, log, asset))
         }
         skipException { contract.getCreatePayoutEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(it.asset, chainProperties).name
+            val asset = getAsset(it.asset, chainProperties)
+            events.add(Event(it, chainId, log, asset))
+        }
+        skipException { contract.getReleaseEvents(txReceipt) }?.forEach {
+            val log = getLog(logsMap, it)
+            val asset = getAsset(it.asset, chainProperties)
             events.add(Event(it, chainId, log, asset))
         }
         return events

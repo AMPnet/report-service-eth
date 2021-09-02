@@ -31,6 +31,9 @@ class Event(
     var contract: String,
 
     @Column(nullable = false)
+    var issuer: String,
+
+    @Column(nullable = false)
     var hash: String,
 
     @Enumerated(EnumType.STRING)
@@ -44,6 +47,9 @@ class Event(
     var asset: String,
 
     @Column(nullable = false)
+    var tokenSymbol: String,
+
+    @Column(nullable = false)
     var blockNumber: Long,
 
     @Column(nullable = false)
@@ -52,11 +58,11 @@ class Event(
     @Column(nullable = false)
     var timestamp: Long,
 
-    @Column(nullable = true)
-    var tokenAmount: BigInteger?,
+    @Column(nullable = false)
+    var tokenValue: BigInteger,
 
     @Column(nullable = true)
-    var tokenValue: BigInteger?,
+    var tokenAmount: BigInteger?,
 
     @Column(nullable = true)
     var payoutId: Long?,
@@ -72,22 +78,24 @@ class Event(
         event: TransactionEvents.InvestEventResponse,
         chainId: Long,
         log: Log,
-        asset: String
+        asset: IAsset.AssetState
     ) : this(
         UUID.randomUUID(),
         chainId,
         event.investor,
         log.address,
         log.address,
+        asset.issuer,
         log.transactionHash,
         TransactionType.RESERVE_INVESTMENT,
         log.logIndex.toLong(),
-        asset,
+        asset.name,
+        asset.symbol,
         log.blockNumber.toLong(),
         log.blockHash,
         event.timestamp.toLong(),
-        event.tokenAmount,
         event.tokenValue,
+        event.tokenAmount,
         null,
         null
     )
@@ -100,22 +108,24 @@ class Event(
         event: TransactionEvents.CancelInvestmentEventResponse,
         chainId: Long,
         log: Log,
-        asset: String
+        asset: IAsset.AssetState
     ) : this(
         UUID.randomUUID(),
         chainId,
         event.investor,
         log.address,
         log.address,
+        asset.issuer,
         log.transactionHash,
         TransactionType.CANCEL_INVESTMENT,
         log.logIndex.toLong(),
-        asset,
+        asset.name,
+        asset.symbol,
         log.blockNumber.toLong(),
         log.blockHash,
         event.timestamp.toLong(),
-        event.tokenAmount,
         event.tokenValue,
+        event.tokenAmount,
         null,
         null
     )
@@ -128,22 +138,24 @@ class Event(
         event: TransactionEvents.ClaimEventResponse,
         chainId: Long,
         log: Log,
-        asset: String
+        asset: IAsset.AssetState
     ) : this(
         UUID.randomUUID(),
         chainId,
         event.investor,
         log.address,
         log.address,
+        asset.issuer,
         log.transactionHash,
         TransactionType.COMPLETED_INVESTMENT,
         log.logIndex.toLong(),
-        asset,
+        asset.name,
+        asset.symbol,
         log.blockNumber.toLong(),
         log.blockHash,
         event.timestamp.toLong(),
-        event.tokenAmount,
         event.tokenValue,
+        event.tokenAmount,
         null,
         null
     )
@@ -156,22 +168,54 @@ class Event(
         event: TransactionEvents.CreatePayoutEventResponse,
         chainId: Long,
         log: Log,
-        asset: String
+        asset: IAsset.AssetState
     ) : this(
         UUID.randomUUID(),
         chainId,
         event.creator,
         log.address,
         log.address,
+        asset.issuer,
         log.transactionHash,
         TransactionType.CANCEL_INVESTMENT,
         log.logIndex.toLong(),
-        asset,
+        asset.name,
+        asset.symbol,
         log.blockNumber.toLong(),
         log.blockHash,
         event.timestamp.toLong(),
-        null,
         event.amount,
+        null,
+        event.payoutId.toLong(),
+        event.amount
+    )
+
+    /*
+     * from - address of the PayoutManager contract.
+     * to - address of the wallet which received revenue share payout.
+     */
+    constructor(
+        event: TransactionEvents.ReleaseEventResponse,
+        chainId: Long,
+        log: Log,
+        asset: IAsset.AssetState
+    ) : this(
+        UUID.randomUUID(),
+        chainId,
+        log.address,
+        event.investor,
+        log.address,
+        asset.issuer,
+        log.transactionHash,
+        TransactionType.CANCEL_INVESTMENT,
+        log.logIndex.toLong(),
+        asset.name,
+        asset.symbol,
+        log.blockNumber.toLong(),
+        log.blockHash,
+        event.timestamp.toLong(),
+        event.amount,
+        null,
         event.payoutId.toLong(),
         event.amount
     )

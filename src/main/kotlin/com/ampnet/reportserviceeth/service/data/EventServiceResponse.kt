@@ -14,8 +14,8 @@ data class EventServiceResponse(
     val type: TransactionType,
     val asset: String,
     val timestamp: Long,
+    val tokenValue: BigInteger,
     val tokenAmount: BigInteger?,
-    val tokenValue: BigInteger?,
     val payoutId: Long?,
     val revenue: BigInteger?
 ) {
@@ -28,8 +28,8 @@ data class EventServiceResponse(
         event.type,
         event.asset,
         event.timestamp.toTimestamp(),
-        event.tokenAmount,
         event.tokenValue,
+        event.tokenAmount,
         event.payoutId,
         event.revenue
     )

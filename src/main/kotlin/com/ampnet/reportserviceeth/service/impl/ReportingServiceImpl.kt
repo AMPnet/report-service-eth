@@ -2,6 +2,7 @@ package com.ampnet.reportserviceeth.service.impl
 
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
 import com.ampnet.reportserviceeth.controller.pojo.TransactionServiceRequest
+import com.ampnet.reportserviceeth.controller.pojo.TransactionsServiceRequest
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.service.ReportingService
@@ -24,12 +25,8 @@ class ReportingServiceImpl(
 
     private val rootTemplate = "templates/root.htm"
 
-    override fun generatePdfReportForUserTransactions(
-        address: String,
-        chainId: Long,
-        periodRequest: PeriodServiceRequest
-    ): ByteArray {
-        val template = templateService.generateTemplateForUserTransactions(address, chainId, periodRequest)
+    override fun generatePdfReportForUserTransactions(request: TransactionsServiceRequest): ByteArray {
+        val template = templateService.generateTemplateForUserTransactions(request)
         return generateFromTemplateToByteArray(template)
     }
 

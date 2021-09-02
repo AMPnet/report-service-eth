@@ -1,0 +1,1 @@
+ALTER TABLE event ADD COLUMN token_symbol VARCHAR NOT NULL;

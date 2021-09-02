@@ -1,5 +1,6 @@
 package com.ampnet.reportserviceeth.blockchain
 
+import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.toLocalDateTime
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import java.math.BigInteger
@@ -13,17 +14,17 @@ data class TransactionInfo(
     val tokenAmount: BigInteger?,
     val timestamp: LocalDateTime,
     val txHash: String,
-    val asset: String?,
-    val assetTokenSymbol: String?
+    val asset: String,
+    val assetTokenSymbol: String
 ) {
     /*
-     * from - address of the wallet that reserved invested in the asset.
-     * to - address of the CfManagerSoftcap contract
+     * from - address of the wallet that reserved investment in the asset.
+     * to - address of the CfManagerSoftcap contract.
      */
     constructor(
         event: TransactionEvents.InvestEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState?
+        asset: IAsset.AssetState
     ) : this(
         TransactionType.RESERVE_INVESTMENT,
         event.investor,
@@ -32,18 +33,18 @@ data class TransactionInfo(
         event.tokenAmount,
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
-        asset?.name,
-        asset?.symbol
+        asset.name,
+        asset.symbol
     )
 
     /*
      * from - address of the wallet that canceled investment in the asset.
-     * to - address of the CfManagerSoftcap contract
+     * to - address of the CfManagerSoftcap contract.
      */
     constructor(
         event: TransactionEvents.CancelInvestmentEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState?
+        asset: IAsset.AssetState
     ) : this(
         TransactionType.CANCEL_INVESTMENT,
         event.investor,
@@ -52,18 +53,18 @@ data class TransactionInfo(
         event.tokenAmount,
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
-        asset?.name,
-        asset?.symbol
+        asset.name,
+        asset.symbol
     )
 
     /*
      * from - address of the wallet that completed investment in the asset.
-     * to - address of the CfManagerSoftcap contract
+     * to - address of the CfManagerSoftcap contract.
      */
     constructor(
         event: TransactionEvents.ClaimEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState?
+        asset: IAsset.AssetState
     ) : this(
         TransactionType.COMPLETED_INVESTMENT,
         event.investor,
@@ -72,8 +73,8 @@ data class TransactionInfo(
         event.tokenAmount,
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
-        asset?.name,
-        asset?.symbol
+        asset.name,
+        asset.symbol
     )
 
     /*
@@ -83,16 +84,48 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.CreatePayoutEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState?
+        asset: IAsset.AssetState
     ) : this(
-        TransactionType.REVENUE_SHARE,
+        TransactionType.CREATE_PAYOUT,
         event.creator,
         txRecipient.to,
         event.amount,
         null,
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
-        asset?.name,
-        asset?.symbol
+        asset.name,
+        asset.symbol
+    )
+
+    /*
+     * from - address of the PayoutManager contract.
+     * to - address of the wallet which received revenue share payout.
+     */
+    constructor(
+        event: TransactionEvents.ReleaseEventResponse,
+        txRecipient: TransactionReceipt,
+        asset: IAsset.AssetState
+    ) : this(
+        TransactionType.REVENUE_SHARE,
+        txRecipient.to,
+        event.investor,
+        event.amount,
+        null,
+        event.timestamp.toLocalDateTime(),
+        txRecipient.transactionHash,
+        asset.name,
+        asset.symbol
+    )
+
+    constructor(event: Event) : this(
+        event.type,
+        event.fromAddress,
+        event.toAddress,
+        event.tokenValue,
+        event.tokenAmount,
+        event.timestamp.toLocalDateTime(),
+        event.hash,
+        event.asset,
+        event.tokenSymbol
     )
 }

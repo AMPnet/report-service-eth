@@ -2,7 +2,6 @@ package com.ampnet.reportserviceeth.controller
 
 import com.ampnet.identityservice.proto.UserResponse
 import com.ampnet.reportserviceeth.TestBase
-import com.ampnet.reportserviceeth.blockchain.BlockchainEventService
 import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.TransactionInfo
 import com.ampnet.reportserviceeth.blockchain.TransactionType
@@ -11,6 +10,8 @@ import com.ampnet.reportserviceeth.config.DatabaseCleanerService
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.ErrorResponse
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
+import com.ampnet.reportserviceeth.persistence.model.Event
+import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.toGwei
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -33,8 +34,11 @@ import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import java.io.File
+import java.math.BigInteger
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.UUID
 
 @ExtendWith(value = [SpringExtension::class, RestDocumentationExtension::class])
 @SpringBootTest
@@ -55,11 +59,11 @@ abstract class ControllerTestBase : TestBase() {
     @Autowired
     protected lateinit var databaseCleanerService: DatabaseCleanerService
 
-    @MockBean
-    protected lateinit var blockchainService: BlockchainService
+    @Autowired
+    protected lateinit var eventRepository: EventRepository
 
     @MockBean
-    protected lateinit var blockchainEventService: BlockchainEventService
+    protected lateinit var blockchainService: BlockchainService
 
     @MockBean
     protected lateinit var userService: UserService
@@ -186,5 +190,44 @@ abstract class ControllerTestBase : TestBase() {
             )
         }
         return invests + revenueShares + cancelInvestments
+    }
+
+    protected fun createEvent(
+        from: String = userAddress,
+        to: String = projectWallet,
+        type: TransactionType = TransactionType.COMPLETED_INVESTMENT,
+        amount: String = "10000",
+        contractAddress: String = projectWallet,
+        issuerAddress: String = issuer,
+        txHash: String = UUID.randomUUID().toString(),
+        chain: Long = defaultChainId,
+        logIndex: Long = 134L,
+        blockHash: String = "blockHash",
+        localDateTime: LocalDateTime = LocalDateTime.now(),
+        saveToDb: Boolean = true
+    ): Event {
+        val event = Event(
+            UUID.randomUUID(), chain, from.lowercase(), to.lowercase(),
+            contractAddress, issuerAddress, txHash, type,
+            logIndex, "asset_name", "symbol", 500045L, blockHash,
+            localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
+            amount.toGwei(), amount.toGwei(), 50L, BigInteger("500")
+        )
+        return if (saveToDb) eventRepository.save(event)
+        else event
+    }
+
+    protected fun createEventsResponse(): List<Event> {
+        val investment = "30000"
+        val invests = MutableList(2) {
+            createEvent(userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT, investment)
+        }
+        val cancelInvestments = MutableList(1) {
+            createEvent(userAddress, projectWallet, TransactionType.CANCEL_INVESTMENT, investment)
+        }
+        val revenueShares = MutableList(2) {
+            createEvent(projectWallet, userAddress, TransactionType.REVENUE_SHARE, "500")
+        }
+        return invests + cancelInvestments + revenueShares
     }
 }

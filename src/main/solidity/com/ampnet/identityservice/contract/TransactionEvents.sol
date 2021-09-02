@@ -37,4 +37,11 @@ interface TransactionEvents {
         uint256 amount,
         uint256 timestamp
     );
+    event Release(
+        address indexed investor,
+        address asset,
+        uint256 payoutId,
+        uint256 amount,
+        uint256 timestamp
+    );
 }

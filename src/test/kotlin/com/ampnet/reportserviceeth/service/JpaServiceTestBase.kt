@@ -9,6 +9,7 @@ import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.blockchain.properties.Chain
 import com.ampnet.reportserviceeth.config.JsonConfig
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
+import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.impl.TranslationServiceImpl
 import com.ampnet.reportserviceeth.toGwei
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -18,8 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.math.BigInteger
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.UUID
 
 @ExtendWith(SpringExtension::class)
 @Import(JsonConfig::class)
@@ -43,6 +47,9 @@ abstract class JpaServiceTestBase : TestBase() {
 
     @Mock
     protected lateinit var userService: UserService
+
+    @Mock
+    protected lateinit var eventService: EventService
 
     @Autowired
     @Qualifier("camelCaseObjectMapper")
@@ -77,4 +84,25 @@ abstract class JpaServiceTestBase : TestBase() {
             .setDocumentValidFrom("23.07.2021.")
             .setDocumentValidUntil("23.07.2031.")
             .build()
+
+    protected fun createEvent(
+        from: String = userAddress,
+        to: String = projectWallet,
+        type: TransactionType = TransactionType.COMPLETED_INVESTMENT,
+        amount: String = "1000000",
+        txHash: String = "txHash",
+        chain: Long = chainId,
+        contractAddress: String = projectWallet,
+        issuerAddress: String = issuer,
+        logIndex: Long = 134L,
+        blockHash: String = "blockHash",
+        localDateTime: LocalDateTime = LocalDateTime.now(),
+    ) =
+        Event(
+            UUID.randomUUID(), chain, from, to,
+            contractAddress, issuerAddress, txHash, type,
+            logIndex, "asset_name", "symbol", 500045L, blockHash,
+            localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
+            amount.toGwei(), amount.toGwei(), 50L, BigInteger("500")
+        )
 }

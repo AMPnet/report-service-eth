@@ -2,11 +2,12 @@ package com.ampnet.reportserviceeth.controller
 
 import com.ampnet.reportserviceeth.blockchain.properties.Chain
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
-import com.ampnet.reportserviceeth.controller.pojo.TxHistoryRequest
+import com.ampnet.reportserviceeth.controller.pojo.TransactionsServiceRequest
 import com.ampnet.reportserviceeth.controller.pojo.TxHistoryResponse
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.service.EventService
+import com.ampnet.reportserviceeth.service.data.EventServiceResponse
 import mu.KLogging
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
@@ -35,8 +36,8 @@ class TxHistoryController(private val eventService: EventService) {
         logger.debug {
             "Received request to get transactions for address: $address on chain: $chainId for issuer: $issuer"
         }
-        val request = TxHistoryRequest(address, chainId, issuer, PeriodServiceRequest(from, to))
-        val events = eventService.getTransactions(request)
+        val request = TransactionsServiceRequest(address, chainId, issuer, PeriodServiceRequest(from, to))
+        val events = eventService.getTransactions(request).map { EventServiceResponse(it) }
         return ResponseEntity.ok(TxHistoryResponse(events))
     }
 }

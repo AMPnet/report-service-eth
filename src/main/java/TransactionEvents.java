@@ -31,6 +31,10 @@ public class TransactionEvents extends org.web3j.tx.Contract {
             java.util.Arrays.<org.web3j.abi.TypeReference<?>>asList(new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.Address>() {}, new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.Address>() {}, new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.generated.Uint256>() {}));
     ;
 
+    public static final org.web3j.abi.datatypes.Event RELEASE_EVENT = new org.web3j.abi.datatypes.Event("Release",
+            java.util.Arrays.asList(new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.Address>(true) {}, new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.Address>() {}, new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.generated.Uint256>() {}, new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.generated.Uint256>() {}, new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.generated.Uint256>() {}));
+    ;
+
     protected TransactionEvents(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, credentials, contractGasProvider);
     }
@@ -215,6 +219,42 @@ public class TransactionEvents extends org.web3j.tx.Contract {
         return transferEventFlowable(filter);
     }
 
+    public java.util.List<TransactionEvents.ReleaseEventResponse> getReleaseEvents(org.web3j.protocol.core.methods.response.TransactionReceipt transactionReceipt) {
+        java.util.List<org.web3j.tx.Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(RELEASE_EVENT, transactionReceipt);
+        java.util.ArrayList<TransactionEvents.ReleaseEventResponse> responses = new java.util.ArrayList<>(valueList.size());
+        for (org.web3j.tx.Contract.EventValuesWithLog eventValues : valueList) {
+            TransactionEvents.ReleaseEventResponse typedResponse = new TransactionEvents.ReleaseEventResponse();
+            typedResponse.log = eventValues.getLog();
+            typedResponse.investor = (String) eventValues.getIndexedValues().get(0).getValue();
+            typedResponse.asset = (String) eventValues.getNonIndexedValues().get(0).getValue();
+            typedResponse.payoutId = (java.math.BigInteger) eventValues.getNonIndexedValues().get(1).getValue();
+            typedResponse.amount = (java.math.BigInteger) eventValues.getNonIndexedValues().get(2).getValue();
+            typedResponse.timestamp = (java.math.BigInteger) eventValues.getNonIndexedValues().get(3).getValue();
+            responses.add(typedResponse);
+        }
+        return responses;
+    }
+
+    public io.reactivex.Flowable<TransactionEvents.ReleaseEventResponse> releaseEventFlowable(org.web3j.protocol.core.methods.request.EthFilter filter) {
+        return web3j.ethLogFlowable(filter).map(log -> {
+            org.web3j.tx.Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(RELEASE_EVENT, log);
+            TransactionEvents.ReleaseEventResponse typedResponse = new TransactionEvents.ReleaseEventResponse();
+            typedResponse.log = log;
+            typedResponse.investor = (String) eventValues.getIndexedValues().get(0).getValue();
+            typedResponse.asset = (String) eventValues.getNonIndexedValues().get(0).getValue();
+            typedResponse.payoutId = (java.math.BigInteger) eventValues.getNonIndexedValues().get(1).getValue();
+            typedResponse.amount = (java.math.BigInteger) eventValues.getNonIndexedValues().get(2).getValue();
+            typedResponse.timestamp = (java.math.BigInteger) eventValues.getNonIndexedValues().get(3).getValue();
+            return typedResponse;
+        });
+    }
+
+    public io.reactivex.Flowable<TransactionEvents.ReleaseEventResponse> releaseEventFlowable(org.web3j.protocol.core.DefaultBlockParameter startBlock, org.web3j.protocol.core.DefaultBlockParameter endBlock) {
+        org.web3j.protocol.core.methods.request.EthFilter filter = new org.web3j.protocol.core.methods.request.EthFilter(startBlock, endBlock, getContractAddress());
+        filter.addSingleTopic(org.web3j.abi.EventEncoder.encode(RELEASE_EVENT));
+        return releaseEventFlowable(filter);
+    }
+
     public static TransactionEvents load(String contractAddress, org.web3j.protocol.Web3j web3j, org.web3j.crypto.Credentials credentials, org.web3j.tx.gas.ContractGasProvider contractGasProvider) {
         return new TransactionEvents(contractAddress, web3j, credentials, contractGasProvider);
     }
@@ -285,5 +325,17 @@ public class TransactionEvents extends org.web3j.tx.Contract {
         public String to;
 
         public java.math.BigInteger value;
+    }
+
+    public static class ReleaseEventResponse extends org.web3j.protocol.core.methods.response.BaseEventResponse {
+        public String investor;
+
+        public String asset;
+
+        public java.math.BigInteger payoutId;
+
+        public java.math.BigInteger amount;
+
+        public java.math.BigInteger timestamp;
     }
 }
