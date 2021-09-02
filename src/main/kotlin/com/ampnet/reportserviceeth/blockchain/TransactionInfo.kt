@@ -14,8 +14,8 @@ data class TransactionInfo(
     val tokenAmount: BigInteger?,
     val timestamp: LocalDateTime,
     val txHash: String,
-    val asset: String?,
-    val assetTokenSymbol: String?
+    val asset: String,
+    val assetTokenSymbol: String
 ) {
     /*
      * from - address of the wallet that reserved investment in the asset.
@@ -24,7 +24,7 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.InvestEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState?
+        asset: IAsset.AssetState
     ) : this(
         TransactionType.RESERVE_INVESTMENT,
         event.investor,
@@ -33,8 +33,8 @@ data class TransactionInfo(
         event.tokenAmount,
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
-        asset?.name,
-        asset?.symbol
+        asset.name,
+        asset.symbol
     )
 
     /*
@@ -44,7 +44,7 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.CancelInvestmentEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState?
+        asset: IAsset.AssetState
     ) : this(
         TransactionType.CANCEL_INVESTMENT,
         event.investor,
@@ -53,8 +53,8 @@ data class TransactionInfo(
         event.tokenAmount,
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
-        asset?.name,
-        asset?.symbol
+        asset.name,
+        asset.symbol
     )
 
     /*
@@ -64,7 +64,7 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.ClaimEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState?
+        asset: IAsset.AssetState
     ) : this(
         TransactionType.COMPLETED_INVESTMENT,
         event.investor,
@@ -73,8 +73,8 @@ data class TransactionInfo(
         event.tokenAmount,
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
-        asset?.name,
-        asset?.symbol
+        asset.name,
+        asset.symbol
     )
 
     /*
@@ -84,7 +84,7 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.CreatePayoutEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState?
+        asset: IAsset.AssetState
     ) : this(
         TransactionType.CREATE_PAYOUT,
         event.creator,
@@ -93,8 +93,8 @@ data class TransactionInfo(
         null,
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
-        asset?.name,
-        asset?.symbol
+        asset.name,
+        asset.symbol
     )
 
     /*
@@ -104,7 +104,7 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.ReleaseEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState?
+        asset: IAsset.AssetState
     ) : this(
         TransactionType.REVENUE_SHARE,
         txRecipient.to,
@@ -113,8 +113,8 @@ data class TransactionInfo(
         null,
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
-        asset?.name,
-        asset?.symbol
+        asset.name,
+        asset.symbol
     )
 
     constructor(event: Event) : this(
