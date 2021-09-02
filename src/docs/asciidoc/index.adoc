@@ -29,8 +29,22 @@ include::{snippets}/TxHistoryControllerTest/mustBeAbleToGetTransactionForSpecifi
 All requests need header: `Authorization: Bearer JWT`.
 Chain ID must be provided in the request path, e.g. 80001.
 
+Transaction types are:
+
+RESERVE_INVESTMENT - Refers to the investment placed into the campaign before it is finalized. Can be canceled.
+
+CANCEL_INVESTMENT - Refers to the cancellation of the reserved investments.
+
+COMPLETED_INVESTMENT - Refers to the investment claimed when the campaign is finalized.
+
+CREATE_PAYOUT - Refers to the payout manager transferring certain amount of tokens to its contract, making it
+eligible for individual addresses which invested into the asset to collect its share.
+
+REVENUE_SHARE - Refers to the investor addresses collecting revenue share.
+
 === Get user transactions report
 Query parameters `from` and `to` are both optional.
+Path variable `issuer` is the contract address of the issuer.
 
 .Request
 include::{snippets}/ReportingControllerTest/mustBeAbleToGeneratePdfForAllUserTransactions/http-request.adoc[]
@@ -38,6 +52,7 @@ Response is a PDF file data.
 
 === Get user transaction report
 Query parameters `txHash`, `fromTxHash` and `toTxHash` are required.
+Path variable `issuer` is the contract address of the issuer.
 
 .Request
 include::{snippets}/ReportingControllerTest/mustBeAbleToGeneratePdfForUserTransaction/http-request.adoc[]
