@@ -48,6 +48,7 @@ class EventQueueServiceImpl(
         logger.debug { "Start block number: $startBlockNumber" }
         try {
             val latestBlockNumber = blockchainService.getBlockNumber(chainId)
+            logger.debug { "Latest block number is: $latestBlockNumber" }
             val endBlockNumber = calculateEndBlockNumber(
                 startBlockNumber, latestBlockNumber.toLong(), chainProperties.chain
             )

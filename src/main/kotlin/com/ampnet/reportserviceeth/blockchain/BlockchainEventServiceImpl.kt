@@ -95,6 +95,9 @@ class BlockchainEventServiceImpl(
                     "for contracts ${deployedContracts.joinToString()}"
             )
         val logs = ethLog.logs.mapNotNull { it.get() as? EthLog.LogObject }
+        logger.debug {
+            "Logs from startBlock:$startBlockNumber to endBlock: $endBlockNumber for chain: $chainId are: $logs"
+        }
         return generateEvents(logs, chainProperties, chainId)
     }
 
@@ -139,6 +142,7 @@ class BlockchainEventServiceImpl(
         return try {
             action()
         } catch (ex: Exception) {
+            logger.debug { "There was an exception while fetching events: ${ex.message}" }
             null
         }
     }
