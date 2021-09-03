@@ -13,6 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
+/*
+This is intended for manual testing.
+It is required to setup the following property: com.ampnet.reportserviceeth.infura-id
+ */
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @Disabled("Not for automated testing")
@@ -54,7 +58,7 @@ class BlockchainEventServiceTest {
     @Test
     fun mustBeAbleToGetAllEvents() {
         applicationProperties.chainMumbai.maxBlocks = 99_999
-        val startBlockNumber = 18259390L
+        val startBlockNumber = 18457110L
         val events = service.getAllEvents(
             startBlockNumber, startBlockNumber + applicationProperties.chainMumbai.maxBlocks,
             Chain.MATIC_TESTNET_MUMBAI.id
