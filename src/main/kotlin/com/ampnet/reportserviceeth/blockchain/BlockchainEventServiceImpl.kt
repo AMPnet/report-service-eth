@@ -83,6 +83,7 @@ class BlockchainEventServiceImpl(
     override fun getAllEvents(startBlockNumber: Long, endBlockNumber: Long, chainId: Long): List<Event> {
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
         val deployedContracts = getDeployedContractsForFetchingEvents(chainProperties)
+        logger.debug { "Fetching events from contracts: ${deployedContracts.joinToString()}" }
         val ethFilter = EthFilter(
             DefaultBlockParameter.valueOf(BigInteger.valueOf(startBlockNumber)),
             DefaultBlockParameter.valueOf(BigInteger.valueOf(endBlockNumber)),
@@ -94,6 +95,7 @@ class BlockchainEventServiceImpl(
                 "Failed to fetch events from $startBlockNumber to $endBlockNumber block, " +
                     "for contracts ${deployedContracts.joinToString()}"
             )
+        logger.debug { "EthLog object is: $ethLog" }
         val logs = ethLog.logs.mapNotNull { it.get() as? EthLog.LogObject }
         logger.debug {
             "Logs from startBlock:$startBlockNumber to endBlock: $endBlockNumber for chain: $chainId are: $logs"
