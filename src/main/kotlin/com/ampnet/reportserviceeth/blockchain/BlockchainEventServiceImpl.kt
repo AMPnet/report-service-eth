@@ -95,7 +95,6 @@ class BlockchainEventServiceImpl(
                 "Failed to fetch events from $startBlockNumber to $endBlockNumber block, " +
                     "for contracts ${deployedContracts.joinToString()}"
             )
-        logger.debug { "EthLog object is: $ethLog" }
         val logs = ethLog.logs.mapNotNull { it.get() as? EthLog.LogObject }
         logger.debug {
             "Logs from startBlock:$startBlockNumber to endBlock: $endBlockNumber for chain: $chainId are: $logs"
