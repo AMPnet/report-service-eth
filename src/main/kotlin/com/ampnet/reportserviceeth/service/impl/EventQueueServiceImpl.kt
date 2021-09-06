@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit
 private val logger = KotlinLogging.logger {}
 
 @Service
+@Suppress("TooGenericExceptionCaught")
 class EventQueueServiceImpl(
     applicationProperties: ApplicationProperties,
     private val taskRepository: TaskRepository,
@@ -32,7 +33,15 @@ class EventQueueServiceImpl(
 
     init {
         executorService.scheduleAtFixedRate(
-            { processTasks(Chain.MATIC_TESTNET_MUMBAI.id) },
+            {
+                try {
+                    processTasks(Chain.MATIC_TESTNET_MUMBAI.id)
+                } catch (ex: Throwable) {
+                    logger.error {
+                        "Unknown error occurred while polling ${Chain.MATIC_TESTNET_MUMBAI.name}: ${ex.message}"
+                    }
+                }
+            },
             applicationProperties.queue.initialDelay,
             applicationProperties.queue.polling,
             TimeUnit.MILLISECONDS
