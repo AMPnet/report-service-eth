@@ -62,7 +62,10 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
                 ),
             )
             testContext.transactionsRequest = TransactionsServiceRequest(
-                userAddress, chainId, issuer, PeriodServiceRequest(null, null)
+                userAddress, chainId, issuer,
+                PeriodServiceRequest(
+                    LocalDateTime.now().minusDays(10), LocalDateTime.now()
+                )
             )
             Mockito.`when`(eventService.getTransactions(testContext.transactionsRequest))
                 .thenReturn(testContext.events)
@@ -182,7 +185,10 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         suppose("Blockchain service will return transactions for wallet") {
             testContext.events = createEventsFlow()
             testContext.transactionsRequest = TransactionsServiceRequest(
-                testContext.user.address, chainId, issuer, PeriodServiceRequest(null, null)
+                testContext.user.address, chainId, issuer,
+                PeriodServiceRequest(
+                    LocalDateTime.now().minusDays(10), LocalDateTime.now()
+                )
             )
             Mockito.`when`(eventService.getTransactions(testContext.transactionsRequest))
                 .thenReturn(testContext.events)
@@ -220,7 +226,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         }
 
         verify("Template data service can get users accounts summary") {
-            val periodRequest = PeriodServiceRequest(null, null)
+            val periodRequest = PeriodServiceRequest(LocalDateTime.now().minusDays(10), LocalDateTime.now())
             val usersAccountsSummary =
                 templateDataService.getAllActiveUsersSummaryData(IssuerRequest(issuer, chainId), periodRequest)
             val transactionsSummaryList = usersAccountsSummary.summaries
@@ -254,7 +260,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         }
 
         verify("Template data service can get users accounts summary") {
-            val periodRequest = PeriodServiceRequest(null, null)
+            val periodRequest = PeriodServiceRequest(LocalDateTime.now().minusDays(10), LocalDateTime.now())
             val exception = assertThrows<ResourceNotFoundException> {
                 templateDataService.getAllActiveUsersSummaryData(IssuerRequest(issuer, chainId), periodRequest)
             }
@@ -275,7 +281,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         }
 
         verify("Template data service can get users accounts summary") {
-            val periodRequest = PeriodServiceRequest(null, null)
+            val periodRequest = PeriodServiceRequest(LocalDateTime.now().minusDays(10), LocalDateTime.now())
             val exception = assertThrows<ResourceNotFoundException> {
                 templateDataService.getAllActiveUsersSummaryData(IssuerRequest(issuer, chainId), periodRequest)
             }

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
@@ -31,6 +32,13 @@ class TxHistoryControllerTest : ControllerTestBase() {
     @Test
     @WithMockCrowdfundUser
     fun mustBeAbleToGetAllTxHistory() {
+        suppose("User service returns user info") {
+            Mockito.`when`(
+                userService.getUser(userAddress.lowercase())
+            ).thenReturn(
+                createUserResponse(userAddress.lowercase())
+            )
+        }
         suppose("There are stored events") {
             testContext.events.add(createEvent(userAddress, secondUserAddress, issuerAddress = defaultIssuerAddress))
             testContext.events.add(

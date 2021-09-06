@@ -4,9 +4,11 @@ import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InvalidRequestException
+import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.service.ReportingService
 import com.ampnet.reportserviceeth.service.XlsxService
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
+import com.ampnet.reportserviceeth.service.toLocalDateTime
 import mu.KLogging
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpHeaders
@@ -18,12 +20,15 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 @RestController
 class AdminController(
     private val reportingService: ReportingService,
     private val xlsxService: XlsxService,
-    private val blockchainService: BlockchainService
+    private val blockchainService: BlockchainService,
+    private val userService: UserService
 ) {
 
     companion object : KLogging()
@@ -40,7 +45,7 @@ class AdminController(
             "Received request to get users accounts summary for all the active users for issuer: $issuer"
         }
         verifyUserIsIssuerOwner(user, issuer, chainId)
-        val periodRequest = PeriodServiceRequest(from, to)
+        val periodRequest = getReportPeriodForAddress(from, to, user)
         val pdfContents = reportingService.generatePdfReportForAllActiveUsers(issuer, chainId, periodRequest)
         return ResponseEntity(pdfContents, ControllerUtils.getHttpHeadersForPdf(), HttpStatus.OK)
     }
@@ -66,4 +71,11 @@ class AdminController(
         if (address.lowercase() != issuerOwner.lowercase())
             throw InvalidRequestException(ErrorCode.USER_NOT_ISSUER, "Issuer owner is address: $issuerOwner")
     }
+
+    fun getReportPeriodForAddress(from: LocalDate?, to: LocalDate?, address: String) =
+        PeriodServiceRequest(
+            from?.let { LocalDateTime.of(from, LocalTime.MIN) }
+                ?: userService.getUser(address.lowercase()).createdAt.toLocalDateTime(),
+            to?.let { LocalDateTime.of(to, LocalTime.MAX) } ?: LocalDateTime.now()
+        )
 }
