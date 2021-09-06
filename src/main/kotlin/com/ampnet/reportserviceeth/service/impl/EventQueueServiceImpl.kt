@@ -6,7 +6,6 @@ import com.ampnet.reportserviceeth.blockchain.properties.Chain
 import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesHandler
 import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.config.ChainProperties
-import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.persistence.model.Task
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.persistence.repository.TaskRepository
@@ -19,7 +18,6 @@ import java.util.concurrent.TimeUnit
 private val logger = KotlinLogging.logger {}
 
 @Service
-@Suppress("TooGenericExceptionCaught")
 class EventQueueServiceImpl(
     applicationProperties: ApplicationProperties,
     private val taskRepository: TaskRepository,
@@ -33,15 +31,7 @@ class EventQueueServiceImpl(
 
     init {
         executorService.scheduleAtFixedRate(
-            {
-                try {
-                    processTasks(Chain.MATIC_TESTNET_MUMBAI.id)
-                } catch (ex: Throwable) {
-                    logger.error {
-                        "Unknown error occurred while polling ${Chain.MATIC_TESTNET_MUMBAI.name}: ${ex.message}"
-                    }
-                }
-            },
+            { processTasks(Chain.MATIC_TESTNET_MUMBAI.id) },
             applicationProperties.queue.initialDelay,
             applicationProperties.queue.polling,
             TimeUnit.MILLISECONDS
@@ -49,6 +39,7 @@ class EventQueueServiceImpl(
     }
 
     @Transactional
+    @Suppress("TooGenericExceptionCaught")
     fun processTasks(chainId: Long) {
         logger.debug { "Processing tasks for chainId: $chainId" }
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
@@ -70,7 +61,7 @@ class EventQueueServiceImpl(
             logger.debug { "Number of fetched events: ${events.size}" }
             eventRepository.saveAll(events)
             taskRepository.save(Task(chainId, endBlockNumber))
-        } catch (ex: InternalException) {
+        } catch (ex: Throwable) {
             logger.error { "Failed to fetch blockchain events: ${ex.message}" }
             return
         }
