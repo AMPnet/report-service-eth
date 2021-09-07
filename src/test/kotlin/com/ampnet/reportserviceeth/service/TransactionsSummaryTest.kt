@@ -14,6 +14,7 @@ import com.ampnet.reportserviceeth.service.data.UserInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -24,8 +25,8 @@ class TransactionsSummaryTest : TestBase() {
     @Test
     fun mustSetCorrectPeriodAndDateOfFinish() {
         val periodRequest = PeriodServiceRequest(
-            LocalDateTime.of(2020, 7, 1, 0, 0, 0),
-            LocalDateTime.of(2020, 9, 1, 0, 0, 0)
+            LocalDate.of(2020, 7, 1),
+            LocalDate.of(2020, 9, 1)
         )
         val txSummary = TransactionsSummary(
             createTransactions().mapNotNull { it },
@@ -34,7 +35,25 @@ class TransactionsSummaryTest : TestBase() {
             Translations(mapOf())
         )
         assertThat(txSummary.period).isEqualTo(getPeriod(periodRequest))
-        assertThat(txSummary.dateOfFinish).isEqualTo(formatToYearMonthDay(periodRequest.to))
+        assertThat(txSummary.dateOfFinish).isEqualTo(getDateOfFinish(periodRequest))
+    }
+
+    @Test
+    fun mustSetCorrectPeriodAndDateOfFinishForZeroTransactionsAndNullPeriodRequest() {
+        val periodRequest = PeriodServiceRequest(null, null)
+        val userInfo = UserInfo(createUserResponse())
+        val txSummary = TransactionsSummary(listOf(), userInfo, periodRequest, Translations(mapOf()))
+        assertThat(txSummary.period).isEqualTo(getPeriodZeroTx(userInfo.createdAt))
+        assertThat(txSummary.dateOfFinish).isEqualTo(getDateOfFinish(periodRequest))
+    }
+
+    private fun getDateOfFinish(period: PeriodServiceRequest): String {
+        return if (period.to == null) formatToYearMonthDay(LocalDateTime.now())
+        else formatToYearMonthDay(period.to)
+    }
+
+    private fun getPeriodZeroTx(createdAt: LocalDateTime): String {
+        return formatToYearMonthDay(createdAt) + " - " + formatToYearMonthDay(LocalDateTime.now())
     }
 
     private fun getPeriod(period: PeriodServiceRequest): String {

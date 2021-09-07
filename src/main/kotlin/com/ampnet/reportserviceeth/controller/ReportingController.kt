@@ -3,9 +3,7 @@ package com.ampnet.reportserviceeth.controller
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
 import com.ampnet.reportserviceeth.controller.pojo.TransactionServiceRequest
 import com.ampnet.reportserviceeth.controller.pojo.TransactionsServiceRequest
-import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.service.ReportingService
-import com.ampnet.reportserviceeth.service.toLocalDateTime
 import mu.KLogging
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
@@ -15,13 +13,10 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 
 @RestController
 class ReportingController(
-    private val reportingService: ReportingService,
-    private val userService: UserService
+    private val reportingService: ReportingService
 ) {
 
     companion object : KLogging()
@@ -35,7 +30,7 @@ class ReportingController(
     ): ResponseEntity<ByteArray> {
         val address = ControllerUtils.getAddressFromSecurityContext()
         logger.debug { "Received request to get report of transactions for address: $address" }
-        val periodRequest = getReportPeriodForAddress(from, to, address)
+        val periodRequest = PeriodServiceRequest(from, to)
         val transactionsRequest = TransactionsServiceRequest(address, chainId, issuer, periodRequest)
         val pdfContents = reportingService.generatePdfReportForUserTransactions(transactionsRequest)
         return ResponseEntity(pdfContents, ControllerUtils.getHttpHeadersForPdf(), HttpStatus.OK)
@@ -56,11 +51,4 @@ class ReportingController(
         val pdfContents = reportingService.generatePdfReportForUserTransaction(transactionServiceRequest)
         return ResponseEntity(pdfContents, ControllerUtils.getHttpHeadersForPdf(), HttpStatus.OK)
     }
-
-    fun getReportPeriodForAddress(from: LocalDate?, to: LocalDate?, address: String) =
-        PeriodServiceRequest(
-            from?.let { LocalDateTime.of(from, LocalTime.MIN) }
-                ?: userService.getUser(address.lowercase()).createdAt.toLocalDateTime(),
-            to?.let { LocalDateTime.of(to, LocalTime.MAX) } ?: LocalDateTime.now()
-        )
 }
