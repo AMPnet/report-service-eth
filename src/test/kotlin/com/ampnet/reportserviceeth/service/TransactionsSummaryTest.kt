@@ -56,13 +56,12 @@ class TransactionsSummaryTest : TestBase() {
         return formatToYearMonthDay(createdAt) + " - " + formatToYearMonthDay(LocalDateTime.now())
     }
 
-    private fun getPeriod(period: PeriodServiceRequest): String {
-        return formatToYearMonthDay(period.from) + " - " + formatToYearMonthDay(period.to)
-    }
+    private fun getPeriod(period: PeriodServiceRequest): String =
+        formatToYearMonthDay(period.from) + " - " + formatToYearMonthDay(period.to)
 
-    private fun formatToYearMonthDay(date: LocalDateTime?): String {
-        return date!!.format(DateTimeFormatter.ofPattern(DATE_FORMAT))
-    }
+    private fun formatToYearMonthDay(date: LocalDateTime?): String =
+        date!!.format(DateTimeFormatter.ofPattern(DATE_FORMAT))
+
 
     private fun createUserResponse(address: String = userAddress): UserResponse {
         return UserResponse.newBuilder()

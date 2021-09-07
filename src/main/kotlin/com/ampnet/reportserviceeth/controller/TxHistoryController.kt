@@ -18,9 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 
 @RestController
-class TxHistoryController(
-    private val eventService: EventService
-) {
+class TxHistoryController(private val eventService: EventService) {
 
     companion object : KLogging()
 

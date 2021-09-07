@@ -15,9 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 
 @RestController
-class ReportingController(
-    private val reportingService: ReportingService
-) {
+class ReportingController(private val reportingService: ReportingService) {
 
     companion object : KLogging()
 
