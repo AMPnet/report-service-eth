@@ -17,6 +17,7 @@ import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import org.junit.jupiter.api.fail
 
 class TransactionsSummaryTest : TestBase() {
 
@@ -60,7 +61,7 @@ class TransactionsSummaryTest : TestBase() {
         formatToYearMonthDay(period.from) + " - " + formatToYearMonthDay(period.to)
 
     private fun formatToYearMonthDay(date: LocalDateTime?): String =
-        date!!.format(DateTimeFormatter.ofPattern(DATE_FORMAT))
+        date?.format(DateTimeFormatter.ofPattern(DATE_FORMAT)) ?: fail("Date is not properly formatted")
 
     private fun createUserResponse(address: String = userAddress): UserResponse {
         return UserResponse.newBuilder()
