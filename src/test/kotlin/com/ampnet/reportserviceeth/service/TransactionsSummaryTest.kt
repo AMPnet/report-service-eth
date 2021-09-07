@@ -62,7 +62,6 @@ class TransactionsSummaryTest : TestBase() {
     private fun formatToYearMonthDay(date: LocalDateTime?): String =
         date!!.format(DateTimeFormatter.ofPattern(DATE_FORMAT))
 
-
     private fun createUserResponse(address: String = userAddress): UserResponse {
         return UserResponse.newBuilder()
             .setAddress(address)
