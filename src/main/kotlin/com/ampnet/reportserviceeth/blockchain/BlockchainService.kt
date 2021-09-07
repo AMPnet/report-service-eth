@@ -12,6 +12,9 @@ interface BlockchainService {
 
     @Throws(InternalException::class)
     fun getWhitelistedAddress(issuerRequest: IssuerRequest): List<String>
+
     @Throws(InternalException::class)
     fun getBlockNumber(chainId: Long): BigInteger
+
+    fun getIssuerState(chainId: Long, issuer: String): IIssuer.IssuerState?
 }

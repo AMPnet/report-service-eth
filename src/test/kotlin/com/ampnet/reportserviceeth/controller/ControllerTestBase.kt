@@ -12,6 +12,7 @@ import com.ampnet.reportserviceeth.exception.ErrorResponse
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
+import com.ampnet.reportserviceeth.service.FileService
 import com.ampnet.reportserviceeth.toGwei
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -49,6 +50,8 @@ abstract class ControllerTestBase : TestBase() {
     protected val thirdUserAddress = "0x5BF28A1E60Eb56107FAd2dE1F2AA51FC7A60C690"
     protected val projectWallet: String = "0xFeC646017105fA2A4FFDc773e9c539Eda5af724a"
     protected val txHash = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
+    protected val issuerInfo = "QmQ1wY6jd5uqAcPbdANR6BDqQt8fqEoCc64ypC6dvwnmTb"
+    protected val ipfsHash = "QmYuSijGgZAnBadguWUjLTYyfbvpaUBoWRfQMveo6XfzP3"
     protected val logo = "https://ampnet.io/assets/images/logo-amp.png"
     protected val issuer = "issuer-contract-address"
     protected val defaultChainId = Chain.MATIC_TESTNET_MUMBAI.id
@@ -67,6 +70,9 @@ abstract class ControllerTestBase : TestBase() {
 
     @MockBean
     protected lateinit var userService: UserService
+
+    @MockBean
+    protected lateinit var fileService: FileService
 
     protected lateinit var mockMvc: MockMvc
 
@@ -230,4 +236,12 @@ abstract class ControllerTestBase : TestBase() {
         }
         return invests + cancelInvestments + revenueShares
     }
+
+    protected fun createIssuerState() =
+        IIssuer.IssuerState(
+            BigInteger.TEN, "0xf9a13b61d15e4eb4046da02d34473f5dc53e5f7c", "lagata",
+            "0x4d2ebc8b12e6f9d5ee6d2412e0651cb0f603c54c", "0x7ae3ead4f7dea70c11853992274552e98787c647",
+            "0x9733aa0fb74a01f058fbeb0ad9da3f483058908e", "0xd449f575b45318f196ec806b84fcbf3f9583f8dc",
+            issuerInfo
+        )
 }

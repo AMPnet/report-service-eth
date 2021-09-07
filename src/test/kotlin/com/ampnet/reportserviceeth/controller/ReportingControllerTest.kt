@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.io.File
 import java.time.LocalDate
 
 class ReportingControllerTest : ControllerTestBase() {
@@ -38,6 +39,14 @@ class ReportingControllerTest : ControllerTestBase() {
         }
         suppose("There are events for user wallet") {
             testContext.events = createEventsResponse()
+        }
+        suppose("Blockchain service will return issuer state") {
+            Mockito.`when`(blockchainService.getIssuerState(defaultChainId, issuer))
+                .thenReturn(createIssuerState())
+        }
+        suppose("File service will return ipfs hash") {
+            Mockito.`when`(fileService.getLogoHash(issuerInfo))
+                .thenReturn(ipfsHash)
         }
 
         verify("User can get pdf with all transactions") {
@@ -70,6 +79,14 @@ class ReportingControllerTest : ControllerTestBase() {
                 userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT,
                 "700", txHash = txHash
             )
+        }
+        suppose("Blockchain service will return issuer state") {
+            Mockito.`when`(blockchainService.getIssuerState(defaultChainId, issuer))
+                .thenReturn(createIssuerState())
+        }
+        suppose("File service will return ipfs hash") {
+            Mockito.`when`(fileService.getLogoHash(issuerInfo))
+                .thenReturn(ipfsHash)
         }
 
         verify("User can get pdf with single transaction") {

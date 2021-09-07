@@ -11,7 +11,6 @@ import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.exception.ResourceNotFoundException
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.data.DATE_FORMAT
-import com.ampnet.reportserviceeth.service.data.DEFAULT_LOGO
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.data.LENGTH_OF_PERCENTAGE
 import com.ampnet.reportserviceeth.service.data.TO_PERCENTAGE
@@ -31,7 +30,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
     private lateinit var testContext: TestContext
 
     private val templateDataService: TemplateDataService by lazy {
-        TemplateDataServiceImpl(blockchainService, userService, translationService, eventService)
+        TemplateDataServiceImpl(blockchainService, userService, translationService, eventService, fileService)
     }
 
     @BeforeEach
@@ -67,6 +66,14 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             Mockito.`when`(eventService.getTransactions(testContext.transactionsRequest))
                 .thenReturn(testContext.events)
         }
+        suppose("Blockchain service will return issuer state") {
+            Mockito.`when`(blockchainService.getIssuerState(chainId, issuer))
+                .thenReturn(createIssuerState())
+        }
+        suppose("File service will return ipfs hash") {
+            Mockito.`when`(fileService.getLogoHash(issuerInfo))
+                .thenReturn(ipfsHash)
+        }
 
         verify("Template data service can get user transactions") {
             val txSummary = templateDataService.getUserTransactionsData(testContext.transactionsRequest)
@@ -95,6 +102,8 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
 //            assertThat(sharePayoutTx.description).isEqualTo(project.name)
             assertThat(sharePayoutTx.txDate).isNotBlank
             assertThat(sharePayoutTx.valueInDollar).isEqualTo(sharePayoutTx.value.toEther())
+
+            assertThat(txSummary.logo).isEqualTo(ipfsUrl + ipfsHash)
         }
     }
 
@@ -130,6 +139,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             assertThat(tx.assetTokenSymbol).isEqualTo(transaction.assetTokenSymbol)
             assertThat(tx.percentageInProject).isNull()
             assertThat(userInfo.address).isEqualTo(testContext.user.address)
+            assertThat(singleTxSummary.logo).isNull()
         }
     }
 
@@ -224,9 +234,8 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             val usersAccountsSummary =
                 templateDataService.getAllActiveUsersSummaryData(IssuerRequest(issuer, chainId), periodRequest)
             val transactionsSummaryList = usersAccountsSummary.summaries
-            val logo = usersAccountsSummary.logo
             assertThat(transactionsSummaryList).hasSize(3)
-            assertThat(logo).isEqualTo(DEFAULT_LOGO)
+            assertThat(usersAccountsSummary.logo).isNull()
             transactionsSummaryList.forEach {
                 when (it.userInfo.address) {
                     userAddress -> {

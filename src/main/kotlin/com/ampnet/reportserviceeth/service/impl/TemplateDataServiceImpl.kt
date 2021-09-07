@@ -10,6 +10,7 @@ import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.exception.ResourceNotFoundException
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.service.EventService
+import com.ampnet.reportserviceeth.service.FileService
 import com.ampnet.reportserviceeth.service.TemplateDataService
 import com.ampnet.reportserviceeth.service.TranslationService
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
@@ -32,8 +33,11 @@ class TemplateDataServiceImpl(
     private val blockchainService: BlockchainService,
     private val userService: UserService,
     private val translationService: TranslationService,
-    private val eventService: EventService
+    private val eventService: EventService,
+    private val fileService: FileService
 ) : TemplateDataService {
+
+    private val ipfsUrl = "https://ampnet.mypinata.cloud/ipfs/"
 
     companion object : KLogging()
 
@@ -44,7 +48,8 @@ class TemplateDataServiceImpl(
         val user = UserInfo(userService.getUser(request.address))
         val transactionsWithNames =
             generateTransactionReportData(transactions, user.language, translations)
-        return TransactionsSummary(transactionsWithNames, user, request.period, translations)
+        val logo = getLogoUrl(request.chainId, request.issuer)
+        return TransactionsSummary(transactionsWithNames, user, request.period, translations, logo)
     }
 
     override fun getUserTransactionData(request: TransactionServiceRequest): SingleTransactionSummary {
@@ -59,7 +64,8 @@ class TemplateDataServiceImpl(
                 ?: throw InvalidRequestException(
                     ErrorCode.INT_UNSUPPORTED_TX, "Transaction with hash:${request.txHash} is not supported in report"
                 )
-        return SingleTransactionSummary(mappedTransaction, userWithInfo, translations)
+        val logo = getLogoUrl(request.chainId, request.issuer)
+        return SingleTransactionSummary(mappedTransaction, userWithInfo, translations, logo)
     }
 
     override fun getAllActiveUsersSummaryData(
@@ -86,7 +92,8 @@ class TemplateDataServiceImpl(
             val userInfo = UserInfo(userResponse)
             TransactionsSummary(transactions, userInfo, periodRequest, translations)
         }
-        return UsersAccountsSummary(transactionsSummaryList)
+        val logo = getLogoUrl(issuerRequest.chainId, issuerRequest.address)
+        return UsersAccountsSummary(transactionsSummaryList, logo)
     }
 
     private fun generateTransactionReportData(
@@ -123,4 +130,11 @@ class TemplateDataServiceImpl(
         userUuid: String
     ): List<Transaction> =
         userTransactions[userUuid]?.mapNotNull { TransactionFactory.createTransaction(it) }.orEmpty()
+
+    @Suppress("ReturnCount")
+    private fun getLogoUrl(chainId: Long, issuer: String): String? {
+        val issuerState = blockchainService.getIssuerState(chainId, issuer) ?: return null
+        val logoHash = fileService.getLogoHash(issuerState.info) ?: return null
+        return ipfsUrl + logoHash
+    }
 }

@@ -47,6 +47,15 @@ class TransactionsSummaryTest : TestBase() {
         assertThat(txSummary.dateOfFinish).isEqualTo(getDateOfFinish(periodRequest))
     }
 
+    @Test
+    fun testIssuer() {
+        val i = IIssuer.IssuerState(
+            BigInteger.ONE, userAddress, userAddress, userAddress, userAddress,
+            userAddress, userAddress, "QmYuSijGgZAnBadguWUjLTYyfbvpaUBoWRfQMveo6XfzP3"
+        )
+        println(i.toString())
+    }
+
     private fun getPeriod(period: PeriodServiceRequest): String {
         return formatToYearMonthDay(period.from) + " - " + formatToYearMonthDay(period.to)
     }
