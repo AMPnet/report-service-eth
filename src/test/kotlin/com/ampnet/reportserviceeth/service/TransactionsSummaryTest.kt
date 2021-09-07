@@ -13,11 +13,11 @@ import com.ampnet.reportserviceeth.service.data.Translations
 import com.ampnet.reportserviceeth.service.data.UserInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import org.junit.jupiter.api.fail
 
 class TransactionsSummaryTest : TestBase() {
 
