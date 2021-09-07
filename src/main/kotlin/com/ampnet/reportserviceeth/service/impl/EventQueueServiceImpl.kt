@@ -6,7 +6,6 @@ import com.ampnet.reportserviceeth.blockchain.properties.Chain
 import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesHandler
 import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.config.ChainProperties
-import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.persistence.model.Task
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.persistence.repository.TaskRepository
@@ -40,6 +39,7 @@ class EventQueueServiceImpl(
     }
 
     @Transactional
+    @Suppress("TooGenericExceptionCaught")
     fun processTasks(chainId: Long) {
         logger.debug { "Processing tasks for chainId: $chainId" }
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
@@ -61,7 +61,7 @@ class EventQueueServiceImpl(
             logger.debug { "Number of fetched events: ${events.size}" }
             eventRepository.saveAll(events)
             taskRepository.save(Task(chainId, endBlockNumber))
-        } catch (ex: InternalException) {
+        } catch (ex: Throwable) {
             logger.error { "Failed to fetch blockchain events: ${ex.message}" }
             return
         }
