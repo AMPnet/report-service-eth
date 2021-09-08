@@ -24,6 +24,12 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
         return properties
     }
 
+    fun getActiveChain(chain: Chain): ChainProperties? {
+        val chainProperties = mapChainProperties(chain)
+        return if (chainProperties.cfManagerFactoryAddress.isBlank()) null
+        else chainProperties
+    }
+
     private fun generateBlockchainProperties(chain: Chain): ChainPropertiesWithServices {
         val chainProperties = getChainProperties(chain)
         val web3j = Web3j.build(HttpService(getChainRpcUrl(chain)))
@@ -43,12 +49,7 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
         }
 
     private fun getChainProperties(chain: Chain): ChainProperties {
-        val chainProperties = when (chain) {
-            Chain.MATIC_MAIN -> applicationProperties.chainMatic
-            Chain.MATIC_TESTNET_MUMBAI -> applicationProperties.chainMumbai
-            Chain.ETHEREUM_MAIN -> applicationProperties.chainEthereum
-            Chain.HARDHAT_TESTNET -> applicationProperties.chainHardhatTestnet
-        }
+        val chainProperties = mapChainProperties(chain)
         if (chainProperties.callerAddress.isBlank() ||
             chainProperties.cfManagerFactoryAddress.isBlank() ||
             chainProperties.payoutManagerFactoryAddress.isBlank()
@@ -60,4 +61,12 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
         }
         return chainProperties
     }
+
+    private fun mapChainProperties(chain: Chain) =
+        when (chain) {
+            Chain.MATIC_MAIN -> applicationProperties.chainMatic
+            Chain.MATIC_TESTNET_MUMBAI -> applicationProperties.chainMumbai
+            Chain.ETHEREUM_MAIN -> applicationProperties.chainEthereum
+            Chain.HARDHAT_TESTNET -> applicationProperties.chainHardhatTestnet
+        }
 }
