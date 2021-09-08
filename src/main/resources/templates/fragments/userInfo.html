@@ -24,7 +24,7 @@
                         <p th:if="${!#strings.isEmpty(data.userInfo.dateOfExpiry)}" th:text="${data.userInfo.dateOfExpiry}">10.05.2021</p>
                         <p th:if="${!#strings.isEmpty(data.userInfo.personalNumber)}" th:text="${data.userInfo.personalNumber}">1717809e-0cb5-452d-9435-bbcfedd3db16</p>
                         <p th:text="${data.userInfo.address}">0xd43e088622404A5A21267033EC200383d39C22ca</p>
-                        <p th:text="${data.period} ?: ''">Aug 1, 2020 to Aug 31, 2020</p>
+                        <p th:text="${data.period}">Aug 1, 2020 to Aug 31, 2020</p>
                     </div>
                 </td>
             </tr>
