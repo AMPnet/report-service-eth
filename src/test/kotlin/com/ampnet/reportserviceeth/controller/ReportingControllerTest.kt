@@ -44,7 +44,7 @@ class ReportingControllerTest : ControllerTestBase() {
                 .thenReturn(createIssuerState())
         }
         suppose("File service will return ipfs hash") {
-            Mockito.`when`(fileService.getLogoHash(issuerInfo))
+            Mockito.`when`(ipfsService.getLogoHash(issuerInfo))
                 .thenReturn(ipfsHash)
         }
 
@@ -84,7 +84,7 @@ class ReportingControllerTest : ControllerTestBase() {
                 .thenReturn(createIssuerState())
         }
         suppose("File service will return ipfs hash") {
-            Mockito.`when`(fileService.getLogoHash(issuerInfo))
+            Mockito.`when`(ipfsService.getLogoHash(issuerInfo))
                 .thenReturn(ipfsHash)
         }
 

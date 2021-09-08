@@ -1,6 +1,7 @@
 package com.ampnet.reportserviceeth.service.impl
 
-import com.ampnet.reportserviceeth.service.FileService
+import com.ampnet.reportserviceeth.config.ApplicationProperties
+import com.ampnet.reportserviceeth.service.IpfsService
 import mu.KLogging
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClientException
@@ -9,14 +10,15 @@ import org.springframework.web.client.postForEntity
 import org.springframework.web.util.UriComponentsBuilder
 
 @Service
-class FileServiceImpl(private val restTemplate: RestTemplate) : FileService {
+class IpfsServiceImpl(
+    private val applicationProperties: ApplicationProperties,
+    private val restTemplate: RestTemplate
+) : IpfsService {
 
     companion object : KLogging()
 
-    private val frontendApi = "https://amptzr-git-sd-338-create-frontend-api-ampnetx.vercel.app/api/ipfs/issuer"
-
     override fun getLogoHash(issuerInfoHash: String): String? {
-        val request = UriComponentsBuilder.fromUriString(frontendApi)
+        val request = UriComponentsBuilder.fromUriString(applicationProperties.ipfs.frontendApi)
             .queryParam("hash", issuerInfoHash).build().toUri()
         try {
             val response = restTemplate.postForEntity<IssuerInfoResponse>(request)
@@ -26,11 +28,11 @@ class FileServiceImpl(private val restTemplate: RestTemplate) : FileService {
                     null
                 }
             } else {
-                logger.error { "Unsuccessful request to frontend api: $request" }
+                logger.warn { "Unsuccessful request to frontend api: $request" }
                 null
             }
         } catch (ex: RestClientException) {
-            logger.error { "Unexpected exception occurred: ${ex.message}" }
+            logger.warn { "Unexpected exception occurred: ${ex.message}" }
             return null
         }
     }

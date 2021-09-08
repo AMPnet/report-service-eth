@@ -30,7 +30,9 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
     private lateinit var testContext: TestContext
 
     private val templateDataService: TemplateDataService by lazy {
-        TemplateDataServiceImpl(blockchainService, userService, translationService, eventService, fileService)
+        TemplateDataServiceImpl(
+            blockchainService, userService, translationService, eventService, ipfsService, applicationProperties
+        )
     }
 
     @BeforeEach
@@ -71,7 +73,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
                 .thenReturn(createIssuerState())
         }
         suppose("File service will return ipfs hash") {
-            Mockito.`when`(fileService.getLogoHash(issuerInfo))
+            Mockito.`when`(ipfsService.getLogoHash(issuerInfo))
                 .thenReturn(ipfsHash)
         }
 
@@ -102,7 +104,6 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
 //            assertThat(sharePayoutTx.description).isEqualTo(project.name)
             assertThat(sharePayoutTx.txDate).isNotBlank
             assertThat(sharePayoutTx.valueInDollar).isEqualTo(sharePayoutTx.value.toEther())
-
             assertThat(txSummary.logo).isEqualTo(ipfsUrl + ipfsHash)
         }
     }

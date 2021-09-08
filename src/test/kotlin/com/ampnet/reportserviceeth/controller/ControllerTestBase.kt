@@ -12,7 +12,7 @@ import com.ampnet.reportserviceeth.exception.ErrorResponse
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
-import com.ampnet.reportserviceeth.service.FileService
+import com.ampnet.reportserviceeth.service.IpfsService
 import com.ampnet.reportserviceeth.toGwei
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -52,7 +52,6 @@ abstract class ControllerTestBase : TestBase() {
     protected val txHash = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
     protected val issuerInfo = "QmQ1wY6jd5uqAcPbdANR6BDqQt8fqEoCc64ypC6dvwnmTb"
     protected val ipfsHash = "QmYuSijGgZAnBadguWUjLTYyfbvpaUBoWRfQMveo6XfzP3"
-    protected val logo = "https://ampnet.io/assets/images/logo-amp.png"
     protected val issuer = "issuer-contract-address"
     protected val defaultChainId = Chain.MATIC_TESTNET_MUMBAI.id
 
@@ -72,7 +71,7 @@ abstract class ControllerTestBase : TestBase() {
     protected lateinit var userService: UserService
 
     @MockBean
-    protected lateinit var fileService: FileService
+    protected lateinit var ipfsService: IpfsService
 
     protected lateinit var mockMvc: MockMvc
 

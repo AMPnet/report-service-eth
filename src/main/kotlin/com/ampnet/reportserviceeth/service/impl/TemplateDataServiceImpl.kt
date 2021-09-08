@@ -2,6 +2,7 @@ package com.ampnet.reportserviceeth.service.impl
 
 import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.TransactionInfo
+import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
 import com.ampnet.reportserviceeth.controller.pojo.TransactionServiceRequest
 import com.ampnet.reportserviceeth.controller.pojo.TransactionsServiceRequest
@@ -10,7 +11,7 @@ import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.exception.ResourceNotFoundException
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.service.EventService
-import com.ampnet.reportserviceeth.service.FileService
+import com.ampnet.reportserviceeth.service.IpfsService
 import com.ampnet.reportserviceeth.service.TemplateDataService
 import com.ampnet.reportserviceeth.service.TranslationService
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
@@ -34,10 +35,9 @@ class TemplateDataServiceImpl(
     private val userService: UserService,
     private val translationService: TranslationService,
     private val eventService: EventService,
-    private val fileService: FileService
+    private val ipfsService: IpfsService,
+    private val applicationProperties: ApplicationProperties
 ) : TemplateDataService {
-
-    private val ipfsUrl = "https://ampnet.mypinata.cloud/ipfs/"
 
     companion object : KLogging()
 
@@ -134,7 +134,7 @@ class TemplateDataServiceImpl(
     @Suppress("ReturnCount")
     private fun getLogoUrl(chainId: Long, issuer: String): String? {
         val issuerState = blockchainService.getIssuerState(chainId, issuer) ?: return null
-        val logoHash = fileService.getLogoHash(issuerState.info) ?: return null
-        return ipfsUrl + logoHash
+        val logoHash = ipfsService.getLogoHash(issuerState.info) ?: return null
+        return applicationProperties.ipfs.ipfsUrl + logoHash
     }
 }

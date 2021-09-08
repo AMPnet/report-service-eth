@@ -7,6 +7,7 @@ import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.TransactionInfo
 import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.blockchain.properties.Chain
+import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.config.JsonConfig
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.persistence.model.Event
@@ -27,7 +28,7 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 @ExtendWith(SpringExtension::class)
-@Import(JsonConfig::class, RestTemplate::class)
+@Import(JsonConfig::class, RestTemplate::class, ApplicationProperties::class)
 abstract class JpaServiceTestBase : TestBase() {
 
     protected val userAddress = "0x8f52B0cC50967fc59C6289f8FDB3E356EdeEBD23"
@@ -38,7 +39,6 @@ abstract class JpaServiceTestBase : TestBase() {
     protected val txHash = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
     protected val issuerInfo = "QmQ1wY6jd5uqAcPbdANR6BDqQt8fqEoCc64ypC6dvwnmTb"
     protected val ipfsHash = "QmYuSijGgZAnBadguWUjLTYyfbvpaUBoWRfQMveo6XfzP3"
-    protected val logo = "https://ampnet.io/assets/images/logo-amp.png"
     protected val issuer = "0x5013F6ce0f9Beb07Be528E408352D03f3FCa1857"
     protected val ipfsUrl = "https://ampnet.mypinata.cloud/ipfs/"
     protected val chainId = Chain.MATIC_TESTNET_MUMBAI.id
@@ -56,10 +56,13 @@ abstract class JpaServiceTestBase : TestBase() {
     protected lateinit var eventService: EventService
 
     @Mock
-    protected lateinit var fileService: FileService
+    protected lateinit var ipfsService: IpfsService
 
     @Autowired
     protected lateinit var restTemplate: RestTemplate
+
+    @Autowired
+    protected lateinit var applicationProperties: ApplicationProperties
 
     @Autowired
     @Qualifier("camelCaseObjectMapper")
