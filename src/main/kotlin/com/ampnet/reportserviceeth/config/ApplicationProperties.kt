@@ -43,6 +43,6 @@ class ChainProperties {
 }
 
 class IpfsProperties {
-    var frontendApi = "https://amptzr-git-sd-338-create-frontend-api-ampnetx.vercel.app/api/ipfs/issuer"
+    var frontendApi = "https://staging.ampnet.io/api/ipfs/issuer"
     var ipfsUrl = "https://ampnet.mypinata.cloud/ipfs/"
 }
