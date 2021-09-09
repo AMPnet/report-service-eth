@@ -36,7 +36,8 @@ class TxHistoryController(private val eventService: EventService) {
         logger.debug {
             "Received request to get transactions for address: $address on chain: $chainId for issuer: $issuer"
         }
-        val request = TransactionsServiceRequest(address, chainId, issuer, PeriodServiceRequest(from, to))
+        val period = PeriodServiceRequest(from, to)
+        val request = TransactionsServiceRequest(address, chainId, issuer, period)
         val events = eventService.getTransactions(request).map { EventServiceResponse(it) }
         return ResponseEntity.ok(TxHistoryResponse(events))
     }

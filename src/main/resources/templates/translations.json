@@ -1,7 +1,7 @@
 {
   "en": {
     "transactions": "Transactions",
-    "accountId": "Account ID",
+    "walletAddress": "Wallet address",
     "deposit": "Deposit",
     "amount": "Amount",
     "date": "Date",
@@ -19,7 +19,7 @@
     "marketplaceBought": "Marketplace shares bought",
     "marketplaceSold": "Marketplace shares sold",
     "totalBalanceAsOf": "Total balance as of ",
-    "reserveInvestment": "Reserve investment",
+    "reserveInvestment": "Investment",
     "cancelInvestment": "Cancel Investment",
     "revenueSharePayout": "Revenue share payout",
     "investmentCompleted": "Investment completed",
@@ -29,11 +29,11 @@
     "dateOfIssue": "Date of Issue",
     "dateOfExpiry": "Date of Expiry",
     "personalNumber": "Personal Number",
-    "asset": "Asset"
+    "project": "Project",
+    "tokenQuantity": "Token quantity"
   },
   "es": {
     "transactions": "Transacciones",
-    "accountId": "ID de la Cuenta",
     "deposit": "Depósito",
     "amount": "Importe",
     "date": "Fecha",
@@ -54,11 +54,13 @@
     "reserveInvestment": "Inversión",
     "cancelInvestment": "Inversión cancelada",
     "revenueSharePayout": "Pago de la cuota de ingresos",
-    "withdraw": "Retirar"
+    "withdraw": "Retirar",
+    "project": "Proyecto",
+    "tokenQuantity": "Cantidad de tokens"
+
   },
   "el": {
     "transactions": "Συναλλαγές",
-    "accountId": "Αριθμός λογαριασμού",
     "deposit": "Κατάθεση",
     "amount": "Ποσό",
     "date": "Ημερομηνία",
@@ -79,6 +81,8 @@
     "reserveInvestment": "Επένδυση",
     "cancelInvestment": "Ακύρωση Επένδυσης",
     "revenueSharePayout": "Πληρωμή μεριδίου εσόδων",
-    "withdraw": "Απόσυρση"
+    "withdraw": "Απόσυρση",
+    "project": "Εργο",
+    "tokenQuantity": "Ποσότητα μάρκας"
   }
 }

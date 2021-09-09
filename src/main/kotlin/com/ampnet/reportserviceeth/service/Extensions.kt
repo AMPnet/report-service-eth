@@ -1,5 +1,6 @@
 package com.ampnet.reportserviceeth.service
 
+import com.ampnet.reportserviceeth.service.data.DATE_FORMAT
 import mu.KotlinLogging
 import org.web3j.protocol.core.RemoteFunctionCall
 import org.web3j.protocol.core.Request
@@ -10,6 +11,8 @@ import java.text.DecimalFormat
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.Optional
 
 const val DECIMALS_PRECISION = 1_000_000_000_000_000_000
@@ -54,3 +57,6 @@ fun BigInteger.toEther(): String = DecimalFormat("#,##0.00")
 
 @Suppress("MagicNumber")
 fun Long.toTimestamp(): Long = this * 1000
+
+fun LocalDateTime.formatToYearMonthDay(locale: Locale): String =
+    this.format(DateTimeFormatter.ofPattern(DATE_FORMAT).withLocale(locale))
