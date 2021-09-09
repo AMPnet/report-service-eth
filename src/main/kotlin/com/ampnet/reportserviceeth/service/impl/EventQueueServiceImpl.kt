@@ -27,15 +27,21 @@ class EventQueueServiceImpl(
     private val chainPropertiesHandler: ChainPropertiesHandler
 ) {
 
-    private val executorService = Executors.newSingleThreadScheduledExecutor()
-
     init {
-        executorService.scheduleAtFixedRate(
-            { processTasksForChains() },
-            applicationProperties.queue.initialDelay,
-            applicationProperties.queue.polling,
-            TimeUnit.MILLISECONDS
-        )
+        val activeChains = Chain.values().mapNotNull { chain ->
+            chainPropertiesHandler.getChainProperties(chain)?.let { properties ->
+                Pair(chain, properties)
+            }
+        }
+        val executorService = Executors.newScheduledThreadPool(activeChains.size)
+        activeChains.forEach {
+            executorService.scheduleAtFixedRate(
+                { processTask(it.first, it.second) },
+                applicationProperties.queue.initialDelay,
+                applicationProperties.queue.polling,
+                TimeUnit.MILLISECONDS
+            )
+        }
     }
 
     @Transactional
@@ -77,10 +83,4 @@ class EventQueueServiceImpl(
         } else {
             latestBlockNumber - chainProperties.numOfConfirmations
         }
-
-    private fun processTasksForChains() {
-        Chain.values().forEach { chain ->
-            chainPropertiesHandler.getChainProperties(chain)?.let { properties -> processTask(chain, properties) }
-        }
-    }
 }
