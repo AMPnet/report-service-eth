@@ -19,7 +19,7 @@ private val logger = KotlinLogging.logger {}
 
 @Service
 class EventQueueServiceImpl(
-    private val applicationProperties: ApplicationProperties,
+    applicationProperties: ApplicationProperties,
     private val taskRepository: TaskRepository,
     private val eventRepository: EventRepository,
     private val blockchainService: BlockchainService,
@@ -31,7 +31,7 @@ class EventQueueServiceImpl(
 
     init {
         executorService.scheduleAtFixedRate(
-            { createTasksForChains() },
+            { processTasksForChains() },
             applicationProperties.queue.initialDelay,
             applicationProperties.queue.polling,
             TimeUnit.MILLISECONDS
@@ -40,30 +40,28 @@ class EventQueueServiceImpl(
 
     @Transactional
     @Suppress("TooGenericExceptionCaught")
-    fun processTasks(chainId: Long) {
-        logger.debug { "Processing tasks for chainId: $chainId" }
-        val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
-        val startBlockNumber = taskRepository.findFirstByOrderByBlockNumberDesc()?.let { it.blockNumber + 1 }
-            ?: chainProperties.chain.startBlockNumber
+    fun processTask(chain: Chain, chainProperties: ChainProperties) {
+        logger.debug { "Processing tasks for chainId: ${chain.id}" }
+        val startBlockNumber = taskRepository.findFirstByBlockNumberForChain(chain.id)?.let { it.blockNumber + 1 }
+            ?: chainProperties.startBlockNumber
         logger.debug { "Start block number: $startBlockNumber" }
         try {
-            val latestBlockNumber = blockchainService.getBlockNumber(chainId)
+            val latestBlockNumber = blockchainService.getBlockNumber(chain.id)
             logger.debug { "Latest block number is: $latestBlockNumber" }
             val endBlockNumber = calculateEndBlockNumber(
-                startBlockNumber, latestBlockNumber.toLong(), chainProperties.chain
+                startBlockNumber, latestBlockNumber.toLong(), chainProperties
             )
             logger.debug { "End block number: $endBlockNumber" }
             if (startBlockNumber >= endBlockNumber) {
                 logger.warn { "End block: $endBlockNumber is smaller than start block: $startBlockNumber" }
                 return
             }
-            val events = blockchainEventService.getAllEvents(startBlockNumber, endBlockNumber, chainId)
+            val events = blockchainEventService.getAllEvents(startBlockNumber, endBlockNumber, chain.id)
             logger.debug { "Number of fetched events: ${events.size}" }
             eventRepository.saveAll(events)
-            taskRepository.save(Task(chainId, endBlockNumber))
+            taskRepository.save(Task(chain.id, endBlockNumber))
         } catch (ex: Throwable) {
             logger.error { "Failed to fetch blockchain events: ${ex.message}" }
-            return
         }
     }
 
@@ -80,9 +78,9 @@ class EventQueueServiceImpl(
             latestBlockNumber - chainProperties.numOfConfirmations
         }
 
-    private fun createTasksForChains() {
+    private fun processTasksForChains() {
         Chain.values().forEach { chain ->
-            chainPropertiesHandler.getActiveChain(chain)?.let { processTasks(chain.id) }
+            chainPropertiesHandler.getChainProperties(chain)?.let { properties -> processTask(chain, properties) }
         }
     }
 }

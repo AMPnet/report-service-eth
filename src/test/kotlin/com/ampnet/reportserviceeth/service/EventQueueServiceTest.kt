@@ -5,6 +5,7 @@ import com.ampnet.reportserviceeth.blockchain.BlockchainEventService
 import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.blockchain.properties.Chain
+import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesHandler
 import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.config.DatabaseCleanerService
 import com.ampnet.reportserviceeth.exception.ErrorCode
@@ -48,6 +49,9 @@ class EventQueueServiceTest : TestBase() {
 
     @Autowired
     private lateinit var applicationProperties: ApplicationProperties
+
+    @Autowired
+    private lateinit var chainPropertiesHandler: ChainPropertiesHandler
 
     @MockBean
     private lateinit var blockchainEventService: BlockchainEventService
@@ -93,7 +97,7 @@ class EventQueueServiceTest : TestBase() {
         verify("Service will save events and create a second task") {
             waitUntilTasksAreProcessed()
             val tasks = taskRepository.findAll()
-            val lastTask = taskRepository.findFirstByOrderByBlockNumberDesc() ?: fail("Cannot find task")
+            val lastTask = taskRepository.findFirstByBlockNumberForChain(chainId) ?: fail("Cannot find task")
             assertThat(tasks).hasSize(2)
             assertThat(lastTask.chainId).isEqualTo(chainId)
             assertThat(lastTask.blockNumber).isEqualTo(
@@ -102,6 +106,15 @@ class EventQueueServiceTest : TestBase() {
 
             val events = eventRepository.findAll()
             assertThat(events).hasSize(2)
+        }
+        verify("There are only tasks for the active chains") {
+            Chain.values().forEach {
+                if (chainPropertiesHandler.getChainProperties(it) != null) {
+                    assertThat(taskRepository.findFirstByBlockNumberForChain(it.id)).isNotNull
+                } else {
+                    assertThat(taskRepository.findFirstByBlockNumberForChain(it.id)).isNull()
+                }
+            }
         }
     }
 

@@ -27,7 +27,7 @@ class GrpcProperties {
 
 @Suppress("MagicNumber")
 class QueueProperties {
-    var polling: Long = 3 * 60 * 1000
+    var polling: Long = 5 * 1000
     var initialDelay: Long = 15_000
 }
 
