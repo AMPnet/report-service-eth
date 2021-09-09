@@ -45,11 +45,10 @@ class TemplateDataServiceImpl(
         val transactions = eventService.getTransactions(request)
             .map { TransactionInfo(it) }
         val translations = translationService.getTranslations()
-        val user = UserInfo(userService.getUser(request.address))
-        val transactionsWithNames =
-            generateTransactionReportData(transactions, user.language, translations)
+        val userInfo = UserInfo(userService.getUser(request.address))
+        val transactionsWithNames = generateTransactionReportData(transactions, userInfo.language, translations)
         val logo = getLogoUrl(request.chainId, request.issuer)
-        return TransactionsSummary(transactionsWithNames, user, request.period, translations, logo)
+        return TransactionsSummary(transactionsWithNames, userInfo, request.period, translations, logo)
     }
 
     override fun getUserTransactionData(request: TransactionServiceRequest): SingleTransactionSummary {

@@ -214,7 +214,7 @@ abstract class ControllerTestBase : TestBase() {
         val event = Event(
             UUID.randomUUID(), chain, from.lowercase(), to.lowercase(),
             contractAddress, issuerAddress, txHash, type,
-            logIndex, "asset_name", "symbol", 500045L, blockHash,
+            logIndex, "project_name", "symbol", 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
             amount.toGwei(), amount.toGwei(), 50L, BigInteger("500")
         )

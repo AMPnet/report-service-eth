@@ -13,6 +13,7 @@ import com.ampnet.reportserviceeth.service.data.Translations
 import com.ampnet.reportserviceeth.service.data.UserInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -47,22 +48,20 @@ class TransactionsSummaryTest : TestBase() {
         assertThat(txSummary.dateOfFinish).isEqualTo(getDateOfFinish(periodRequest))
     }
 
-    private fun getPeriod(period: PeriodServiceRequest): String {
-        return formatToYearMonthDay(period.from) + " - " + formatToYearMonthDay(period.to)
+    private fun getDateOfFinish(period: PeriodServiceRequest): String {
+        return if (period.to == null) formatToYearMonthDay(LocalDateTime.now())
+        else formatToYearMonthDay(period.to)
     }
 
     private fun getPeriodZeroTx(createdAt: LocalDateTime): String {
         return formatToYearMonthDay(createdAt) + " - " + formatToYearMonthDay(LocalDateTime.now())
     }
 
-    private fun getDateOfFinish(period: PeriodServiceRequest): String {
-        return if (period.to == null) formatToYearMonthDay(LocalDateTime.now())
-        else formatToYearMonthDay(period.to)
-    }
+    private fun getPeriod(period: PeriodServiceRequest): String =
+        formatToYearMonthDay(period.from) + " - " + formatToYearMonthDay(period.to)
 
-    private fun formatToYearMonthDay(date: LocalDateTime?): String {
-        return date!!.format(DateTimeFormatter.ofPattern(DATE_FORMAT))
-    }
+    private fun formatToYearMonthDay(date: LocalDateTime?): String =
+        date?.format(DateTimeFormatter.ofPattern(DATE_FORMAT)) ?: fail("Date is not properly formatted")
 
     private fun createUserResponse(address: String = userAddress): UserResponse {
         return UserResponse.newBuilder()

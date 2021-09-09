@@ -39,7 +39,7 @@ abstract class Transaction(transaction: TransactionInfo) {
     val txDate: String
         get() = date.format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm").withLocale(locale))
     val valueInDollar: String = value.toEther()
-    val amountInEther: String = amount?.toEther() ?: ""
+    val amountInEther: String? = amount?.toEther()
     abstract val txStatus: TransactionStatusType
     abstract val name: String
     lateinit var translations: Translations
