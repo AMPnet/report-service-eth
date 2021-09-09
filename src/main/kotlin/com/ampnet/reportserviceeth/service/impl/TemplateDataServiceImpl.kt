@@ -59,7 +59,7 @@ class TemplateDataServiceImpl(
                 ?: throw InvalidRequestException(
                     ErrorCode.INT_UNSUPPORTED_TX, "Transaction with hash:${request.txHash} is not supported in report"
                 )
-        return SingleTransactionSummary(mappedTransaction, userWithInfo, translations, transaction.timestamp)
+        return SingleTransactionSummary(mappedTransaction, userWithInfo, translations)
     }
 
     override fun getAllActiveUsersSummaryData(
