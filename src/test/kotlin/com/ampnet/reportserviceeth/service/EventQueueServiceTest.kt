@@ -165,6 +165,10 @@ class EventQueueServiceTest : TestBase() {
 
             val events = eventRepository.findAll()
             assertThat(events).hasSize(4)
+            val mumbaiEvents = eventRepository.findByChainId(defaultChainId)
+            assertThat(mumbaiEvents).hasSize(2)
+            val maticEvents = eventRepository.findByChainId(maticChainId)
+            assertThat(maticEvents).hasSize(2)
         }
     }
 

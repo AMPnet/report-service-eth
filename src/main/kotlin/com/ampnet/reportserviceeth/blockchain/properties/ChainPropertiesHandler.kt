@@ -24,6 +24,20 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
         return properties
     }
 
+    fun getChainProperties(chain: Chain): ChainProperties? {
+        val chainProperties = when (chain) {
+            Chain.MATIC_MAIN -> applicationProperties.chainMatic
+            Chain.MATIC_TESTNET_MUMBAI -> applicationProperties.chainMumbai
+            Chain.ETHEREUM_MAIN -> applicationProperties.chainEthereum
+            Chain.HARDHAT_TESTNET -> applicationProperties.chainHardhatTestnet
+        }
+        return if (chainProperties.callerAddress.isBlank() ||
+            chainProperties.cfManagerFactoryAddress.isBlank() ||
+            chainProperties.payoutManagerFactoryAddress.isBlank()
+        ) null
+        else chainProperties
+    }
+
     private fun generateBlockchainProperties(chain: Chain): ChainPropertiesWithServices {
         val chainProperties = getChainProperties(chain) ?: throw InternalException(
             ErrorCode.BLOCKCHAIN_CONFIG_MISSING,
@@ -44,18 +58,4 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
         } else {
             "${chain.infura}${applicationProperties.infuraId}"
         }
-
-    fun getChainProperties(chain: Chain): ChainProperties? {
-        val chainProperties = when (chain) {
-            Chain.MATIC_MAIN -> applicationProperties.chainMatic
-            Chain.MATIC_TESTNET_MUMBAI -> applicationProperties.chainMumbai
-            Chain.ETHEREUM_MAIN -> applicationProperties.chainEthereum
-            Chain.HARDHAT_TESTNET -> applicationProperties.chainHardhatTestnet
-        }
-        return if (chainProperties.callerAddress.isBlank() ||
-            chainProperties.cfManagerFactoryAddress.isBlank() ||
-            chainProperties.payoutManagerFactoryAddress.isBlank()
-        ) null
-        else chainProperties
-    }
 }
