@@ -2,7 +2,7 @@ package com.ampnet.reportserviceeth.service.data
 
 data class Translations(val translations: Map<String, String>) {
     val transactions: String by translations
-    val accountId: String by translations
+    val walletAddress: String by translations
     val deposit: String by translations
     val amount: String by translations
     val date: String by translations
@@ -30,5 +30,6 @@ data class Translations(val translations: Map<String, String>) {
     val dateOfIssue: String by translations
     val dateOfExpiry: String by translations
     val personalNumber: String by translations
-    val asset: String by translations
+    val project: String by translations
+    val tokenQuantity: String by translations
 }

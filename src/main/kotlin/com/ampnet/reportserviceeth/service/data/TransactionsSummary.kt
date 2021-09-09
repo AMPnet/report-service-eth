@@ -2,11 +2,11 @@ package com.ampnet.reportserviceeth.service.data
 
 import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
+import com.ampnet.reportserviceeth.service.formatToYearMonthDay
 import com.ampnet.reportserviceeth.service.toEther
 import mu.KLogging
 import java.math.BigInteger
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 const val DATE_FORMAT = "MMM dd, yyyy"
@@ -28,7 +28,7 @@ class TransactionsSummary(
         Locale.forLanguageTag(userInfo.language)
     }
     val period: String = getPeriod(periodRequest)
-    val dateOfFinish: String? = getDateOfFinish(transactions, periodRequest)
+    val dateOfFinish: String = getDateOfFinish(transactions, periodRequest)
     val revenueShare = sumTransactionAmountsByType(TransactionType.REVENUE_SHARE).toEther()
     val investments = (
         sumTransactionAmountsByType(TransactionType.RESERVE_INVESTMENT) -
@@ -36,21 +36,16 @@ class TransactionsSummary(
         ).toEther()
 
     private fun getPeriod(periodRequest: PeriodServiceRequest): String {
-        val fromPeriod = formatToYearMonthDay(periodRequest.from ?: userInfo.createdAt)
-        val toPeriod = formatToYearMonthDay(periodRequest.to ?: LocalDateTime.now())
+        val fromPeriod = (periodRequest.from ?: userInfo.createdAt).formatToYearMonthDay(locale)
+        val toPeriod = (periodRequest.to ?: LocalDateTime.now()).formatToYearMonthDay(locale)
         return "$fromPeriod - $toPeriod"
     }
 
-    private fun getDateOfFinish(transactions: List<Transaction>, periodRequest: PeriodServiceRequest): String? {
-        return if (transactions.isEmpty()) {
-            formatToYearMonthDay(periodRequest.to ?: LocalDateTime.now())
-        } else {
-            formatToYearMonthDay(periodRequest.to) ?: formatToYearMonthDay(transactions.last().date)
-        }
+    private fun getDateOfFinish(transactions: List<Transaction>, periodRequest: PeriodServiceRequest): String {
+        return periodRequest.to?.formatToYearMonthDay(locale)
+            ?: if (transactions.isEmpty()) LocalDateTime.now().formatToYearMonthDay(locale)
+            else transactions.last().date.formatToYearMonthDay(locale)
     }
-
-    private fun formatToYearMonthDay(date: LocalDateTime?): String? =
-        date?.format(DateTimeFormatter.ofPattern(DATE_FORMAT).withLocale(locale))
 
     private fun sumTransactionAmountsByType(type: TransactionType): BigInteger {
         return transactionsByType[type]?.sumOf { it.value } ?: BigInteger.ZERO
