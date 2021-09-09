@@ -24,7 +24,7 @@ class IpfsServiceImpl(
         logoHashes[issuerInfoHash]?.let { return it }
         val request = UriComponentsBuilder.fromUriString(applicationProperties.ipfs.frontendApi)
             .queryParam("hash", issuerInfoHash).build().toUri()
-        try {
+        return try {
             val response = restTemplate.postForEntity<IssuerInfoResponse>(request)
             if (response.statusCode.is2xxSuccessful) {
                 val logoHash = response.body?.logo ?: run {
@@ -32,14 +32,14 @@ class IpfsServiceImpl(
                     return null
                 }
                 logoHashes[issuerInfoHash] = logoHash
-                return logoHash
+                logoHash
             } else {
                 logger.warn { "Unsuccessful request to frontend api: $request" }
-                return null
+                null
             }
         } catch (ex: RestClientException) {
             logger.warn { "Unexpected exception occurred: ${ex.message}" }
-            return null
+            null
         }
     }
 
