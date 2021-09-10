@@ -24,8 +24,25 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
         return properties
     }
 
+    fun getChainProperties(chain: Chain): ChainProperties? {
+        val chainProperties = when (chain) {
+            Chain.MATIC_MAIN -> applicationProperties.chainMatic
+            Chain.MATIC_TESTNET_MUMBAI -> applicationProperties.chainMumbai
+            Chain.ETHEREUM_MAIN -> applicationProperties.chainEthereum
+            Chain.HARDHAT_TESTNET -> applicationProperties.chainHardhatTestnet
+        }
+        return if (chainProperties.callerAddress.isBlank() ||
+            chainProperties.cfManagerFactoryAddress.isBlank() ||
+            chainProperties.payoutManagerFactoryAddress.isBlank()
+        ) null
+        else chainProperties
+    }
+
     private fun generateBlockchainProperties(chain: Chain): ChainPropertiesWithServices {
-        val chainProperties = getChainProperties(chain)
+        val chainProperties = getChainProperties(chain) ?: throw InternalException(
+            ErrorCode.BLOCKCHAIN_CONFIG_MISSING,
+            "Config for chain: ${chain.name} not defined in the application properties"
+        )
         val web3j = Web3j.build(HttpService(getChainRpcUrl(chain)))
         return ChainPropertiesWithServices(
             web3j, ReadonlyTransactionManager(web3j, chainProperties.callerAddress), chainProperties
@@ -41,23 +58,4 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
         } else {
             "${chain.infura}${applicationProperties.infuraId}"
         }
-
-    private fun getChainProperties(chain: Chain): ChainProperties {
-        val chainProperties = when (chain) {
-            Chain.MATIC_MAIN -> applicationProperties.chainMatic
-            Chain.MATIC_TESTNET_MUMBAI -> applicationProperties.chainMumbai
-            Chain.ETHEREUM_MAIN -> applicationProperties.chainEthereum
-            Chain.HARDHAT_TESTNET -> applicationProperties.chainHardhatTestnet
-        }
-        if (chainProperties.callerAddress.isBlank() ||
-            chainProperties.cfManagerFactoryAddress.isBlank() ||
-            chainProperties.payoutManagerFactoryAddress.isBlank()
-        ) {
-            throw InternalException(
-                ErrorCode.BLOCKCHAIN_CONFIG_MISSING,
-                "Config for chain: ${chain.name} not defined in the application properties"
-            )
-        }
-        return chainProperties
-    }
 }

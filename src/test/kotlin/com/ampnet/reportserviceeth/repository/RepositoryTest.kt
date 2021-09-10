@@ -111,8 +111,20 @@ class RepositoryTest : TestBase() {
     }
 
     @Test
-    fun mustBeAbleToSaveTask() {
-        taskRepository.save(createTask())
+    fun mustBeAbleToGetFirstTaskByBlockNumberForChain() {
+        suppose("There are two task for a chain") {
+            createTask()
+            testContext.latestTask = createTask(blockNumber = 5100L)
+        }
+        suppose("There are task for another chain") {
+            createTask(Chain.ETHEREUM_MAIN.id, 5200L)
+            createTask(Chain.MATIC_MAIN.id, 5300L)
+        }
+
+        verify("Repository returns correct task") {
+            val latestTask = taskRepository.findFirstByBlockNumberForChain(chainId)
+            assertThat(latestTask).isEqualTo(testContext.latestTask)
+        }
     }
 
     private fun createEvent(
@@ -139,10 +151,14 @@ class RepositoryTest : TestBase() {
         else event
     }
 
-    private fun createTask() = Task(UUID.randomUUID(), chainId, 5075L, 1628065107449L)
+    private fun createTask(chain: Long = chainId, blockNumber: Long = 5075L): Task {
+        val task = Task(UUID.randomUUID(), chain, blockNumber, 1628065107449L)
+        return taskRepository.save(task)
+    }
 
     private class TestContext {
         lateinit var firstEvent: Event
         lateinit var secondEvent: Event
+        lateinit var latestTask: Task
     }
 }
