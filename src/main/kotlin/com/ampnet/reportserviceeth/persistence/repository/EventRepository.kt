@@ -26,4 +26,6 @@ interface EventRepository : JpaRepository<Event, UUID> {
             "AND event.chainId = :chainId"
     )
     fun findForTxHash(txHash: String, issuer: String, address: String, chainId: Long): Event?
+
+    fun findByChainId(chainId: Long): List<Event>
 }
