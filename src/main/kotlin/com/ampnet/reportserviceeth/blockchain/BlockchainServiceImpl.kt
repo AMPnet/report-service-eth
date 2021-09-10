@@ -16,9 +16,7 @@ private val logger = KotlinLogging.logger {}
 
 @Service
 @Suppress("TooManyFunctions")
-class BlockchainServiceImpl(
-    private val chainPropertiesHandler: ChainPropertiesHandler
-) : BlockchainService {
+class BlockchainServiceImpl(private val chainPropertiesHandler: ChainPropertiesHandler) : BlockchainService {
 
     override fun getTransactions(wallet: String, chainId: Long): List<TransactionInfo> {
         logger.debug { "Get transactions for wallet address: $wallet" }
@@ -62,5 +60,13 @@ class BlockchainServiceImpl(
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
         return chainProperties.web3j.ethBlockNumber().sendSafely()?.blockNumber
             ?: throw InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "Failed to fetch latest block number")
+    }
+
+    override fun getIssuerState(chainId: Long, issuer: String): IIssuer.IssuerState? {
+        val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
+        val issuerContract = IIssuer.load(
+            issuer, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
+        )
+        return issuerContract.state.sendSafely()
     }
 }

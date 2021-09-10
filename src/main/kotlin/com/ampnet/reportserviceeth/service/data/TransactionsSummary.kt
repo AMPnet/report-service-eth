@@ -17,7 +17,7 @@ class TransactionsSummary(
     val userInfo: UserInfo,
     val periodRequest: PeriodServiceRequest,
     val translations: Translations,
-    val logo: String = DEFAULT_LOGO
+    val logo: String? = null
 ) {
     companion object : KLogging()
 

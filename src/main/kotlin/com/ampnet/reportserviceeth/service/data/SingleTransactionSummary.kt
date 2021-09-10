@@ -7,7 +7,7 @@ class SingleTransactionSummary(
     val transaction: Transaction,
     val userInfo: UserInfo,
     val translations: Translations,
-    val logo: String = DEFAULT_LOGO
+    val logo: String? = null,
 ) {
     private val locale: Locale = if (userInfo.language.isBlank()) {
         Locale.ENGLISH

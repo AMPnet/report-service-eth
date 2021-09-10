@@ -2,6 +2,7 @@ package com.ampnet.reportserviceeth.service.impl
 
 import com.ampnet.reportserviceeth.blockchain.BlockchainService
 import com.ampnet.reportserviceeth.blockchain.TransactionInfo
+import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
 import com.ampnet.reportserviceeth.controller.pojo.TransactionServiceRequest
 import com.ampnet.reportserviceeth.controller.pojo.TransactionsServiceRequest
@@ -10,6 +11,7 @@ import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.exception.ResourceNotFoundException
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.service.EventService
+import com.ampnet.reportserviceeth.service.IpfsService
 import com.ampnet.reportserviceeth.service.TemplateDataService
 import com.ampnet.reportserviceeth.service.TranslationService
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
@@ -32,7 +34,9 @@ class TemplateDataServiceImpl(
     private val blockchainService: BlockchainService,
     private val userService: UserService,
     private val translationService: TranslationService,
-    private val eventService: EventService
+    private val eventService: EventService,
+    private val ipfsService: IpfsService,
+    private val applicationProperties: ApplicationProperties
 ) : TemplateDataService {
 
     companion object : KLogging()
@@ -42,9 +46,9 @@ class TemplateDataServiceImpl(
             .map { TransactionInfo(it) }
         val translations = translationService.getTranslations()
         val userInfo = UserInfo(userService.getUser(request.address))
-        val transactionsWithNames =
-            generateTransactionReportData(transactions, userInfo.language, translations)
-        return TransactionsSummary(transactionsWithNames, userInfo, request.period, translations)
+        val transactionsWithNames = generateTransactionReportData(transactions, userInfo.language, translations)
+        val logo = getLogoUrl(request.chainId, request.issuer)
+        return TransactionsSummary(transactionsWithNames, userInfo, request.period, translations, logo)
     }
 
     override fun getUserTransactionData(request: TransactionServiceRequest): SingleTransactionSummary {
@@ -59,7 +63,8 @@ class TemplateDataServiceImpl(
                 ?: throw InvalidRequestException(
                     ErrorCode.INT_UNSUPPORTED_TX, "Transaction with hash:${request.txHash} is not supported in report"
                 )
-        return SingleTransactionSummary(mappedTransaction, userWithInfo, translations)
+        val logo = getLogoUrl(request.chainId, request.issuer)
+        return SingleTransactionSummary(mappedTransaction, userWithInfo, translations, logo)
     }
 
     override fun getAllActiveUsersSummaryData(
@@ -86,7 +91,8 @@ class TemplateDataServiceImpl(
             val userInfo = UserInfo(userResponse)
             TransactionsSummary(transactions, userInfo, periodRequest, translations)
         }
-        return UsersAccountsSummary(transactionsSummaryList)
+        val logo = getLogoUrl(issuerRequest.chainId, issuerRequest.address)
+        return UsersAccountsSummary(transactionsSummaryList, logo)
     }
 
     private fun generateTransactionReportData(
@@ -123,4 +129,11 @@ class TemplateDataServiceImpl(
         userUuid: String
     ): List<Transaction> =
         userTransactions[userUuid]?.mapNotNull { TransactionFactory.createTransaction(it) }.orEmpty()
+
+    private fun getLogoUrl(chainId: Long, issuer: String): String? =
+        blockchainService.getIssuerState(chainId, issuer)?.let { issuerState ->
+            ipfsService.getLogoHash(issuerState.info)?.let { logoHash ->
+                applicationProperties.ipfs.ipfsUrl + logoHash
+            }
+        }
 }

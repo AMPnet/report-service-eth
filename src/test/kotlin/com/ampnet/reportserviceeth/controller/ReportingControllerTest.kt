@@ -39,6 +39,14 @@ class ReportingControllerTest : ControllerTestBase() {
         suppose("There are events for user wallet") {
             testContext.events = createEventsResponse()
         }
+        suppose("Blockchain service will return issuer state") {
+            Mockito.`when`(blockchainService.getIssuerState(defaultChainId, issuer))
+                .thenReturn(createIssuerState())
+        }
+        suppose("File service will return ipfs hash") {
+            Mockito.`when`(ipfsService.getLogoHash(issuerInfo))
+                .thenReturn(ipfsHash)
+        }
 
         verify("User can get pdf with all transactions") {
             val from = LocalDate.of(2019, 10, 10)
@@ -70,6 +78,14 @@ class ReportingControllerTest : ControllerTestBase() {
                 userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT,
                 "700", txHash = txHash
             )
+        }
+        suppose("Blockchain service will return issuer state") {
+            Mockito.`when`(blockchainService.getIssuerState(defaultChainId, issuer))
+                .thenReturn(createIssuerState())
+        }
+        suppose("File service will return ipfs hash") {
+            Mockito.`when`(ipfsService.getLogoHash(issuerInfo))
+                .thenReturn(ipfsHash)
         }
 
         verify("User can get pdf with single transaction") {

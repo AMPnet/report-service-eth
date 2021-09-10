@@ -13,6 +13,7 @@ class ApplicationProperties {
     val chainMatic = ChainProperties()
     val chainMumbai = ChainProperties()
     val chainHardhatTestnet = ChainProperties()
+    val ipfs = IpfsProperties()
     lateinit var infuraId: String
 }
 
@@ -39,4 +40,9 @@ class ChainProperties {
     var startBlockNumber: Long = 18_306_544
     var numOfConfirmations: Long = 10
     var maxBlocks: Long = 1000
+}
+
+class IpfsProperties {
+    var frontendApi = "https://staging.ampnet.io/api/ipfs/issuer"
+    var ipfsUrl = "https://ampnet.mypinata.cloud/ipfs/"
 }

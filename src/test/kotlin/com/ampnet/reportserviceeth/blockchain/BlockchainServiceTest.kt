@@ -43,4 +43,10 @@ class BlockchainServiceTest {
         val blockNumber = service.getBlockNumber(Chain.MATIC_TESTNET_MUMBAI.id)
         assertThat(blockNumber).isNotNull
     }
+
+    @Test
+    fun mustGetIssuerState() {
+        val issuerState = service.getIssuerState(Chain.MATIC_TESTNET_MUMBAI.id, issuerContract)
+        assertThat(issuerState).isNotNull
+    }
 }
