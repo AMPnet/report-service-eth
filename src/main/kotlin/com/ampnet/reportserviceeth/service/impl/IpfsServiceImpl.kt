@@ -19,7 +19,6 @@ class IpfsServiceImpl(
 
     companion object : KLogging()
 
-    @Suppress("ReturnCount")
     override fun getLogoHash(issuerInfoHash: String): String? {
         logoHashes[issuerInfoHash]?.let { return it }
         val request = UriComponentsBuilder.fromUriString(applicationProperties.ipfs.frontendApi)
@@ -27,12 +26,13 @@ class IpfsServiceImpl(
         return try {
             val response = restTemplate.postForEntity<IssuerInfoResponse>(request)
             if (response.statusCode.is2xxSuccessful) {
-                val logoHash = response.body?.logo ?: run {
+                response.body?.logo?.let {
+                    logoHashes[issuerInfoHash] = it
+                    it
+                } ?: run {
                     logger.error { "Missing body in response to: $request" }
-                    return null
+                    null
                 }
-                logoHashes[issuerInfoHash] = logoHash
-                logoHash
             } else {
                 logger.warn { "Unsuccessful request to frontend api: $request" }
                 null
