@@ -130,10 +130,10 @@ class TemplateDataServiceImpl(
     ): List<Transaction> =
         userTransactions[userUuid]?.mapNotNull { TransactionFactory.createTransaction(it) }.orEmpty()
 
-    @Suppress("ReturnCount")
-    private fun getLogoUrl(chainId: Long, issuer: String): String? {
-        val issuerState = blockchainService.getIssuerState(chainId, issuer) ?: return null
-        val logoHash = ipfsService.getLogoHash(issuerState.info) ?: return null
-        return applicationProperties.ipfs.ipfsUrl + logoHash
-    }
+    private fun getLogoUrl(chainId: Long, issuer: String): String? =
+        blockchainService.getIssuerState(chainId, issuer)?.let { issuerState ->
+            ipfsService.getLogoHash(issuerState.info)?.let { logoHash ->
+                applicationProperties.ipfs.ipfsUrl + logoHash
+            }
+        }
 }
