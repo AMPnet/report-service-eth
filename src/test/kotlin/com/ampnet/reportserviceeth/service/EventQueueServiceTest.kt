@@ -32,7 +32,8 @@ import java.util.UUID
 @SpringBootTest
 class EventQueueServiceTest : TestBase() {
 
-    private val chainId = Chain.MATIC_TESTNET_MUMBAI.id
+    private val defaultChainId = Chain.MATIC_TESTNET_MUMBAI.id
+    private val maticChainId = Chain.MATIC_MAIN.id
     private val startBlockNumber: Long = 100
     private val lastBlockNumber: Long = 200
     private lateinit var testContext: TestContext
@@ -61,7 +62,7 @@ class EventQueueServiceTest : TestBase() {
         databaseCleanerService.deleteAllTasks()
         databaseCleanerService.deleteAllEvents()
         Mockito.clearInvocations(blockchainEventService)
-        given(blockchainService.getBlockNumber(chainId)).willReturn(BigInteger.valueOf(-1))
+        given(blockchainService.getBlockNumber(defaultChainId)).willReturn(BigInteger.valueOf(-1))
         given(blockchainEventService.getAllEvents(any(), any(), any())).willReturn(emptyList())
     }
 
@@ -74,28 +75,31 @@ class EventQueueServiceTest : TestBase() {
     @Test
     fun mustSaveEventsOnExistingTask() {
         suppose("There is an existing task") {
-            testContext.task = taskRepository.save(Task(chainId, startBlockNumber))
+            testContext.task = taskRepository.save(Task(defaultChainId, startBlockNumber))
         }
         suppose("Blockchain service will return two events") {
-            testContext.investEvent = createEvent(TransactionType.RESERVE_INVESTMENT, "blockHash1")
-            testContext.cancelInvestmentEvent = createEvent(TransactionType.CANCEL_INVESTMENT, "blockHash2")
             given(
                 blockchainEventService.getAllEvents(
                     startBlockNumber + 1,
-                    lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations, chainId
+                    lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations, defaultChainId
                 )
-            ).willReturn(listOf(testContext.investEvent, testContext.cancelInvestmentEvent))
+            ).willReturn(
+                listOf(
+                    createEvent(TransactionType.RESERVE_INVESTMENT, "blockHash1"),
+                    createEvent(TransactionType.CANCEL_INVESTMENT, "blockHash2")
+                )
+            )
         }
         suppose("Blockchain service will return latest block number") {
-            given(blockchainService.getBlockNumber(chainId)).willReturn(BigInteger.valueOf(lastBlockNumber))
+            given(blockchainService.getBlockNumber(defaultChainId)).willReturn(BigInteger.valueOf(lastBlockNumber))
         }
 
         verify("Service will save events and create a second task") {
             waitUntilTasksAreProcessed()
             val tasks = taskRepository.findAll()
-            val lastTask = taskRepository.findFirstByOrderByBlockNumberDesc() ?: fail("Cannot find task")
+            val lastTask = taskRepository.findFirstByBlockNumberForChain(defaultChainId) ?: fail("Cannot find task")
             assertThat(tasks).hasSize(2)
-            assertThat(lastTask.chainId).isEqualTo(chainId)
+            assertThat(lastTask.chainId).isEqualTo(defaultChainId)
             assertThat(lastTask.blockNumber).isEqualTo(
                 lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations
             )
@@ -106,19 +110,82 @@ class EventQueueServiceTest : TestBase() {
     }
 
     @Test
+    fun mustSaveEventsFromMultipleChains() {
+        suppose("There is an existing task for two chains") {
+            testContext.task = taskRepository.save(Task(defaultChainId, startBlockNumber))
+            testContext.anotherTask = taskRepository.save(Task(Chain.MATIC_MAIN.id, startBlockNumber))
+        }
+        suppose("Blockchain service will return two events for mumbai testnet") {
+            given(
+                blockchainEventService.getAllEvents(
+                    startBlockNumber + 1,
+                    lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations, defaultChainId
+                )
+            ).willReturn(
+                listOf(
+                    createEvent(TransactionType.RESERVE_INVESTMENT, "blockHash1"),
+                    createEvent(TransactionType.CANCEL_INVESTMENT, "blockHash2")
+                )
+            )
+        }
+        suppose("Blockchain service will return two events for matic mainnet") {
+            given(
+                blockchainEventService.getAllEvents(
+                    startBlockNumber + 1,
+                    lastBlockNumber - applicationProperties.chainMatic.numOfConfirmations,
+                    maticChainId
+                )
+            ).willReturn(
+                listOf(
+                    createEvent(TransactionType.RESERVE_INVESTMENT, "blockHash3", maticChainId),
+                    createEvent(TransactionType.CANCEL_INVESTMENT, "blockHash4", maticChainId)
+                )
+            )
+        }
+        suppose("Blockchain service will return latest block number for both chains") {
+            given(blockchainService.getBlockNumber(defaultChainId)).willReturn(BigInteger.valueOf(lastBlockNumber))
+            given(blockchainService.getBlockNumber(maticChainId)).willReturn(BigInteger.valueOf(lastBlockNumber))
+        }
+
+        verify("Service will save events and create tasks") {
+            waitUntilTasksAreProcessed()
+            val tasks = taskRepository.findAll()
+            assertThat(tasks).hasSize(4)
+            val mumbaiTask = taskRepository.findFirstByBlockNumberForChain(defaultChainId) ?: fail("Cannot find the task")
+            assertThat(mumbaiTask.chainId).isEqualTo(defaultChainId)
+            assertThat(mumbaiTask.blockNumber).isEqualTo(
+                lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations
+            )
+            val maticTask = taskRepository.findFirstByBlockNumberForChain(maticChainId)
+                ?: fail("Cannot find the task")
+            assertThat(maticTask.chainId).isEqualTo(maticChainId)
+            assertThat(maticTask.blockNumber).isEqualTo(
+                lastBlockNumber - applicationProperties.chainMatic.numOfConfirmations
+            )
+
+            val events = eventRepository.findAll()
+            assertThat(events).hasSize(4)
+            val mumbaiEvents = eventRepository.findByChainId(defaultChainId)
+            assertThat(mumbaiEvents).hasSize(2)
+            val maticEvents = eventRepository.findByChainId(maticChainId)
+            assertThat(maticEvents).hasSize(2)
+        }
+    }
+
+    @Test
     fun mustNotSaveTaskOrEventOnExceptionThrown() {
         suppose("There is an existing task") {
-            testContext.task = taskRepository.save(Task(chainId, startBlockNumber))
+            testContext.task = taskRepository.save(Task(defaultChainId, startBlockNumber))
         }
         suppose("Blockchain service will return latest block number") {
-            given(blockchainService.getBlockNumber(chainId))
+            given(blockchainService.getBlockNumber(defaultChainId))
                 .willReturn(BigInteger.valueOf(lastBlockNumber))
         }
         suppose("Blockchain service will return two events") {
             given(
                 blockchainEventService.getAllEvents(
                     startBlockNumber + 1,
-                    lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations, chainId
+                    lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations, defaultChainId
                 )
             ).willAnswer { throw InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "blockchain exception") }
         }
@@ -127,7 +194,7 @@ class EventQueueServiceTest : TestBase() {
             waitUntilTasksAreProcessed()
             val tasks = taskRepository.findAll()
             val task = tasks.first()
-            assertThat(task.chainId).isEqualTo(chainId)
+            assertThat(task.chainId).isEqualTo(defaultChainId)
             assertThat(task.blockNumber).isEqualTo(startBlockNumber)
 
             val events = eventRepository.findAll()
@@ -140,21 +207,20 @@ class EventQueueServiceTest : TestBase() {
             .getAllEvents(
                 startBlockNumber + 1,
                 lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations,
-                chainId
+                defaultChainId
             )
         Thread.sleep(applicationProperties.queue.polling / 2)
     }
 
-    private fun createEvent(transactionType: TransactionType, blockHash: String) =
+    private fun createEvent(transactionType: TransactionType, blockHash: String, chain: Long = defaultChainId) =
         Event(
-            UUID.randomUUID(), chainId, "fromAddress", "toAddress", "contractAddress",
+            UUID.randomUUID(), chain, "fromAddress", "toAddress", "contractAddress",
             "issuer", "txHash", transactionType, 10, "assetName", "symbol", 100, blockHash,
             Instant.now().toEpochMilli(), BigInteger.TEN, null, null, null
         )
 
     private class TestContext {
         lateinit var task: Task
-        lateinit var investEvent: Event
-        lateinit var cancelInvestmentEvent: Event
+        lateinit var anotherTask: Task
     }
 }
