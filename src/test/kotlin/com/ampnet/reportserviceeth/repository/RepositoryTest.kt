@@ -110,23 +110,6 @@ class RepositoryTest : TestBase() {
         }
     }
 
-    @Test
-    fun mustBeAbleToGetFirstTaskByBlockNumberForChain() {
-        suppose("There are two task for a chain") {
-            createTask()
-            testContext.latestTask = createTask(blockNumber = 5100L)
-        }
-        suppose("There are task for another chain") {
-            createTask(Chain.ETHEREUM_MAIN.id, 5200L)
-            createTask(Chain.MATIC_MAIN.id, 5300L)
-        }
-
-        verify("Repository returns correct task") {
-            val latestTask = taskRepository.findFirstByBlockNumberForChain(chainId)
-            assertThat(latestTask).isEqualTo(testContext.latestTask)
-        }
-    }
-
     private fun createEvent(
         from: String = userAddress,
         to: String = secondUserAddress,
