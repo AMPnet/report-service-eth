@@ -4,6 +4,7 @@ import com.ampnet.reportserviceeth.blockchain.TransactionInfo
 import com.ampnet.reportserviceeth.blockchain.TransactionStatusType
 import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.service.toEther
+import com.ampnet.reportserviceeth.service.toMwei
 import java.math.BigInteger
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -38,7 +39,7 @@ abstract class Transaction(transaction: TransactionInfo) {
     val date: LocalDateTime = transaction.timestamp
     val txDate: String
         get() = date.format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm").withLocale(locale))
-    val valueInDollar: String = value.toEther()
+    val valueInDollar: String = value.toMwei()
     val amountInEther: String? = amount?.toEther()
     abstract val txStatus: TransactionStatusType
     abstract val name: String

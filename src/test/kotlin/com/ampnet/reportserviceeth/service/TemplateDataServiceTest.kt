@@ -15,7 +15,7 @@ import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.data.LENGTH_OF_PERCENTAGE
 import com.ampnet.reportserviceeth.service.data.TO_PERCENTAGE
 import com.ampnet.reportserviceeth.service.impl.TemplateDataServiceImpl
-import com.ampnet.reportserviceeth.toGwei
+import com.ampnet.reportserviceeth.toWei
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -80,8 +80,8 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         verify("Template data service can get user transactions") {
             val txSummary = templateDataService.getUserTransactionsData(testContext.transactionsRequest)
             assertThat(txSummary.investments)
-                .isEqualTo(BigInteger.valueOf(testContext.reserveInvestment - testContext.cancelInvestment).toEther())
-            assertThat(txSummary.revenueShare).isEqualTo(BigInteger.valueOf(testContext.sharePayout).toEther())
+                .isEqualTo(BigInteger.valueOf(testContext.reserveInvestment - testContext.cancelInvestment).toMwei())
+            assertThat(txSummary.revenueShare).isEqualTo(BigInteger.valueOf(testContext.sharePayout).toMwei())
 
             val transactions = txSummary.transactions
             assertThat(transactions).hasSize(3)
@@ -91,7 +91,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
 //                getPercentageInProject(project.expectedFunding, investTx.amount)
 //            )
             assertThat(investTx.txDate).isNotBlank
-            assertThat(investTx.valueInDollar).isEqualTo(investTx.value.toEther())
+            assertThat(investTx.valueInDollar).isEqualTo(investTx.value.toMwei())
             val cancelInvestmentTx =
                 transactions.first { it.type == TransactionType.CANCEL_INVESTMENT }
 //            assertThat(cancelInvestmentTx.description).isEqualTo(project.name)
@@ -99,11 +99,11 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
 //                getPercentageInProject(project.expectedFunding, cancelInvestmentTx.amount)
 //            )
             assertThat(cancelInvestmentTx.txDate).isNotBlank
-            assertThat(cancelInvestmentTx.valueInDollar).isEqualTo(cancelInvestmentTx.value.toEther())
+            assertThat(cancelInvestmentTx.valueInDollar).isEqualTo(cancelInvestmentTx.value.toMwei())
             val sharePayoutTx = transactions.first { it.type == TransactionType.COMPLETED_INVESTMENT }
 //            assertThat(sharePayoutTx.description).isEqualTo(project.name)
             assertThat(sharePayoutTx.txDate).isNotBlank
-            assertThat(sharePayoutTx.valueInDollar).isEqualTo(sharePayoutTx.value.toEther())
+            assertThat(sharePayoutTx.valueInDollar).isEqualTo(sharePayoutTx.value.toMwei())
             assertThat(txSummary.logo).isEqualTo(ipfsUrl + ipfsHash)
         }
     }
@@ -242,14 +242,14 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
                     userAddress -> {
                         assertThat(it.investments).isEqualTo(
                             (
-                                testContext.reserveInvestment.toString().toGwei() -
-                                    testContext.cancelInvestment.toString().toGwei()
-                                ).toEther()
+                                testContext.reserveInvestment.toString().toWei() -
+                                    testContext.cancelInvestment.toString().toWei()
+                                ).toMwei()
                         )
-                        assertThat(it.revenueShare).isEqualTo(testContext.sharePayout.toString().toGwei().toEther())
+                        assertThat(it.revenueShare).isEqualTo(testContext.sharePayout.toString().toWei().toMwei())
                     }
                     secondUserAddress -> assertThat(it.investments).isEqualTo(
-                        BigInteger.valueOf(testContext.reserveInvestment).toString().toGwei().toEther()
+                        BigInteger.valueOf(testContext.reserveInvestment).toString().toWei().toMwei()
                     )
                     thirdUserAddress -> assertThat(it.transactions).isEmpty()
                 }
