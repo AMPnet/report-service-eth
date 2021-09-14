@@ -96,9 +96,6 @@ class BlockchainEventServiceImpl(
                     "for contracts ${deployedContracts.joinToString()}"
             )
         val logs = ethLog.logs.mapNotNull { it.get() as? EthLog.LogObject }
-        logger.debug {
-            "Logs from startBlock:$startBlockNumber to endBlock: $endBlockNumber for chain: $chainId are: $logs"
-        }
         return generateEvents(logs, chainProperties, chainId)
     }
 

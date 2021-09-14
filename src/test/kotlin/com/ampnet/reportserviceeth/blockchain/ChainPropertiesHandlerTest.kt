@@ -34,7 +34,7 @@ class ChainPropertiesHandlerTest {
         val infuraId = "some-id"
         val applicationProperties = ApplicationProperties().apply { this.infuraId = infuraId }
         val chainPropertiesHandler = ChainPropertiesHandler(applicationProperties)
-        val chain = Chain.MATIC_TESTNET_MUMBAI
+        val chain = Chain.ETHEREUM_MAIN
         val rpc = chainPropertiesHandler.getChainRpcUrl(chain)
         assertThat(rpc).isEqualTo(chain.infura + infuraId)
     }
