@@ -94,15 +94,16 @@ class EventQueueServiceTest : TestBase() {
             given(blockchainService.getBlockNumber(defaultChainId)).willReturn(BigInteger.valueOf(lastBlockNumber))
         }
 
-        verify("Service will save events and create a second task") {
+        verify("Service will save events and update the task") {
             waitUntilTasksAreProcessed()
             val tasks = taskRepository.findAll()
-            val lastTask = taskRepository.findFirstByBlockNumberForChain(defaultChainId) ?: fail("Cannot find task")
-            assertThat(tasks).hasSize(2)
-            assertThat(lastTask.chainId).isEqualTo(defaultChainId)
-            assertThat(lastTask.blockNumber).isEqualTo(
+            val onlyTask = tasks.first()
+            assertThat(tasks).hasSize(1)
+            assertThat(onlyTask.chainId).isEqualTo(defaultChainId)
+            assertThat(onlyTask.blockNumber).isEqualTo(
                 lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations
             )
+            assertThat(onlyTask.timestamp).isGreaterThanOrEqualTo(testContext.task.timestamp)
 
             val events = eventRepository.findAll()
             assertThat(events).hasSize(2)
@@ -147,21 +148,24 @@ class EventQueueServiceTest : TestBase() {
             given(blockchainService.getBlockNumber(maticChainId)).willReturn(BigInteger.valueOf(lastBlockNumber))
         }
 
-        verify("Service will save events and create tasks") {
+        verify("Service will save events and update tasks") {
             waitUntilTasksAreProcessed()
             val tasks = taskRepository.findAll()
-            assertThat(tasks).hasSize(4)
-            val mumbaiTask = taskRepository.findFirstByBlockNumberForChain(defaultChainId) ?: fail("Cannot find the task")
+            assertThat(tasks).hasSize(2)
+            val mumbaiTask = taskRepository.findByChainId(defaultChainId) ?: fail("Cannot find the task")
             assertThat(mumbaiTask.chainId).isEqualTo(defaultChainId)
             assertThat(mumbaiTask.blockNumber).isEqualTo(
                 lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations
             )
-            val maticTask = taskRepository.findFirstByBlockNumberForChain(maticChainId)
+            assertThat(mumbaiTask.timestamp).isGreaterThanOrEqualTo(testContext.task.timestamp)
+
+            val maticTask = taskRepository.findByChainId(maticChainId)
                 ?: fail("Cannot find the task")
             assertThat(maticTask.chainId).isEqualTo(maticChainId)
             assertThat(maticTask.blockNumber).isEqualTo(
                 lastBlockNumber - applicationProperties.chainMatic.numOfConfirmations
             )
+            assertThat(maticTask.timestamp).isGreaterThanOrEqualTo(testContext.anotherTask.timestamp)
 
             val events = eventRepository.findAll()
             assertThat(events).hasSize(4)
@@ -190,7 +194,7 @@ class EventQueueServiceTest : TestBase() {
             ).willAnswer { throw InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "blockchain exception") }
         }
 
-        verify("Service will not save any events or additional task") {
+        verify("Service will not save any events or update task") {
             waitUntilTasksAreProcessed()
             val tasks = taskRepository.findAll()
             val task = tasks.first()

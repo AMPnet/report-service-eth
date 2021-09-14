@@ -12,6 +12,7 @@ import com.ampnet.reportserviceeth.persistence.repository.TaskRepository
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -48,8 +49,8 @@ class EventQueueServiceImpl(
     @Suppress("TooGenericExceptionCaught")
     fun processTask(chain: Chain, chainProperties: ChainProperties) {
         logger.debug { "Processing tasks for chainId: ${chain.id}" }
-        val startBlockNumber = taskRepository.findFirstByBlockNumberForChain(chain.id)?.let { it.blockNumber + 1 }
-            ?: chainProperties.startBlockNumber
+        val task = taskRepository.findByChainId(chain.id)
+        val startBlockNumber = task?.let { it.blockNumber + 1 } ?: chainProperties.startBlockNumber
         logger.debug { "Start block number: $startBlockNumber" }
         try {
             val latestBlockNumber = blockchainService.getBlockNumber(chain.id)
@@ -65,7 +66,11 @@ class EventQueueServiceImpl(
             val events = blockchainEventService.getAllEvents(startBlockNumber, endBlockNumber, chain.id)
             logger.debug { "Number of fetched events: ${events.size}" }
             eventRepository.saveAll(events)
-            taskRepository.save(Task(chain.id, endBlockNumber))
+            val updatedTask = task?.apply {
+                this.blockNumber = endBlockNumber
+                this.timestamp = Instant.now().toEpochMilli()
+            } ?: Task(chain.id, endBlockNumber)
+            taskRepository.save(updatedTask)
         } catch (ex: Throwable) {
             logger.error { "Failed to fetch blockchain events: ${ex.message}" }
         }

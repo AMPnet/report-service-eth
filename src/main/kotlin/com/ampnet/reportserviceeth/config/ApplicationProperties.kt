@@ -37,7 +37,7 @@ class ChainProperties {
     var callerAddress: String = "0x0000000000000000000000000000000000000000"
     var cfManagerFactoryAddress: String = ""
     var payoutManagerFactoryAddress: String = ""
-    var startBlockNumber: Long = 18_306_544
+    var startBlockNumber: Long = 1
     var numOfConfirmations: Long = 10
     var maxBlocks: Long = 1000
 }

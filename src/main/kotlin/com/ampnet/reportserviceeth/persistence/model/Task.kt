@@ -18,10 +18,10 @@ class Task(
     val chainId: Long,
 
     @Column(nullable = false)
-    val blockNumber: Long,
+    var blockNumber: Long,
 
     @Column(nullable = false)
-    val timestamp: Long
+    var timestamp: Long
 ) {
     constructor(chainId: Long, blockNumber: Long) : this(
         UUID.randomUUID(),
