@@ -13,7 +13,8 @@ import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.service.IpfsService
-import com.ampnet.reportserviceeth.toGwei
+import com.ampnet.reportserviceeth.toMWei
+import com.ampnet.reportserviceeth.toWei
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
@@ -159,7 +160,7 @@ abstract class ControllerTestBase : TestBase() {
         to: String,
         amount: String = "70"
     ): TransactionInfo = TransactionInfo(
-        type, from, to, amount.toGwei(), amount.toGwei(),
+        type, from, to, amount.toWei(), amount.toWei(),
         LocalDateTime.now(), "0xafd91eb7096efdc4e8ef331a83bc512f279b80730dfbd62824df92e4e504f2f8",
         "Gold mine in Chile", "GMC"
     )
@@ -216,7 +217,7 @@ abstract class ControllerTestBase : TestBase() {
             contractAddress, issuerAddress, txHash, type,
             logIndex, "project_name", "symbol", 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
-            amount.toGwei(), amount.toGwei(), 50L, BigInteger("500")
+            amount.toMWei(), amount.toWei(), 50L, BigInteger("500")
         )
         return if (saveToDb) eventRepository.save(event)
         else event

@@ -12,7 +12,7 @@ import com.ampnet.reportserviceeth.config.JsonConfig
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.impl.TranslationServiceImpl
-import com.ampnet.reportserviceeth.toGwei
+import com.ampnet.reportserviceeth.toWei
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -80,7 +80,7 @@ abstract class JpaServiceTestBase : TestBase() {
         date: LocalDateTime = LocalDateTime.now().minusDays(1),
         txHash: String = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
     ): TransactionInfo = TransactionInfo(
-        type, from, to, amount.toGwei(), amount.toGwei(),
+        type, from, to, amount.toWei(), amount.toWei(),
         date, txHash, "asset", "GMC"
     )
 
@@ -116,7 +116,7 @@ abstract class JpaServiceTestBase : TestBase() {
             contractAddress, issuerAddress, txHash, type,
             logIndex, "asset_name", "symbol", 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
-            amount.toGwei(), amount.toGwei(), 50L, BigInteger("500")
+            amount.toWei(), amount.toWei(), 50L, BigInteger("500")
         )
 
     protected fun createIssuerState() =

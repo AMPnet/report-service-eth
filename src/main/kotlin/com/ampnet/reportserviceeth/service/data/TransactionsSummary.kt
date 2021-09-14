@@ -3,7 +3,7 @@ package com.ampnet.reportserviceeth.service.data
 import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
 import com.ampnet.reportserviceeth.service.formatToYearMonthDay
-import com.ampnet.reportserviceeth.service.toEther
+import com.ampnet.reportserviceeth.service.toMwei
 import mu.KLogging
 import java.math.BigInteger
 import java.time.LocalDateTime
@@ -29,11 +29,11 @@ class TransactionsSummary(
     }
     val period: String = getPeriod(periodRequest)
     val dateOfFinish: String = getDateOfFinish(transactions, periodRequest)
-    val revenueShare = sumTransactionAmountsByType(TransactionType.REVENUE_SHARE).toEther()
+    val revenueShare = sumTransactionAmountsByType(TransactionType.REVENUE_SHARE).toMwei()
     val investments = (
         sumTransactionAmountsByType(TransactionType.RESERVE_INVESTMENT) -
             sumTransactionAmountsByType(TransactionType.CANCEL_INVESTMENT)
-        ).toEther()
+        ).toMwei()
 
     private fun getPeriod(periodRequest: PeriodServiceRequest): String {
         val fromPeriod = (periodRequest.from ?: userInfo.createdAt).formatToYearMonthDay(locale)

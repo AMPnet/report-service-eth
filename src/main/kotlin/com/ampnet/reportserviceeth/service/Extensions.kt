@@ -15,7 +15,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.Optional
 
-const val DECIMALS_PRECISION = 1_000_000_000_000_000_000
+const val ETHER_DECIMALS_PRECISION = 1_000_000_000_000_000_000L
+const val MWEI_DECIMALS_PRECISION = 1_000_000L
 
 private val logger = KotlinLogging.logger {}
 
@@ -53,7 +54,10 @@ fun Long.toLocalDateTime(): LocalDateTime =
     LocalDateTime.ofInstant(Instant.ofEpochSecond(this), ZoneId.systemDefault())
 
 fun BigInteger.toEther(): String = DecimalFormat("#,##0.00")
-    .format(this / BigInteger.valueOf(DECIMALS_PRECISION))
+    .format(this / BigInteger.valueOf(ETHER_DECIMALS_PRECISION))
+
+fun BigInteger.toMwei(): String = DecimalFormat("#,##0.00")
+    .format(this / BigInteger.valueOf(MWEI_DECIMALS_PRECISION))
 
 @Suppress("MagicNumber")
 fun Long.toTimestamp(): Long = this * 1000
