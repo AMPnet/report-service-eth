@@ -10,7 +10,6 @@ import java.time.LocalDateTime
 import java.util.Locale
 
 const val DATE_FORMAT = "MMM dd, yyyy"
-const val DEFAULT_LOGO = "https://ampnet.io/assets/images/logo-amp.png"
 
 class TransactionsSummary(
     val transactions: List<Transaction>,

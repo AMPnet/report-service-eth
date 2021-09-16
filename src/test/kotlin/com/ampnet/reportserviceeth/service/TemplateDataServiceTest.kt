@@ -10,10 +10,7 @@ import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.exception.ResourceNotFoundException
 import com.ampnet.reportserviceeth.persistence.model.Event
-import com.ampnet.reportserviceeth.service.data.DATE_FORMAT
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
-import com.ampnet.reportserviceeth.service.data.LENGTH_OF_PERCENTAGE
-import com.ampnet.reportserviceeth.service.data.TO_PERCENTAGE
 import com.ampnet.reportserviceeth.service.impl.TemplateDataServiceImpl
 import com.ampnet.reportserviceeth.toWei
 import org.assertj.core.api.Assertions.assertThat
@@ -23,7 +20,6 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import java.math.BigInteger
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class TemplateDataServiceTest : JpaServiceTestBase() {
 
@@ -324,15 +320,6 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
                 TransactionType.CANCEL_INVESTMENT
             )
         )
-
-    private fun getPercentageInProject(expectedFunding: Long?, amount: Long): String? {
-        return expectedFunding?.let {
-            (TO_PERCENTAGE * amount / expectedFunding).toString().take(LENGTH_OF_PERCENTAGE)
-        }
-    }
-
-    private fun formatToYearMonthDay(date: LocalDateTime?): String? =
-        date?.format(DateTimeFormatter.ofPattern(DATE_FORMAT))
 
     private class TestContext {
         lateinit var events: List<Event>
