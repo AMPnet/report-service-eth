@@ -75,6 +75,10 @@ dependencies {
     implementation("com.openhtmltopdf:openhtmltopdf-slf4j:$openHtmlToPdfVersion")
     implementation("org.thymeleaf:thymeleaf:3.0.12.RELEASE")
 
+    val sentryVersion = "5.1.2"
+    implementation("io.sentry:sentry-spring-boot-starter:$sentryVersion")
+    implementation("io.sentry:sentry-logback:$sentryVersion")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testImplementation("org.springframework.security:spring-security-test")
