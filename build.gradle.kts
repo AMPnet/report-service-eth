@@ -9,17 +9,17 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 plugins {
-    val kotlinVersion = "1.5.10"
+    val kotlinVersion = "1.5.21"
     kotlin("plugin.jpa") version kotlinVersion
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
 
-    id("org.springframework.boot") version "2.5.1"
+    id("org.springframework.boot") version "2.5.4"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    id("com.google.cloud.tools.jib") version "2.8.0"
+    id("com.google.cloud.tools.jib") version "3.1.4"
     id("org.asciidoctor.jvm.convert") version "3.3.2"
-    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
-    id("io.gitlab.arturbosch.detekt").version("1.16.0")
+    id("org.jlleitschuh.gradle.ktlint") version "10.2.0"
+    id("io.gitlab.arturbosch.detekt").version("1.18.1")
     id("com.google.protobuf") version "0.8.17"
     idea
     jacoco
@@ -32,7 +32,7 @@ allOpen {
 }
 
 group = "com.ampnet"
-version = "0.1.2"
+version = "0.1.3"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 configurations {
@@ -55,7 +55,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("io.github.microutils:kotlin-logging:2.0.5")
+    implementation("io.github.microutils:kotlin-logging:2.0.11")
 
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
@@ -68,7 +68,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.1")
     implementation("org.flywaydb:flyway-core")
 
-    val openHtmlToPdfVersion = "1.0.6"
+    val openHtmlToPdfVersion = "1.0.10"
     implementation("com.openhtmltopdf:openhtmltopdf-core:$openHtmlToPdfVersion")
     implementation("com.openhtmltopdf:openhtmltopdf-pdfbox:$openHtmlToPdfVersion")
     implementation("com.openhtmltopdf:openhtmltopdf-svg-support:$openHtmlToPdfVersion")
