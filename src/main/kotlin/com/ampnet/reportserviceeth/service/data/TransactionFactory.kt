@@ -66,25 +66,25 @@ abstract class Transaction(transaction: TransactionInfo) {
 }
 
 class TransactionReserveInvestment(transaction: TransactionInfo) : Transaction(transaction) {
-    override val txStatus = TransactionStatusType.PAID_IN
+    override val txStatus = TransactionStatusType.PAID_OUT
     override val name: String
         get() = translations.reserveInvestment
 }
 
-class TransactionCancelInvestment(transaction: TransactionInfo) : Transaction(transaction) {
+class TransactionInvestmentCompleted(transaction: TransactionInfo) : Transaction(transaction) {
     override val txStatus = TransactionStatusType.PAID_OUT
+    override val name: String
+        get() = translations.investmentCompleted
+}
+
+class TransactionCancelInvestment(transaction: TransactionInfo) : Transaction(transaction) {
+    override val txStatus = TransactionStatusType.PAID_IN
     override val name: String
         get() = translations.cancelInvestment
 }
 
 class TransactionSharePayout(transaction: TransactionInfo) : Transaction(transaction) {
-    override val txStatus = TransactionStatusType.PAID_OUT
-    override val name: String
-        get() = translations.revenueSharePayout
-}
-
-class TransactionInvestmentCompleted(transaction: TransactionInfo) : Transaction(transaction) {
     override val txStatus = TransactionStatusType.PAID_IN
     override val name: String
-        get() = translations.investmentCompleted
+        get() = translations.revenueSharePayout
 }

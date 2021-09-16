@@ -10,13 +10,13 @@
         <tbody>
         <tr>
             <td th:text="${data.translations.totalRevenue}" class="text-left table-border-right">Total revenue share received</td>
-            <td th:text="'€' + ${data.revenueShare}" class="table-border-right">€35.00</td>
+            <td th:text="'$' + ${data.revenueShare}" class="table-border-right">$35.00</td>
             <td></td>
         </tr>
         <tr class="table-grey-background">
             <td th:text="${data.translations.totalInvestments}" class="text-left table-border-right">Total investments placed</td>
             <td class="table-border-right"></td>
-            <td th:text="'€' + ${data.investments}">€1000.00</td>
+            <td th:text="'$' + ${data.investments}">$1000.00</td>
         </tr>
         </tbody>
     </table>
