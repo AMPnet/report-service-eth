@@ -4,10 +4,8 @@ import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesHandler
 import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesWithServices
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
-import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.sendSafely
-import com.ampnet.reportserviceeth.service.unwrap
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.web3j.protocol.core.DefaultBlockParameter
@@ -27,63 +25,11 @@ class BlockchainEventServiceImpl(
     private val chainPropertiesHandler: ChainPropertiesHandler
 ) : BlockchainEventService {
 
-    /**
-     * Transaction receipt is fetched for the txHash and it contains `to` and `from` variables, asset address
-     * and list of all the events.
-     * In case of INVEST, CANCEL_INVESTMENT, CLAIM_TOKENS events `to` is the address of CfManagerSoftcap contract.
-     * In case of REVENUE_SHARE event `to` is the address of PayoutManager contract.
-     * Returns transactionInfo object which is mapped from the type of events available.
-     * If transaction receipt not found for the txHash or doesn't contain any events returns InternalException.
-     *
-     * @param txHash String hash of the transaction
-     * @param chainId Long id of the wanted chain
-     * @return [TransactionInfo] object
-     */
-    @Suppress("ReturnCount")
-    @Throws(InternalException::class, InvalidRequestException::class)
-    override fun getTransactionInfo(txHash: String, chainId: Long): TransactionInfo {
-        logger.debug { "Get info for transaction with hash: $txHash" }
-        val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
-        val txReceipt: TransactionReceipt = chainProperties.web3j.ethGetTransactionReceipt(txHash)
-            .sendSafely()?.transactionReceipt?.unwrap() ?: throw InternalException(
-            ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-            "Failed to fetch transaction info for txHash: $txHash"
-        )
-        if (txReceipt.to == null) throw InvalidRequestException(
-            ErrorCode.BLOCKCHAIN_TX_NOT_A_CONTRACT_CALL, "$txHash is a contract creation transaction"
-        )
-        val contract = TransactionEvents.load(
-            txReceipt.to,
-            chainProperties.web3j,
-            chainProperties.transactionManager,
-            DefaultGasProvider()
-        )
-        skipException { contract.getInvestEvents(txReceipt) }?.firstOrNull()?.let {
-            logger.debug { "Fetched reserve investment event for hash: $txHash" }
-            return TransactionInfo(it, txReceipt, getAsset(it.asset, chainProperties))
-        }
-        skipException { contract.getCancelInvestmentEvents(txReceipt) }?.firstOrNull()?.let {
-            logger.debug { "Fetched cancel investment event for hash: $txHash" }
-            return TransactionInfo(it, txReceipt, getAsset(it.asset, chainProperties))
-        }
-        skipException { contract.getClaimEvents(txReceipt) }?.firstOrNull()?.let {
-            logger.debug { "Fetched investment completed event for hash: $txHash" }
-            return TransactionInfo(it, txReceipt, getAsset(it.asset, chainProperties))
-        }
-        skipException { contract.getReleaseEvents(txReceipt) }?.firstOrNull()?.let {
-            logger.debug { "Fetched revenue share payout event for hash: $txHash" }
-            return TransactionInfo(
-                it, txReceipt, getAsset(it.asset, chainProperties)
-            )
-        }
-        throw InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "Failed to map transaction info for txHash: $txHash")
-    }
-
     @Throws(InternalException::class)
     override fun getAllEvents(startBlockNumber: Long, endBlockNumber: Long, chainId: Long): List<Event> {
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
         val deployedContracts = getDeployedContractsForFetchingEvents(chainProperties)
-        logger.debug { "Fetching events from contracts: ${deployedContracts.joinToString()}" }
+        logger.debug { "Fetching events from chain: $chainId for contracts: ${deployedContracts.joinToString()}" }
         val ethFilter = EthFilter(
             DefaultBlockParameter.valueOf(BigInteger.valueOf(startBlockNumber)),
             DefaultBlockParameter.valueOf(BigInteger.valueOf(endBlockNumber)),
