@@ -11,7 +11,7 @@ class IpfsServiceTest : JpaServiceTestBase() {
     @Test
     fun mustGetLogoHash() {
         val fileService = IpfsServiceImpl(applicationProperties, restTemplate)
-        val logoHash = fileService.getLogoHash("QmQ1wY6jd5uqAcPbdANR6BDqQt8fqEoCc64ypC6dvwnmTb")
+        val logoHash = fileService.getLogoUrl("QmQ1wY6jd5uqAcPbdANR6BDqQt8fqEoCc64ypC6dvwnmTb")
         assertThat(logoHash).isNotNull
     }
 }

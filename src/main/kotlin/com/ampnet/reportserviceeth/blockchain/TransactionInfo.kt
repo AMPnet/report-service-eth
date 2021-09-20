@@ -2,6 +2,8 @@ package com.ampnet.reportserviceeth.blockchain
 
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.toLocalDateTime
+import com.ampnet.reportserviceth.contract.IAssetCommon
+import com.ampnet.reportserviceth.contract.TransactionEvents
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import java.math.BigInteger
 import java.time.LocalDateTime
@@ -24,7 +26,7 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.InvestEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState
+        asset: IAssetCommon.AssetCommonState
     ) : this(
         TransactionType.RESERVE_INVESTMENT,
         event.investor,
@@ -44,7 +46,7 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.CancelInvestmentEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState
+        asset: IAssetCommon.AssetCommonState
     ) : this(
         TransactionType.CANCEL_INVESTMENT,
         event.investor,
@@ -64,7 +66,7 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.ClaimEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState
+        asset: IAssetCommon.AssetCommonState
     ) : this(
         TransactionType.COMPLETED_INVESTMENT,
         event.investor,
@@ -84,7 +86,7 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.CreatePayoutEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState
+        asset: IAssetCommon.AssetCommonState
     ) : this(
         TransactionType.CREATE_PAYOUT,
         event.creator,
@@ -104,7 +106,7 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.ReleaseEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAsset.AssetState
+        asset: IAssetCommon.AssetCommonState
     ) : this(
         TransactionType.REVENUE_SHARE,
         txRecipient.to,

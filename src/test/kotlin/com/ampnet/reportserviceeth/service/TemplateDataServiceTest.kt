@@ -65,12 +65,12 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
                 .thenReturn(testContext.events)
         }
         suppose("Blockchain service will return issuer state") {
-            Mockito.`when`(blockchainService.getIssuerState(chainId, issuer))
-                .thenReturn(createIssuerState())
+            Mockito.`when`(blockchainService.getIssuerCommonState(chainId, issuer))
+                .thenReturn(generateIssuerCommonState())
         }
         suppose("File service will return ipfs hash") {
-            Mockito.`when`(ipfsService.getLogoHash(issuerInfo))
-                .thenReturn(ipfsHash)
+            Mockito.`when`(ipfsService.getLogoUrl(ipfsCid))
+                .thenReturn(ipfsCid)
         }
 
         verify("Template data service can get user transactions") {
@@ -82,25 +82,24 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             val transactions = txSummary.transactions
             assertThat(transactions).hasSize(3)
             val investTx = transactions.first { it.type == TransactionType.RESERVE_INVESTMENT }
-//            assertThat(investTx.description).isEqualTo(project.name)
-//            assertThat(investTx.percentageInProject).isEqualTo(
-//                getPercentageInProject(project.expectedFunding, investTx.amount)
-//            )
+            assertThat(investTx.description).isEqualTo(defaultAssetName)
+            assertThat(investTx.assetTokenSymbol).isEqualTo(defaultAssetSymbol)
             assertThat(investTx.txDate).isNotBlank
             assertThat(investTx.valueInDollar).isEqualTo(investTx.value.toMwei())
-            val cancelInvestmentTx =
-                transactions.first { it.type == TransactionType.CANCEL_INVESTMENT }
-//            assertThat(cancelInvestmentTx.description).isEqualTo(project.name)
-//            assertThat(cancelInvestmentTx.percentageInProject).isEqualTo(
-//                getPercentageInProject(project.expectedFunding, cancelInvestmentTx.amount)
-//            )
+
+            val cancelInvestmentTx = transactions.first { it.type == TransactionType.CANCEL_INVESTMENT }
+            assertThat(cancelInvestmentTx.description).isEqualTo(defaultAssetName)
+            assertThat(cancelInvestmentTx.assetTokenSymbol).isEqualTo(defaultAssetSymbol)
             assertThat(cancelInvestmentTx.txDate).isNotBlank
             assertThat(cancelInvestmentTx.valueInDollar).isEqualTo(cancelInvestmentTx.value.toMwei())
+
             val sharePayoutTx = transactions.first { it.type == TransactionType.COMPLETED_INVESTMENT }
-//            assertThat(sharePayoutTx.description).isEqualTo(project.name)
+            assertThat(sharePayoutTx.description).isEqualTo(defaultAssetName)
+            assertThat(sharePayoutTx.assetTokenSymbol).isEqualTo(defaultAssetSymbol)
             assertThat(sharePayoutTx.txDate).isNotBlank
             assertThat(sharePayoutTx.valueInDollar).isEqualTo(sharePayoutTx.value.toMwei())
-            assertThat(txSummary.logo).isEqualTo(ipfsUrl + ipfsHash)
+
+            assertThat(txSummary.logo).isEqualTo(applicationProperties.ipfs.ipfsUrl + ipfsCid)
         }
     }
 

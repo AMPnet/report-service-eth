@@ -32,7 +32,7 @@ allOpen {
 }
 
 group = "com.ampnet"
-version = "0.1.4"
+version = "0.2.0"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 configurations {
@@ -64,7 +64,7 @@ dependencies {
     implementation("com.github.AMPnet:jwt:1.0.1")
     implementation("net.devh:grpc-client-spring-boot-starter:2.12.0.RELEASE")
     implementation("org.apache.poi:poi-ooxml:5.0.0")
-    implementation("org.web3j:core:4.8.4")
+    implementation("org.web3j:core:4.8.7")
     implementation("com.squareup.okhttp3:okhttp:4.9.1")
     implementation("org.flywaydb:flyway-core")
 
@@ -145,7 +145,7 @@ tasks.jacocoTestReport {
     sourceDirectories.setFrom(listOf(file("${project.projectDir}/src/main/kotlin")))
     classDirectories.setFrom(
         fileTree("$buildDir/classes/kotlin/main").apply {
-            exclude("**/pojo/**", "**/grpc/**")
+            exclude("**/pojo/**", "**/grpc/**", "**/blockchain/**")
         }
     )
     dependsOn(tasks.test)
@@ -153,11 +153,7 @@ tasks.jacocoTestReport {
 tasks.jacocoTestCoverageVerification {
     classDirectories.setFrom(
         sourceSets.main.get().output.asFileTree.matching {
-            exclude(
-                "com/ampnet/*/proto/**",
-                "com/ampnet/reportserviceeth/grpc/**",
-                "com/ampnet/reportserviceeth/blockchain/*"
-            )
+            exclude("**/proto/**", "**/grpc/**", "**/blockchain/**", "**/contract/*")
         }
     )
     violationRules {

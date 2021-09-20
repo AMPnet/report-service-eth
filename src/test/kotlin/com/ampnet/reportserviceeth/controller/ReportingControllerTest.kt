@@ -40,11 +40,11 @@ class ReportingControllerTest : ControllerTestBase() {
             testContext.events = createEventsResponse()
         }
         suppose("Blockchain service will return issuer state") {
-            Mockito.`when`(blockchainService.getIssuerState(defaultChainId, issuer))
-                .thenReturn(createIssuerState())
+            Mockito.`when`(blockchainService.getIssuerCommonState(defaultChainId, issuer))
+                .thenReturn(generateIssuerCommonState())
         }
         suppose("File service will return ipfs hash") {
-            Mockito.`when`(ipfsService.getLogoHash(issuerInfo))
+            Mockito.`when`(ipfsService.getLogoUrl(issuerInfo))
                 .thenReturn(ipfsHash)
         }
 
@@ -80,11 +80,11 @@ class ReportingControllerTest : ControllerTestBase() {
             )
         }
         suppose("Blockchain service will return issuer state") {
-            Mockito.`when`(blockchainService.getIssuerState(defaultChainId, issuer))
-                .thenReturn(createIssuerState())
+            Mockito.`when`(blockchainService.getIssuerCommonState(defaultChainId, issuer))
+                .thenReturn(generateIssuerCommonState())
         }
         suppose("File service will return ipfs hash") {
-            Mockito.`when`(ipfsService.getLogoHash(issuerInfo))
+            Mockito.`when`(ipfsService.getLogoUrl(issuerInfo))
                 .thenReturn(ipfsHash)
         }
 

@@ -6,6 +6,10 @@ import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.sendSafely
+import com.ampnet.reportserviceth.contract.IAssetCommon
+import com.ampnet.reportserviceth.contract.ICfManagerSoftcapFactory
+import com.ampnet.reportserviceth.contract.IPayoutManagerFactory
+import com.ampnet.reportserviceth.contract.TransactionEvents
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.web3j.protocol.core.DefaultBlockParameter
@@ -30,6 +34,8 @@ class BlockchainEventServiceImpl(
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
         val deployedContracts = getDeployedContractsForFetchingEvents(chainProperties)
         logger.debug { "Fetching events from chain: $chainId for contracts: ${deployedContracts.joinToString()}" }
+        if (deployedContracts.isEmpty()) return emptyList()
+
         val ethFilter = EthFilter(
             DefaultBlockParameter.valueOf(BigInteger.valueOf(startBlockNumber)),
             DefaultBlockParameter.valueOf(BigInteger.valueOf(endBlockNumber)),
@@ -45,7 +51,6 @@ class BlockchainEventServiceImpl(
         return generateEvents(logs, chainProperties, chainId)
     }
 
-    @Suppress("ThrowsCount")
     private fun getDeployedContractsForFetchingEvents(
         chainProperties: ChainPropertiesWithServices
     ): List<String> {
@@ -73,12 +78,7 @@ class BlockchainEventServiceImpl(
                 }
                 emptyList()
             }
-        return cfManagerInstances.plus(payoutManagerInstances).ifEmpty {
-            throw InternalException(
-                ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-                "There are no contracts deployed to fetch events"
-            )
-        }
+        return cfManagerInstances.plus(payoutManagerInstances)
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
@@ -91,11 +91,14 @@ class BlockchainEventServiceImpl(
         }
     }
 
-    private fun getAsset(contractAddress: String, chainProperties: ChainPropertiesWithServices): IAsset.AssetState {
-        val assetContract = IAsset.load(
+    private fun getAsset(
+        contractAddress: String,
+        chainProperties: ChainPropertiesWithServices
+    ): IAssetCommon.AssetCommonState {
+        val assetContract = IAssetCommon.load(
             contractAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
-        return assetContract.state.sendSafely() ?: throw InternalException(
+        return assetContract.commonState().sendSafely() ?: throw InternalException(
             ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
             "Cannot find the asset for address: $contractAddress"
         )

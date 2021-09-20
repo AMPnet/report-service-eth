@@ -46,7 +46,7 @@ class BlockchainServiceTest {
 
     @Test
     fun mustGetIssuerState() {
-        val issuerState = service.getIssuerState(Chain.MATIC_TESTNET_MUMBAI.id, issuerContract)
+        val issuerState = service.getIssuerCommonState(Chain.MATIC_TESTNET_MUMBAI.id, issuerContract)
         assertThat(issuerState).isNotNull
     }
 }
