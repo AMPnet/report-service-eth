@@ -54,30 +54,30 @@ class BlockchainEventServiceImpl(
     private fun getDeployedContractsForFetchingEvents(
         chainProperties: ChainPropertiesWithServices
     ): List<String> {
-        val cfManagerFactoryContract = ICfManagerSoftcapFactory.load(
-            chainProperties.chain.cfManagerFactoryAddress,
-            chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
-        )
-        val payoutManagerFactoryContract = IPayoutManagerFactory.load(
-            chainProperties.chain.payoutManagerFactoryAddress,
-            chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
-        )
-        val payoutManagerInstances = payoutManagerFactoryContract.instances.sendSafely()?.mapNotNull { it as? String }
-            ?: run {
-                logger.debug {
-                    "There are no contracts deployed for the payoutManagerFactory at: " +
-                        chainProperties.chain.payoutManagerFactoryAddress
-                }
-                emptyList()
+        val payoutManagerInstances: List<String> = chainProperties.chain.payoutManagerFactoryAddress.map { address ->
+            val payoutManagerFactoryContract = IPayoutManagerFactory.load(
+                address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
+            )
+            payoutManagerFactoryContract.instances.sendSafely()?.mapNotNull { it as? String }.orEmpty()
+        }.flatten()
+        if (payoutManagerInstances.isEmpty()) {
+            logger.info {
+                "There are no contracts deployed for the payoutManagerFactory address: " +
+                    chainProperties.chain.payoutManagerFactoryAddress
             }
-        val cfManagerInstances = cfManagerFactoryContract.instances.sendSafely()?.mapNotNull { it as? String }
-            ?: run {
-                logger.debug {
-                    "There are no contracts deployed for the cfManagerFactory at: " +
-                        chainProperties.chain.cfManagerFactoryAddress
-                }
-                emptyList()
+        }
+        val cfManagerInstances: List<String> = chainProperties.chain.cfManagerFactoryAddress.map { address ->
+            val cfManagerFactoryContract = ICfManagerSoftcapFactory.load(
+                address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
+            )
+            cfManagerFactoryContract.instances.sendSafely()?.mapNotNull { it as? String }.orEmpty()
+        }.flatten()
+        if (cfManagerInstances.isEmpty()) {
+            logger.info {
+                "There are no contracts deployed for the cfManagerFactory address: " +
+                    chainProperties.chain.cfManagerFactoryAddress
             }
+        }
         return cfManagerInstances.plus(payoutManagerInstances)
     }
 
@@ -114,7 +114,7 @@ class BlockchainEventServiceImpl(
         // The contract address is not important since it doesn't fetch anything from the blockchain.
         // It is only used to map logs to events.
         val contract = TransactionEvents.load(
-            chainProperties.chain.payoutManagerFactoryAddress,
+            chainProperties.chain.callerAddress,
             chainProperties.web3j,
             chainProperties.transactionManager,
             DefaultGasProvider()
