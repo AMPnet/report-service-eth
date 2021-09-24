@@ -17,9 +17,7 @@ import com.ampnet.reportserviceeth.service.TranslationService
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.data.SingleTransactionSummary
 import com.ampnet.reportserviceeth.service.data.Transaction
-import com.ampnet.reportserviceeth.service.data.TransactionCancelInvestment
 import com.ampnet.reportserviceeth.service.data.TransactionFactory
-import com.ampnet.reportserviceeth.service.data.TransactionReserveInvestment
 import com.ampnet.reportserviceeth.service.data.TransactionsSummary
 import com.ampnet.reportserviceeth.service.data.Translations
 import com.ampnet.reportserviceeth.service.data.UserInfo
@@ -40,6 +38,8 @@ class TemplateDataServiceImpl(
 ) : TemplateDataService {
 
     companion object : KLogging()
+
+    private val logoUrlMap = mutableMapOf<String, String>()
 
     override fun getUserTransactionsData(request: TransactionsServiceRequest): TransactionsSummary {
         val transactions = eventService.getTransactions(request)
@@ -104,18 +104,6 @@ class TemplateDataServiceImpl(
         transactions.forEach { transaction ->
             transaction.setLanguage(language)
             transaction.translations = translations
-            when (transaction) {
-                is TransactionReserveInvestment -> {
-//                    getExpectedProjectFunding(ownerUuidTo, projects)?.let {
-//                        transaction.setPercentageInProject(it)
-//                    }
-                }
-                is TransactionCancelInvestment -> {
-//                    getExpectedProjectFunding(ownerUuidFrom, projects)?.let {
-//                        transaction.setPercentageInProject(it)
-//                    }
-                }
-            }
         }
         return transactions
     }
@@ -127,13 +115,18 @@ class TemplateDataServiceImpl(
     private fun getTransactions(
         userTransactions: Map<String, List<TransactionInfo>>,
         userUuid: String
-    ): List<Transaction> =
-        userTransactions[userUuid]?.mapNotNull { TransactionFactory.createTransaction(it) }.orEmpty()
+    ): List<Transaction> = userTransactions[userUuid]
+        ?.mapNotNull { TransactionFactory.createTransaction(it) }
+        .orEmpty()
 
-    private fun getLogoUrl(chainId: Long, issuer: String): String? =
-        blockchainService.getIssuerState(chainId, issuer)?.let { issuerState ->
-            ipfsService.getLogoHash(issuerState.info)?.let { logoHash ->
+    private fun getLogoUrl(chainId: Long, issuer: String): String? {
+        logoUrlMap[issuer]?.let { return it }
+        val logoUrl = blockchainService.getIssuerCommonState(chainId, issuer)?.let { issuerState ->
+            ipfsService.getLogoUrl(issuerState.info)?.let { logoHash ->
                 applicationProperties.ipfs.ipfsUrl + logoHash
             }
         }
+        logoUrl?.let { logoUrlMap[issuer] = logoUrl }
+        return logoUrl
+    }
 }

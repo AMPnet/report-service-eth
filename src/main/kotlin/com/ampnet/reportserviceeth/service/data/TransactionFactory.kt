@@ -10,9 +10,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-const val TO_PERCENTAGE = 100L
-const val LENGTH_OF_PERCENTAGE = 8
-
 class TransactionFactory private constructor() {
     companion object {
         fun createTransaction(transaction: TransactionInfo): Transaction? {
@@ -49,14 +46,6 @@ abstract class Transaction(transaction: TransactionInfo) {
     var assetTokenSymbol: String? = transaction.assetTokenSymbol
     var percentageInProject: String? = null
     var locale: Locale = Locale.ENGLISH
-
-    fun setPercentageInProject() {
-        TODO("Not implemented")
-    }
-
-    fun amountToCalculate(): BigInteger {
-        TODO("Not implemented")
-    }
 
     fun setLanguage(language: String) {
         if (language.isNotBlank()) {

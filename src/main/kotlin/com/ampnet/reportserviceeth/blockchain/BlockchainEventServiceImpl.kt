@@ -6,6 +6,10 @@ import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.sendSafely
+import com.ampnet.reportserviceth.contract.IAssetCommon
+import com.ampnet.reportserviceth.contract.ICampaignFactoryCommon
+import com.ampnet.reportserviceth.contract.ISnapshotDistributorFactoryCommon
+import com.ampnet.reportserviceth.contract.TransactionEvents
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.web3j.protocol.core.DefaultBlockParameter
@@ -29,7 +33,9 @@ class BlockchainEventServiceImpl(
     override fun getAllEvents(startBlockNumber: Long, endBlockNumber: Long, chainId: Long): List<Event> {
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
         val deployedContracts = getDeployedContractsForFetchingEvents(chainProperties)
-        logger.debug { "Fetching events from chain: $chainId for contracts: ${deployedContracts.joinToString()}" }
+//        logger.debug { "Fetching events from chain: $chainId for contracts: ${deployedContracts.joinToString()}" }
+        if (deployedContracts.isEmpty()) return emptyList()
+
         val ethFilter = EthFilter(
             DefaultBlockParameter.valueOf(BigInteger.valueOf(startBlockNumber)),
             DefaultBlockParameter.valueOf(BigInteger.valueOf(endBlockNumber)),
@@ -45,40 +51,34 @@ class BlockchainEventServiceImpl(
         return generateEvents(logs, chainProperties, chainId)
     }
 
-    @Suppress("ThrowsCount")
     private fun getDeployedContractsForFetchingEvents(
         chainProperties: ChainPropertiesWithServices
     ): List<String> {
-        val cfManagerFactoryContract = ICfManagerSoftcapFactory.load(
-            chainProperties.chain.cfManagerFactoryAddress,
-            chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
-        )
-        val payoutManagerFactoryContract = IPayoutManagerFactory.load(
-            chainProperties.chain.payoutManagerFactoryAddress,
-            chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
-        )
-        val payoutManagerInstances = payoutManagerFactoryContract.instances.sendSafely()?.mapNotNull { it as? String }
-            ?: run {
-                logger.debug {
-                    "There are no contracts deployed for the payoutManagerFactory at: " +
-                        chainProperties.chain.payoutManagerFactoryAddress
-                }
-                emptyList()
-            }
-        val cfManagerInstances = cfManagerFactoryContract.instances.sendSafely()?.mapNotNull { it as? String }
-            ?: run {
-                logger.debug {
-                    "There are no contracts deployed for the cfManagerFactory at: " +
-                        chainProperties.chain.cfManagerFactoryAddress
-                }
-                emptyList()
-            }
-        return cfManagerInstances.plus(payoutManagerInstances).ifEmpty {
-            throw InternalException(
-                ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-                "There are no contracts deployed to fetch events"
+        val snapshotInstances: List<String> = chainProperties.chain.snapshotDistributorAddresses.map { address ->
+            val snapshotFactoryCommon = ISnapshotDistributorFactoryCommon.load(
+                address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
             )
+            snapshotFactoryCommon.instances.sendSafely()?.mapNotNull { it as? String }.orEmpty()
+        }.flatten()
+        if (snapshotInstances.isEmpty()) {
+            logger.info {
+                "There are no contracts deployed for the payoutManagerFactory address: " +
+                    chainProperties.chain.snapshotDistributorAddresses
+            }
         }
+        val cfManagerInstances: List<String> = chainProperties.chain.cfManagerFactoryAddresses.map { address ->
+            val cfManagerFactoryContract = ICampaignFactoryCommon.load(
+                address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
+            )
+            cfManagerFactoryContract.instances.sendSafely()?.mapNotNull { it as? String }.orEmpty()
+        }.flatten()
+        if (cfManagerInstances.isEmpty()) {
+            logger.info {
+                "There are no contracts deployed for the cfManagerFactory address: " +
+                    chainProperties.chain.cfManagerFactoryAddresses
+            }
+        }
+        return cfManagerInstances.plus(snapshotInstances)
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
@@ -91,11 +91,14 @@ class BlockchainEventServiceImpl(
         }
     }
 
-    private fun getAsset(contractAddress: String, chainProperties: ChainPropertiesWithServices): IAsset.AssetState {
-        val assetContract = IAsset.load(
+    private fun getAsset(
+        contractAddress: String,
+        chainProperties: ChainPropertiesWithServices
+    ): IAssetCommon.AssetCommonState {
+        val assetContract = IAssetCommon.load(
             contractAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
-        return assetContract.state.sendSafely() ?: throw InternalException(
+        return assetContract.commonState().sendSafely() ?: throw InternalException(
             ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
             "Cannot find the asset for address: $contractAddress"
         )
@@ -111,7 +114,7 @@ class BlockchainEventServiceImpl(
         // The contract address is not important since it doesn't fetch anything from the blockchain.
         // It is only used to map logs to events.
         val contract = TransactionEvents.load(
-            chainProperties.chain.payoutManagerFactoryAddress,
+            chainProperties.chain.callerAddress,
             chainProperties.web3j,
             chainProperties.transactionManager,
             DefaultGasProvider()

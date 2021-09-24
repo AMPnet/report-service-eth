@@ -15,6 +15,7 @@ import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.service.IpfsService
 import com.ampnet.reportserviceeth.toMWei
 import com.ampnet.reportserviceeth.toWei
+import com.ampnet.reportserviceth.contract.IIssuerCommon
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
@@ -237,11 +238,9 @@ abstract class ControllerTestBase : TestBase() {
         return invests + cancelInvestments + revenueShares
     }
 
-    protected fun createIssuerState() =
-        IIssuer.IssuerState(
-            BigInteger.TEN, "0xf9a13b61d15e4eb4046da02d34473f5dc53e5f7c", "lagata",
-            "0x4d2ebc8b12e6f9d5ee6d2412e0651cb0f603c54c", "0x7ae3ead4f7dea70c11853992274552e98787c647",
-            "0x9733aa0fb74a01f058fbeb0ad9da3f483058908e", "0xd449f575b45318f196ec806b84fcbf3f9583f8dc",
-            issuerInfo
+    protected fun generateIssuerCommonState() =
+        IIssuerCommon.IssuerCommonState(
+            "flavor", "version", "0xf9a13b61d15e4eb4046da02d34473f5dc53e5f7c",
+            "0x4d2ebc8b12e6f9d5ee6d2412e0651cb0f603c54c", "QmaPmqiytVSSHtbmjfWp82VQcE82pq28iHeTL8hmVigscJ"
         )
 }

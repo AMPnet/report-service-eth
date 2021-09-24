@@ -13,6 +13,7 @@ import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.impl.TranslationServiceImpl
 import com.ampnet.reportserviceeth.toWei
+import com.ampnet.reportserviceth.contract.IIssuerCommon
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -37,11 +38,11 @@ abstract class JpaServiceTestBase : TestBase() {
     protected val userWallet: String = "0x520eC1D2f24740B85c6A30fB9e56298dAd540FDb"
     protected val projectWallet: String = "0xFeC646017105fA2A4FFDc773e9c539Eda5af724a"
     protected val txHash = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
-    protected val issuerInfo = "QmQ1wY6jd5uqAcPbdANR6BDqQt8fqEoCc64ypC6dvwnmTb"
-    protected val ipfsHash = "QmYuSijGgZAnBadguWUjLTYyfbvpaUBoWRfQMveo6XfzP3"
+    protected val ipfsCid = "QmYuSijGgZAnBadguWUjLTYyfbvpaUBoWRfQMveo6XfzP3"
     protected val issuer = "0x5013F6ce0f9Beb07Be528E408352D03f3FCa1857"
-    protected val ipfsUrl = "https://ampnet.mypinata.cloud/ipfs/"
     protected val chainId = Chain.MATIC_TESTNET_MUMBAI.id
+    protected val defaultAssetName = "asset_name"
+    protected val defaultAssetSymbol = "SMB"
 
     @Mock
     protected lateinit var blockchainService: BlockchainService
@@ -114,16 +115,14 @@ abstract class JpaServiceTestBase : TestBase() {
         Event(
             UUID.randomUUID(), chain, from, to,
             contractAddress, issuerAddress, txHash, type,
-            logIndex, "asset_name", "symbol", 500045L, blockHash,
+            logIndex, defaultAssetName, defaultAssetSymbol, 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
             amount.toWei(), amount.toWei(), 50L, BigInteger("500")
         )
 
-    protected fun createIssuerState() =
-        IIssuer.IssuerState(
-            BigInteger.TEN, "0xf9a13b61d15e4eb4046da02d34473f5dc53e5f7c", "lagata",
-            "0x4d2ebc8b12e6f9d5ee6d2412e0651cb0f603c54c", "0x7ae3ead4f7dea70c11853992274552e98787c647",
-            "0x9733aa0fb74a01f058fbeb0ad9da3f483058908e", "0xd449f575b45318f196ec806b84fcbf3f9583f8dc",
-            issuerInfo
+    protected fun generateIssuerCommonState() =
+        IIssuerCommon.IssuerCommonState(
+            "flavor", "version", "0xf9a13b61d15e4eb4046da02d34473f5dc53e5f7c",
+            "0x4d2ebc8b12e6f9d5ee6d2412e0651cb0f603c54c", ipfsCid
         )
 }

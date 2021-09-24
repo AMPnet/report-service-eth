@@ -2,6 +2,7 @@ package com.ampnet.reportserviceeth.blockchain
 
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
+import com.ampnet.reportserviceth.contract.IIssuerCommon
 import java.math.BigInteger
 
 interface BlockchainService {
@@ -16,5 +17,5 @@ interface BlockchainService {
     @Throws(InternalException::class)
     fun getBlockNumber(chainId: Long): BigInteger
 
-    fun getIssuerState(chainId: Long, issuer: String): IIssuer.IssuerState?
+    fun getIssuerCommonState(chainId: Long, issuer: String): IIssuerCommon.IssuerCommonState?
 }

@@ -32,10 +32,12 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
             Chain.HARDHAT_TESTNET -> applicationProperties.chainHardhatTestnet
         }
         return if (chainProperties.callerAddress.isBlank() ||
-            chainProperties.cfManagerFactoryAddress.isBlank() ||
-            chainProperties.payoutManagerFactoryAddress.isBlank()
-        ) null
-        else chainProperties
+            chainProperties.cfManagerFactoryAddresses.isEmpty()
+        ) {
+            null
+        } else {
+            chainProperties
+        }
     }
 
     private fun generateBlockchainProperties(chain: Chain): ChainPropertiesWithServices {

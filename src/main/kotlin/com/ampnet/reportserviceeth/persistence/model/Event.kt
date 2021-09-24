@@ -1,6 +1,8 @@
 package com.ampnet.reportserviceeth.persistence.model
 
 import com.ampnet.reportserviceeth.blockchain.TransactionType
+import com.ampnet.reportserviceth.contract.IAssetCommon
+import com.ampnet.reportserviceth.contract.TransactionEvents
 import org.web3j.protocol.core.methods.response.Log
 import java.math.BigInteger
 import java.util.UUID
@@ -78,7 +80,7 @@ class Event(
         event: TransactionEvents.InvestEventResponse,
         chainId: Long,
         log: Log,
-        asset: IAsset.AssetState
+        asset: IAssetCommon.AssetCommonState
     ) : this(
         UUID.randomUUID(),
         chainId,
@@ -108,7 +110,7 @@ class Event(
         event: TransactionEvents.CancelInvestmentEventResponse,
         chainId: Long,
         log: Log,
-        asset: IAsset.AssetState
+        asset: IAssetCommon.AssetCommonState
     ) : this(
         UUID.randomUUID(),
         chainId,
@@ -138,7 +140,7 @@ class Event(
         event: TransactionEvents.ClaimEventResponse,
         chainId: Long,
         log: Log,
-        asset: IAsset.AssetState
+        asset: IAssetCommon.AssetCommonState
     ) : this(
         UUID.randomUUID(),
         chainId,
@@ -168,7 +170,7 @@ class Event(
         event: TransactionEvents.CreatePayoutEventResponse,
         chainId: Long,
         log: Log,
-        asset: IAsset.AssetState
+        asset: IAssetCommon.AssetCommonState
     ) : this(
         UUID.randomUUID(),
         chainId,
@@ -198,7 +200,7 @@ class Event(
         event: TransactionEvents.ReleaseEventResponse,
         chainId: Long,
         log: Log,
-        asset: IAsset.AssetState
+        asset: IAssetCommon.AssetCommonState
     ) : this(
         UUID.randomUUID(),
         chainId,
