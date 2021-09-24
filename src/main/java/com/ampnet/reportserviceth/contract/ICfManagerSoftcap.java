@@ -2,9 +2,12 @@ package com.ampnet.reportserviceth.contract;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Callable;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.DynamicStruct;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
@@ -34,6 +37,10 @@ public class ICfManagerSoftcap extends Contract {
     public static final String FUNC_COMMONSTATE = "commonState";
 
     public static final String FUNC_FLAVOR = "flavor";
+
+    public static final String FUNC_GETINFOHISTORY = "getInfoHistory";
+
+    public static final String FUNC_GETSTATE = "getState";
 
     public static final String FUNC_VERSION = "version";
 
@@ -67,6 +74,28 @@ public class ICfManagerSoftcap extends Contract {
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
         return executeRemoteCallSingleValueReturn(function, String.class);
+    }
+
+    public RemoteFunctionCall<List> getInfoHistory() {
+        final Function function = new Function(FUNC_GETINFOHISTORY, 
+                Arrays.<Type>asList(), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<InfoEntry>>() {}));
+        return new RemoteFunctionCall<List>(function,
+                new Callable<List>() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public List call() throws Exception {
+                        List<Type> result = (List<Type>) executeCallSingleValueReturn(function, List.class);
+                        return convertToNative(result);
+                    }
+                });
+    }
+
+    public RemoteFunctionCall<CfManagerSoftcapState> getState() {
+        final Function function = new Function(FUNC_GETSTATE, 
+                Arrays.<Type>asList(), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<CfManagerSoftcapState>() {}));
+        return executeRemoteCallSingleValueReturn(function, CfManagerSoftcapState.class);
     }
 
     public RemoteFunctionCall<String> version() {
@@ -167,6 +196,114 @@ public class ICfManagerSoftcap extends Contract {
             this.pricePerToken = pricePerToken.getValue();
             this.fundsRaised = fundsRaised.getValue();
             this.tokensSold = tokensSold.getValue();
+        }
+    }
+
+    public static class InfoEntry extends DynamicStruct {
+        public String info;
+
+        public BigInteger timestamp;
+
+        public InfoEntry(String info, BigInteger timestamp) {
+            super(new Utf8String(info),new Uint256(timestamp));
+            this.info = info;
+            this.timestamp = timestamp;
+        }
+
+        public InfoEntry(Utf8String info, Uint256 timestamp) {
+            super(info,timestamp);
+            this.info = info.getValue();
+            this.timestamp = timestamp.getValue();
+        }
+    }
+
+    public static class CfManagerSoftcapState extends DynamicStruct {
+        public String flavor;
+
+        public String version;
+
+        public String contractAddress;
+
+        public String owner;
+
+        public String asset;
+
+        public String issuer;
+
+        public BigInteger tokenPrice;
+
+        public BigInteger softCap;
+
+        public BigInteger minInvestment;
+
+        public BigInteger maxInvestment;
+
+        public Boolean whitelistRequired;
+
+        public Boolean finalized;
+
+        public Boolean canceled;
+
+        public BigInteger totalClaimableTokens;
+
+        public BigInteger totalInvestorsCount;
+
+        public BigInteger totalClaimsCount;
+
+        public BigInteger totalFundsRaised;
+
+        public BigInteger totalTokensSold;
+
+        public BigInteger totalTokensBalance;
+
+        public String info;
+
+        public CfManagerSoftcapState(String flavor, String version, String contractAddress, String owner, String asset, String issuer, BigInteger tokenPrice, BigInteger softCap, BigInteger minInvestment, BigInteger maxInvestment, Boolean whitelistRequired, Boolean finalized, Boolean canceled, BigInteger totalClaimableTokens, BigInteger totalInvestorsCount, BigInteger totalClaimsCount, BigInteger totalFundsRaised, BigInteger totalTokensSold, BigInteger totalTokensBalance, String info) {
+            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Address(asset),new Address(issuer),new Uint256(tokenPrice),new Uint256(softCap),new Uint256(minInvestment),new Uint256(maxInvestment),new Bool(whitelistRequired),new Bool(finalized),new Bool(canceled),new Uint256(totalClaimableTokens),new Uint256(totalInvestorsCount),new Uint256(totalClaimsCount),new Uint256(totalFundsRaised),new Uint256(totalTokensSold),new Uint256(totalTokensBalance),new Utf8String(info));
+            this.flavor = flavor;
+            this.version = version;
+            this.contractAddress = contractAddress;
+            this.owner = owner;
+            this.asset = asset;
+            this.issuer = issuer;
+            this.tokenPrice = tokenPrice;
+            this.softCap = softCap;
+            this.minInvestment = minInvestment;
+            this.maxInvestment = maxInvestment;
+            this.whitelistRequired = whitelistRequired;
+            this.finalized = finalized;
+            this.canceled = canceled;
+            this.totalClaimableTokens = totalClaimableTokens;
+            this.totalInvestorsCount = totalInvestorsCount;
+            this.totalClaimsCount = totalClaimsCount;
+            this.totalFundsRaised = totalFundsRaised;
+            this.totalTokensSold = totalTokensSold;
+            this.totalTokensBalance = totalTokensBalance;
+            this.info = info;
+        }
+
+        public CfManagerSoftcapState(Utf8String flavor, Utf8String version, Address contractAddress, Address owner, Address asset, Address issuer, Uint256 tokenPrice, Uint256 softCap, Uint256 minInvestment, Uint256 maxInvestment, Bool whitelistRequired, Bool finalized, Bool canceled, Uint256 totalClaimableTokens, Uint256 totalInvestorsCount, Uint256 totalClaimsCount, Uint256 totalFundsRaised, Uint256 totalTokensSold, Uint256 totalTokensBalance, Utf8String info) {
+            super(flavor,version,contractAddress,owner,asset,issuer,tokenPrice,softCap,minInvestment,maxInvestment,whitelistRequired,finalized,canceled,totalClaimableTokens,totalInvestorsCount,totalClaimsCount,totalFundsRaised,totalTokensSold,totalTokensBalance,info);
+            this.flavor = flavor.getValue();
+            this.version = version.getValue();
+            this.contractAddress = contractAddress.getValue();
+            this.owner = owner.getValue();
+            this.asset = asset.getValue();
+            this.issuer = issuer.getValue();
+            this.tokenPrice = tokenPrice.getValue();
+            this.softCap = softCap.getValue();
+            this.minInvestment = minInvestment.getValue();
+            this.maxInvestment = maxInvestment.getValue();
+            this.whitelistRequired = whitelistRequired.getValue();
+            this.finalized = finalized.getValue();
+            this.canceled = canceled.getValue();
+            this.totalClaimableTokens = totalClaimableTokens.getValue();
+            this.totalInvestorsCount = totalInvestorsCount.getValue();
+            this.totalClaimsCount = totalClaimsCount.getValue();
+            this.totalFundsRaised = totalFundsRaised.getValue();
+            this.totalTokensSold = totalTokensSold.getValue();
+            this.totalTokensBalance = totalTokensBalance.getValue();
+            this.info = info.getValue();
         }
     }
 }

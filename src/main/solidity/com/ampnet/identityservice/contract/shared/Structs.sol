@@ -79,6 +79,22 @@ contract Structs {
         string mappedName;
     }
 
+    struct SnapshotDistributorCommonStateWithName {
+        SnapshotDistributorCommonState distributor;
+        string mappedName;
+    }
+
+    struct SnapshotDistributorCommonState {
+        string flavor;
+        string version;
+        address contractAddress;
+        address owner;
+        string info;
+        address asset;
+        uint256 totalPayoutsCreated;
+        uint256 totalPayoutsAmount;
+    }
+
     struct TokenSaleInfo {
         address cfManager;
         uint256 tokenAmount;

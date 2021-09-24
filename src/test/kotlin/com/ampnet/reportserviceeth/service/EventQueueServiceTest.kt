@@ -62,7 +62,7 @@ class EventQueueServiceTest : TestBase() {
         databaseCleanerService.deleteAllTasks()
         databaseCleanerService.deleteAllEvents()
         Mockito.clearInvocations(blockchainEventService)
-        given(blockchainService.getBlockNumber(defaultChainId)).willReturn(BigInteger.valueOf(-1))
+        given(blockchainService.getBlockNumber(any())).willReturn(BigInteger.valueOf(-1))
         given(blockchainEventService.getAllEvents(any(), any(), any())).willReturn(emptyList())
     }
 
@@ -114,7 +114,7 @@ class EventQueueServiceTest : TestBase() {
     fun mustSaveEventsFromMultipleChains() {
         suppose("There is an existing task for two chains") {
             testContext.task = taskRepository.save(Task(defaultChainId, startBlockNumber))
-            testContext.anotherTask = taskRepository.save(Task(Chain.MATIC_MAIN.id, startBlockNumber))
+            testContext.anotherTask = taskRepository.save(Task(maticChainId, startBlockNumber))
         }
         suppose("Blockchain service will return two events for mumbai testnet") {
             given(
@@ -145,8 +145,7 @@ class EventQueueServiceTest : TestBase() {
             )
         }
         suppose("Blockchain service will return latest block number for both chains") {
-            given(blockchainService.getBlockNumber(maticChainId)).willReturn(BigInteger.valueOf(lastBlockNumber))
-            given(blockchainService.getBlockNumber(defaultChainId)).willReturn(BigInteger.valueOf(lastBlockNumber))
+            given(blockchainService.getBlockNumber(any())).willReturn(BigInteger.valueOf(lastBlockNumber))
         }
 
         verify("Service will save events and update tasks") {

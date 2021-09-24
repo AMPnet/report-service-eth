@@ -14,6 +14,7 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.StaticStruct;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
@@ -41,6 +42,8 @@ public class IIssuer extends Contract {
     public static final String FUNC_COMMONSTATE = "commonState";
 
     public static final String FUNC_FLAVOR = "flavor";
+
+    public static final String FUNC_GETINFOHISTORY = "getInfoHistory";
 
     public static final String FUNC_GETSTATE = "getState";
 
@@ -88,6 +91,21 @@ public class IIssuer extends Contract {
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
         return executeRemoteCallSingleValueReturn(function, String.class);
+    }
+
+    public RemoteFunctionCall<List> getInfoHistory() {
+        final Function function = new Function(FUNC_GETINFOHISTORY, 
+                Arrays.<Type>asList(), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<InfoEntry>>() {}));
+        return new RemoteFunctionCall<List>(function,
+                new Callable<List>() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public List call() throws Exception {
+                        List<Type> result = (List<Type>) executeCallSingleValueReturn(function, List.class);
+                        return convertToNative(result);
+                    }
+                });
     }
 
     public RemoteFunctionCall<IssuerState> getState() {
@@ -207,6 +225,24 @@ public class IIssuer extends Contract {
             this.contractAddress = contractAddress.getValue();
             this.owner = owner.getValue();
             this.info = info.getValue();
+        }
+    }
+
+    public static class InfoEntry extends DynamicStruct {
+        public String info;
+
+        public BigInteger timestamp;
+
+        public InfoEntry(String info, BigInteger timestamp) {
+            super(new Utf8String(info),new Uint256(timestamp));
+            this.info = info;
+            this.timestamp = timestamp;
+        }
+
+        public InfoEntry(Utf8String info, Uint256 timestamp) {
+            super(info,timestamp);
+            this.info = info.getValue();
+            this.timestamp = timestamp.getValue();
         }
     }
 

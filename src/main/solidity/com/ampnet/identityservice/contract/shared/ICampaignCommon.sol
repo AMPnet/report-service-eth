@@ -5,8 +5,5 @@ import "./IVersioned.sol";
 import "./Structs.sol";
 
 interface ICampaignCommon is IVersioned {
-    
-    // READ
     function commonState() external view returns (Structs.CampaignCommonState memory);
-
 }

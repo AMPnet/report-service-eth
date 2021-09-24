@@ -2,7 +2,6 @@ package com.ampnet.reportserviceth.contract;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collections;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.DynamicStruct;
@@ -14,7 +13,6 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.RemoteFunctionCall;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
@@ -33,8 +31,6 @@ public class IAssetCommon extends Contract {
     public static final String BINARY = "";
 
     public static final String FUNC_COMMONSTATE = "commonState";
-
-    public static final String FUNC_FINALIZESALE = "finalizeSale";
 
     public static final String FUNC_FLAVOR = "flavor";
 
@@ -65,14 +61,6 @@ public class IAssetCommon extends Contract {
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<AssetCommonState>() {}));
         return executeRemoteCallSingleValueReturn(function, AssetCommonState.class);
-    }
-
-    public RemoteFunctionCall<TransactionReceipt> finalizeSale() {
-        final Function function = new Function(
-                FUNC_FINALIZESALE, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return executeRemoteCallTransaction(function);
     }
 
     public RemoteFunctionCall<String> flavor() {

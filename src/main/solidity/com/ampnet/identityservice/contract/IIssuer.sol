@@ -14,5 +14,6 @@ interface IIssuer is IIssuerCommon {
 
     function getState() external view returns (Structs.IssuerState memory);
     function isWalletApproved(address _wallet) external view returns (bool);
+    function getInfoHistory() external view returns (Structs.InfoEntry[] memory);
     function getWalletRecords() external view returns (Structs.WalletRecord[] memory);
 }
