@@ -35,7 +35,7 @@ class QueueProperties {
 @Suppress("MagicNumber")
 class ChainProperties {
     var callerAddress: String = "0x0000000000000000000000000000000000000000"
-    var cfManagerFactoryAddress: List<String> = emptyList()
+    var cfManagerFactoryAddresses: List<String> = emptyList()
     var snapshotDistributorAddresses: List<String> = emptyList()
     var startBlockNumber: Long = 1
     var numOfConfirmations: Long = 10

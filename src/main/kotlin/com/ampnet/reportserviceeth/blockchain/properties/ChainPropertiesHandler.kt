@@ -32,7 +32,7 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
             Chain.HARDHAT_TESTNET -> applicationProperties.chainHardhatTestnet
         }
         return if (chainProperties.callerAddress.isBlank() ||
-            chainProperties.cfManagerFactoryAddress.isEmpty()
+            chainProperties.cfManagerFactoryAddresses.isEmpty()
         ) {
             null
         } else {

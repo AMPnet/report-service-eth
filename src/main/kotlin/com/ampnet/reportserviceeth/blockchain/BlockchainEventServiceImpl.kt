@@ -66,7 +66,7 @@ class BlockchainEventServiceImpl(
                     chainProperties.chain.snapshotDistributorAddresses
             }
         }
-        val cfManagerInstances: List<String> = chainProperties.chain.cfManagerFactoryAddress.map { address ->
+        val cfManagerInstances: List<String> = chainProperties.chain.cfManagerFactoryAddresses.map { address ->
             val cfManagerFactoryContract = ICampaignFactoryCommon.load(
                 address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
             )
@@ -75,7 +75,7 @@ class BlockchainEventServiceImpl(
         if (cfManagerInstances.isEmpty()) {
             logger.info {
                 "There are no contracts deployed for the cfManagerFactory address: " +
-                    chainProperties.chain.cfManagerFactoryAddress
+                    chainProperties.chain.cfManagerFactoryAddresses
             }
         }
         return cfManagerInstances.plus(snapshotInstances)
