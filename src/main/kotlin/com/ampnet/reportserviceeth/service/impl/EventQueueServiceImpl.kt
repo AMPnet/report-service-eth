@@ -48,24 +48,22 @@ class EventQueueServiceImpl(
     @Transactional
     @Suppress("TooGenericExceptionCaught")
     fun processTask(chain: Chain, chainProperties: ChainProperties) {
-        logger.debug { "Processing tasks for chainId: ${chain.id}" }
         val task = taskRepository.findByChainId(chain.id)
         val startBlockNumber = task?.let { it.blockNumber + 1 } ?: chainProperties.startBlockNumber
-        logger.debug { "Start block number: $startBlockNumber" }
         try {
             val latestBlockNumber = blockchainService.getBlockNumber(chain.id)
-            logger.debug { "Latest block number is: $latestBlockNumber" }
             val endBlockNumber = calculateEndBlockNumber(
                 startBlockNumber, latestBlockNumber.toLong(), chainProperties
             )
-            logger.debug { "End block number: $endBlockNumber" }
             if (startBlockNumber >= endBlockNumber) {
-                logger.warn { "End block: $endBlockNumber is smaller than start block: $startBlockNumber" }
+//                logger.debug { "End block: $endBlockNumber is smaller than start block: $startBlockNumber" }
                 return
             }
             val events = blockchainEventService.getAllEvents(startBlockNumber, endBlockNumber, chain.id)
-            logger.debug { "Number of fetched events: ${events.size}" }
-            eventRepository.saveAll(events)
+            if (events.isNotEmpty()) {
+                logger.debug { "Number of fetched events: ${events.size}" }
+                eventRepository.saveAll(events)
+            }
             val updatedTask = task?.apply {
                 this.blockNumber = endBlockNumber
                 this.timestamp = Instant.now().toEpochMilli()
