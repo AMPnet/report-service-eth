@@ -13,8 +13,6 @@ import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.service.IpfsService
-import com.ampnet.reportserviceeth.toMWei
-import com.ampnet.reportserviceeth.toWei
 import com.ampnet.reportserviceth.contract.IIssuerCommon
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -36,6 +34,7 @@ import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
+import org.web3j.utils.Convert
 import java.io.File
 import java.math.BigInteger
 import java.time.LocalDateTime
@@ -161,7 +160,9 @@ abstract class ControllerTestBase : TestBase() {
         to: String,
         amount: String = "70"
     ): TransactionInfo = TransactionInfo(
-        type, from, to, amount.toWei(), amount.toWei(),
+        type, from, to,
+        Convert.toWei(amount, Convert.Unit.ETHER).toBigInteger(),
+        Convert.toWei(amount, Convert.Unit.ETHER).toBigInteger(),
         LocalDateTime.now(), "0xafd91eb7096efdc4e8ef331a83bc512f279b80730dfbd62824df92e4e504f2f8",
         "Gold mine in Chile", "GMC"
     )
@@ -203,7 +204,8 @@ abstract class ControllerTestBase : TestBase() {
         from: String = userAddress,
         to: String = projectWallet,
         type: TransactionType = TransactionType.COMPLETED_INVESTMENT,
-        amount: String = "10000",
+        amount: BigInteger = BigInteger.valueOf(700000),
+        value: BigInteger = BigInteger.valueOf(1431433242432),
         contractAddress: String = projectWallet,
         issuerAddress: String = issuer,
         txHash: String = UUID.randomUUID().toString(),
@@ -218,22 +220,23 @@ abstract class ControllerTestBase : TestBase() {
             contractAddress, issuerAddress, txHash, type,
             logIndex, "project_name", "symbol", 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
-            amount.toMWei(), amount.toWei(), 50L, BigInteger("500")
+            value, amount, 50L, BigInteger.valueOf(500)
         )
         return if (saveToDb) eventRepository.save(event)
         else event
     }
 
     protected fun createEventsResponse(): List<Event> {
-        val investment = "30000"
+        val investment = BigInteger.valueOf(24234242423)
+        val amount = BigInteger.valueOf(52542548456)
         val invests = MutableList(2) {
-            createEvent(userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT, investment)
+            createEvent(userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT, investment, amount)
         }
         val cancelInvestments = MutableList(1) {
-            createEvent(userAddress, projectWallet, TransactionType.CANCEL_INVESTMENT, investment)
+            createEvent(userAddress, projectWallet, TransactionType.CANCEL_INVESTMENT, investment, amount)
         }
         val revenueShares = MutableList(2) {
-            createEvent(projectWallet, userAddress, TransactionType.REVENUE_SHARE, "500")
+            createEvent(projectWallet, userAddress, TransactionType.REVENUE_SHARE, investment, amount)
         }
         return invests + cancelInvestments + revenueShares
     }

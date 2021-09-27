@@ -12,12 +12,12 @@ import com.ampnet.reportserviceeth.exception.ResourceNotFoundException
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.impl.TemplateDataServiceImpl
-import com.ampnet.reportserviceeth.toWei
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
+import org.web3j.utils.Convert
 import java.math.BigInteger
 import java.time.LocalDateTime
 
@@ -236,17 +236,19 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
                 when (it.userInfo.address) {
                     userAddress -> {
                         assertThat(it.investments).isEqualTo(
-                            (
-                                testContext.reserveInvestment.toString().toWei() -
-                                    testContext.cancelInvestment.toString().toWei()
-                                ).toMwei()
+                            BigInteger.valueOf(testContext.reserveInvestment - testContext.cancelInvestment).toMwei()
                         )
-                        assertThat(it.revenueShare).isEqualTo(testContext.sharePayout.toString().toWei().toMwei())
+                        assertThat(it.revenueShare).isEqualTo(toPrintValue(testContext.sharePayout))
                     }
-                    secondUserAddress -> assertThat(it.investments).isEqualTo(
-                        BigInteger.valueOf(testContext.reserveInvestment).toString().toWei().toMwei()
-                    )
-                    thirdUserAddress -> assertThat(it.transactions).isEmpty()
+                    secondUserAddress -> {
+                        assertThat(it.investments).isEqualTo(toPrintValue(testContext.reserveInvestment))
+                        assertThat(it.revenueShare).isEqualTo(BigInteger.ZERO.toMwei())
+                    }
+                    thirdUserAddress -> {
+                        assertThat(it.transactions).isEmpty()
+                        assertThat(it.investments).isEqualTo(BigInteger.ZERO.toMwei())
+                        assertThat(it.revenueShare).isEqualTo(BigInteger.ZERO.toMwei())
+                    }
                 }
             }
         }
@@ -287,6 +289,9 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             assertThat(exception.errorCode).isEqualTo(ErrorCode.USER_MISSING_INFO)
         }
     }
+
+    private fun toPrintValue(amount: Long) =
+        Convert.toWei(amount.toString(), Convert.Unit.MWEI).toBigInteger().toMwei()
 
     private fun createEventsFlow(): List<Event> =
         listOf(

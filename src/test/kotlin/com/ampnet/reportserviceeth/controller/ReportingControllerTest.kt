@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.math.BigInteger
 import java.time.LocalDate
 
 class ReportingControllerTest : ControllerTestBase() {
@@ -61,7 +62,7 @@ class ReportingControllerTest : ControllerTestBase() {
 
             val pdfContent = result.response.contentAsByteArray
             verifyPdfFormat(pdfContent)
-            // File(getDownloadDirectory("transactions.pdf")).writeBytes(pdfContent)
+//             File(getDownloadDirectory("transactions.pdf")).writeBytes(pdfContent)
         }
     }
 
@@ -76,7 +77,7 @@ class ReportingControllerTest : ControllerTestBase() {
         suppose("There is an event") {
             testContext.event = createEvent(
                 userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT,
-                "700", txHash = txHash
+                BigInteger.valueOf(700), txHash = txHash
             )
         }
         suppose("Blockchain service will return issuer state") {
@@ -98,7 +99,7 @@ class ReportingControllerTest : ControllerTestBase() {
 
             val pdfContent = result.response.contentAsByteArray
             verifyPdfFormat(pdfContent)
-            // File(getDownloadDirectory("transaction.pdf")).writeBytes(pdfContent)
+//             File(getDownloadDirectory("transaction.pdf")).writeBytes(pdfContent)
         }
     }
 

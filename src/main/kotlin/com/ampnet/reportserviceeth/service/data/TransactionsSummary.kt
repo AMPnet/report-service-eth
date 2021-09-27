@@ -40,13 +40,11 @@ class TransactionsSummary(
         return "$fromPeriod - $toPeriod"
     }
 
-    private fun getDateOfFinish(transactions: List<Transaction>, periodRequest: PeriodServiceRequest): String {
-        return periodRequest.to?.formatToYearMonthDay(locale)
+    private fun getDateOfFinish(transactions: List<Transaction>, periodRequest: PeriodServiceRequest): String =
+        periodRequest.to?.formatToYearMonthDay(locale)
             ?: if (transactions.isEmpty()) LocalDateTime.now().formatToYearMonthDay(locale)
             else transactions.last().date.formatToYearMonthDay(locale)
-    }
 
-    private fun sumTransactionAmountsByType(type: TransactionType): BigInteger {
-        return transactionsByType[type]?.sumOf { it.value } ?: BigInteger.ZERO
-    }
+    private fun sumTransactionAmountsByType(type: TransactionType): BigInteger =
+        transactionsByType[type]?.sumOf { it.value } ?: BigInteger.ZERO
 }

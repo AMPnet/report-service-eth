@@ -12,7 +12,6 @@ import com.ampnet.reportserviceeth.config.JsonConfig
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.impl.TranslationServiceImpl
-import com.ampnet.reportserviceeth.toWei
 import com.ampnet.reportserviceth.contract.IIssuerCommon
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.extension.ExtendWith
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestTemplate
+import org.web3j.utils.Convert
 import java.math.BigInteger
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -81,7 +81,9 @@ abstract class JpaServiceTestBase : TestBase() {
         date: LocalDateTime = LocalDateTime.now().minusDays(1),
         txHash: String = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
     ): TransactionInfo = TransactionInfo(
-        type, from, to, amount.toWei(), amount.toWei(),
+        type, from, to,
+        Convert.toWei(amount, Convert.Unit.MWEI).toBigInteger(),
+        Convert.toWei(amount, Convert.Unit.MWEI).toBigInteger(),
         date, txHash, "asset", "GMC"
     )
 
@@ -103,7 +105,7 @@ abstract class JpaServiceTestBase : TestBase() {
         from: String = userAddress,
         to: String = projectWallet,
         type: TransactionType = TransactionType.COMPLETED_INVESTMENT,
-        amount: String = "1000000",
+        amount: String = "1005000",
         txHash: String = "txHash",
         chain: Long = chainId,
         contractAddress: String = projectWallet,
@@ -117,7 +119,9 @@ abstract class JpaServiceTestBase : TestBase() {
             contractAddress, issuerAddress, txHash, type,
             logIndex, defaultAssetName, defaultAssetSymbol, 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
-            amount.toWei(), amount.toWei(), 50L, BigInteger("500")
+            Convert.toWei(amount, Convert.Unit.MWEI).toBigInteger(),
+            Convert.toWei(amount, Convert.Unit.MWEI).toBigInteger(),
+            50L, BigInteger("500")
         )
 
     protected fun generateIssuerCommonState() =
