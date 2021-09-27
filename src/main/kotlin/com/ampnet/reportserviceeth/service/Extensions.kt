@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import org.web3j.protocol.core.RemoteFunctionCall
 import org.web3j.protocol.core.Request
 import org.web3j.protocol.core.Response
+import org.web3j.utils.Convert
 import java.io.IOException
 import java.math.BigInteger
 import java.text.DecimalFormat
@@ -15,8 +16,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.Optional
 
-const val ETHER_DECIMALS_PRECISION = 1_000_000_000_000_000_000L
-const val MWEI_DECIMALS_PRECISION = 1_000_000L
+const val NUMBER_FORMAT = "#,##0.00"
 
 private val logger = KotlinLogging.logger {}
 
@@ -53,11 +53,11 @@ fun BigInteger.toLocalDateTime(): LocalDateTime =
 fun Long.toLocalDateTime(): LocalDateTime =
     LocalDateTime.ofInstant(Instant.ofEpochSecond(this), ZoneId.systemDefault())
 
-fun BigInteger.toEther(): String = DecimalFormat("#,##0.00")
-    .format(this / BigInteger.valueOf(ETHER_DECIMALS_PRECISION))
+fun BigInteger.toEther(): String = DecimalFormat(NUMBER_FORMAT)
+    .format(Convert.fromWei(this.toBigDecimal(), Convert.Unit.ETHER))
 
-fun BigInteger.toMwei(): String = DecimalFormat("#,##0.00")
-    .format(this / BigInteger.valueOf(MWEI_DECIMALS_PRECISION))
+fun BigInteger.toMwei(): String = DecimalFormat(NUMBER_FORMAT)
+    .format(Convert.fromWei(this.toBigDecimal(), Convert.Unit.MWEI))
 
 @Suppress("MagicNumber")
 fun Long.toTimestamp(): Long = this * 1000
