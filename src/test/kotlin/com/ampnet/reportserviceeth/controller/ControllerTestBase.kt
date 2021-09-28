@@ -244,6 +244,7 @@ abstract class ControllerTestBase : TestBase() {
     protected fun generateIssuerCommonState() =
         IIssuerCommon.IssuerCommonState(
             "flavor", "version", "0xf9a13b61d15e4eb4046da02d34473f5dc53e5f7c",
+            "0x4d2ebc8b12e6f9d5ee6d2412e0651cb0f603c54c", "0x4d2ebc8b12e6f9d5ee6d2412e0651cb0f603c54c",
             "0x4d2ebc8b12e6f9d5ee6d2412e0651cb0f603c54c", "QmaPmqiytVSSHtbmjfWp82VQcE82pq28iHeTL8hmVigscJ"
         )
 }

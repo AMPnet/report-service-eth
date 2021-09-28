@@ -2,6 +2,7 @@ package com.ampnet.reportserviceth.contract;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import org.web3j.abi.TypeReference;
@@ -18,6 +19,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.RemoteFunctionCall;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
@@ -45,7 +47,13 @@ public class IAsset extends Contract {
 
     public static final String FUNC_GETSTATE = "getState";
 
+    public static final String FUNC_LOCKTOKENS = "lockTokens";
+
+    public static final String FUNC_MIGRATEAPXREGISTRY = "migrateApxRegistry";
+
     public static final String FUNC_PRICEDECIMALSPRECISION = "priceDecimalsPrecision";
+
+    public static final String FUNC_UNLOCKTOKENS = "unlockTokens";
 
     public static final String FUNC_VERSION = "version";
 
@@ -118,11 +126,36 @@ public class IAsset extends Contract {
         return executeRemoteCallSingleValueReturn(function, AssetState.class);
     }
 
+    public RemoteFunctionCall<TransactionReceipt> lockTokens(BigInteger amount) {
+        final Function function = new Function(
+                FUNC_LOCKTOKENS, 
+                Arrays.<Type>asList(new Uint256(amount)),
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function);
+    }
+
+    public RemoteFunctionCall<TransactionReceipt> migrateApxRegistry(String newRegistry) {
+        final Function function = new Function(
+                FUNC_MIGRATEAPXREGISTRY, 
+                Arrays.<Type>asList(new Address(160, newRegistry)),
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function);
+    }
+
     public RemoteFunctionCall<BigInteger> priceDecimalsPrecision() {
         final Function function = new Function(FUNC_PRICEDECIMALSPRECISION, 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
+    }
+
+    public RemoteFunctionCall<TransactionReceipt> unlockTokens(String wallet, BigInteger amount) {
+        final Function function = new Function(
+                FUNC_UNLOCKTOKENS, 
+                Arrays.<Type>asList(new Address(160, wallet),
+                new Uint256(amount)),
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function);
     }
 
     public RemoteFunctionCall<String> version() {
