@@ -31,9 +31,15 @@ import org.web3j.tx.gas.ContractGasProvider;
 public class ICampaignCommon extends Contract {
     public static final String BINARY = "";
 
+    public static final String FUNC_CLAIMEDAMOUNT = "claimedAmount";
+
     public static final String FUNC_COMMONSTATE = "commonState";
 
     public static final String FUNC_FLAVOR = "flavor";
+
+    public static final String FUNC_INVESTMENTAMOUNT = "investmentAmount";
+
+    public static final String FUNC_TOKENAMOUNT = "tokenAmount";
 
     public static final String FUNC_VERSION = "version";
 
@@ -55,6 +61,13 @@ public class ICampaignCommon extends Contract {
         super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
+    public RemoteFunctionCall<BigInteger> claimedAmount(String investor) {
+        final Function function = new Function(FUNC_CLAIMEDAMOUNT, 
+                Arrays.<Type>asList(new Address(160, investor)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        return executeRemoteCallSingleValueReturn(function, BigInteger.class);
+    }
+
     public RemoteFunctionCall<CampaignCommonState> commonState() {
         final Function function = new Function(FUNC_COMMONSTATE, 
                 Arrays.<Type>asList(), 
@@ -67,6 +80,20 @@ public class ICampaignCommon extends Contract {
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
         return executeRemoteCallSingleValueReturn(function, String.class);
+    }
+
+    public RemoteFunctionCall<BigInteger> investmentAmount(String investor) {
+        final Function function = new Function(FUNC_INVESTMENTAMOUNT, 
+                Arrays.<Type>asList(new Address(160, investor)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        return executeRemoteCallSingleValueReturn(function, BigInteger.class);
+    }
+
+    public RemoteFunctionCall<BigInteger> tokenAmount(String investor) {
+        final Function function = new Function(FUNC_TOKENAMOUNT, 
+                Arrays.<Type>asList(new Address(160, investor)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public RemoteFunctionCall<String> version() {
@@ -125,6 +152,8 @@ public class ICampaignCommon extends Contract {
 
         public String asset;
 
+        public String stablecoin;
+
         public BigInteger softCap;
 
         public Boolean finalized;
@@ -137,14 +166,15 @@ public class ICampaignCommon extends Contract {
 
         public BigInteger tokensSold;
 
-        public CampaignCommonState(String flavor, String version, String contractAddress, String owner, String info, String asset, BigInteger softCap, Boolean finalized, Boolean canceled, BigInteger pricePerToken, BigInteger fundsRaised, BigInteger tokensSold) {
-            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Utf8String(info),new Address(asset),new Uint256(softCap),new Bool(finalized),new Bool(canceled),new Uint256(pricePerToken),new Uint256(fundsRaised),new Uint256(tokensSold));
+        public CampaignCommonState(String flavor, String version, String contractAddress, String owner, String info, String asset, String stablecoin, BigInteger softCap, Boolean finalized, Boolean canceled, BigInteger pricePerToken, BigInteger fundsRaised, BigInteger tokensSold) {
+            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Utf8String(info),new Address(asset),new Address(stablecoin),new Uint256(softCap),new Bool(finalized),new Bool(canceled),new Uint256(pricePerToken),new Uint256(fundsRaised),new Uint256(tokensSold));
             this.flavor = flavor;
             this.version = version;
             this.contractAddress = contractAddress;
             this.owner = owner;
             this.info = info;
             this.asset = asset;
+            this.stablecoin = stablecoin;
             this.softCap = softCap;
             this.finalized = finalized;
             this.canceled = canceled;
@@ -153,14 +183,15 @@ public class ICampaignCommon extends Contract {
             this.tokensSold = tokensSold;
         }
 
-        public CampaignCommonState(Utf8String flavor, Utf8String version, Address contractAddress, Address owner, Utf8String info, Address asset, Uint256 softCap, Bool finalized, Bool canceled, Uint256 pricePerToken, Uint256 fundsRaised, Uint256 tokensSold) {
-            super(flavor,version,contractAddress,owner,info,asset,softCap,finalized,canceled,pricePerToken,fundsRaised,tokensSold);
+        public CampaignCommonState(Utf8String flavor, Utf8String version, Address contractAddress, Address owner, Utf8String info, Address asset, Address stablecoin, Uint256 softCap, Bool finalized, Bool canceled, Uint256 pricePerToken, Uint256 fundsRaised, Uint256 tokensSold) {
+            super(flavor,version,contractAddress,owner,info,asset,stablecoin,softCap,finalized,canceled,pricePerToken,fundsRaised,tokensSold);
             this.flavor = flavor.getValue();
             this.version = version.getValue();
             this.contractAddress = contractAddress.getValue();
             this.owner = owner.getValue();
             this.info = info.getValue();
             this.asset = asset.getValue();
+            this.stablecoin = stablecoin.getValue();
             this.softCap = softCap.getValue();
             this.finalized = finalized.getValue();
             this.canceled = canceled.getValue();

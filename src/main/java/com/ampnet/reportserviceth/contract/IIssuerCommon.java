@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.DynamicStruct;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
@@ -32,6 +33,8 @@ public class IIssuerCommon extends Contract {
     public static final String FUNC_COMMONSTATE = "commonState";
 
     public static final String FUNC_FLAVOR = "flavor";
+
+    public static final String FUNC_ISWALLETAPPROVED = "isWalletApproved";
 
     public static final String FUNC_VERSION = "version";
 
@@ -65,6 +68,13 @@ public class IIssuerCommon extends Contract {
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
         return executeRemoteCallSingleValueReturn(function, String.class);
+    }
+
+    public RemoteFunctionCall<Boolean> isWalletApproved(String wallet) {
+        final Function function = new Function(FUNC_ISWALLETAPPROVED, 
+                Arrays.<Type>asList(new Address(160, wallet)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
+        return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
     public RemoteFunctionCall<String> version() {
@@ -119,23 +129,31 @@ public class IIssuerCommon extends Contract {
 
         public String owner;
 
+        public String stablecoin;
+
+        public String walletApprover;
+
         public String info;
 
-        public IssuerCommonState(String flavor, String version, String contractAddress, String owner, String info) {
-            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Utf8String(info));
+        public IssuerCommonState(String flavor, String version, String contractAddress, String owner, String stablecoin, String walletApprover, String info) {
+            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Address(stablecoin),new Address(walletApprover),new Utf8String(info));
             this.flavor = flavor;
             this.version = version;
             this.contractAddress = contractAddress;
             this.owner = owner;
+            this.stablecoin = stablecoin;
+            this.walletApprover = walletApprover;
             this.info = info;
         }
 
-        public IssuerCommonState(Utf8String flavor, Utf8String version, Address contractAddress, Address owner, Utf8String info) {
-            super(flavor,version,contractAddress,owner,info);
+        public IssuerCommonState(Utf8String flavor, Utf8String version, Address contractAddress, Address owner, Address stablecoin, Address walletApprover, Utf8String info) {
+            super(flavor,version,contractAddress,owner,stablecoin,walletApprover,info);
             this.flavor = flavor.getValue();
             this.version = version.getValue();
             this.contractAddress = contractAddress.getValue();
             this.owner = owner.getValue();
+            this.stablecoin = stablecoin.getValue();
+            this.walletApprover = walletApprover.getValue();
             this.info = info.getValue();
         }
     }

@@ -8,7 +8,14 @@ contract Structs {
         string version;
         address contractAddress;
         address owner;
+        address stablecoin;
+        address walletApprover;
         string info;
+    }
+
+    struct IssuerCommonStateWithName {
+        IssuerCommonState issuer;
+        string mappedName;
     }
 
     struct AssetCommonState {
@@ -24,6 +31,11 @@ contract Structs {
         address issuer;
     }
 
+    struct AssetCommonStateWithName {
+        AssetCommonState asset;
+        string mappedName;
+    }
+
     struct CampaignCommonState {
         string flavor;
         string version;
@@ -31,52 +43,25 @@ contract Structs {
         address owner;
         string info;
         address asset;
+        address stablecoin;
         uint256 softCap;
         bool finalized;
         bool canceled;
         uint256 pricePerToken;
         uint256 fundsRaised;
         uint256 tokensSold;
-    }
-
-    struct IssuerCommonStateWithName {
-        string flavor;
-        string version;
-        address contractAddress;
-        address owner;
-        string info;
-        string mappedName;
-    }
-
-    struct AssetCommonStateWithName {
-        string flavor;
-        string version;
-        address contractAddress;
-        address owner;
-        string info;
-        string name;
-        string symbol;
-        uint256 totalSupply;
-        uint256 decimals;
-        address issuer;
-        string mappedName;
     }
 
     struct CampaignCommonStateWithName {
-        string flavor;
-        string version;
-        address contractAddress;
-        address owner;
-        string info;
-        address asset;
-        uint256 softCap;
-        bool finalized;
-        bool canceled;
-        uint256 pricePerToken;
-        uint256 pricePrecision;
-        uint256 fundsRaised;
-        uint256 tokensSold;
+        CampaignCommonState campaign;
         string mappedName;
+    }
+
+    struct CampaignCommonStateWithNameAndInvestment {
+        CampaignCommonState campaign;
+        string mappedName;
+        uint256 tokenAmount;
+        uint256 tokenValue;
     }
 
     struct SnapshotDistributorCommonStateWithName {
@@ -250,6 +235,7 @@ contract Structs {
         address owner;
         address asset;
         address issuer;
+        address stablecoin;
         uint256 tokenPrice;
         uint256 softCap;
         uint256 minInvestment;
@@ -266,20 +252,10 @@ contract Structs {
         string info;
     }
 
-    struct PayoutManagerState {
-        string flavor;
-        string version;
-        address contractAddress;
-        address owner;
-        address asset;
-        uint256 totalPayoutsCreated;
-        uint256 totalPayoutsAmount;
-        string info;
-    }
-
     struct Payout {
         uint256 snapshotId;
         string description;
+        address token;
         uint256 amount;
         uint256 totalReleased;
         uint256 totalClaimsCount;

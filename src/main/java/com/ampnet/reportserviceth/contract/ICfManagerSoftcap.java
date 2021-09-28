@@ -2,6 +2,7 @@ package com.ampnet.reportserviceth.contract;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import org.web3j.abi.TypeReference;
@@ -17,6 +18,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.RemoteFunctionCall;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
@@ -34,6 +36,10 @@ import org.web3j.tx.gas.ContractGasProvider;
 public class ICfManagerSoftcap extends Contract {
     public static final String BINARY = "";
 
+    public static final String FUNC_CHANGEOWNERSHIP = "changeOwnership";
+
+    public static final String FUNC_CLAIMEDAMOUNT = "claimedAmount";
+
     public static final String FUNC_COMMONSTATE = "commonState";
 
     public static final String FUNC_FLAVOR = "flavor";
@@ -41,6 +47,10 @@ public class ICfManagerSoftcap extends Contract {
     public static final String FUNC_GETINFOHISTORY = "getInfoHistory";
 
     public static final String FUNC_GETSTATE = "getState";
+
+    public static final String FUNC_INVESTMENTAMOUNT = "investmentAmount";
+
+    public static final String FUNC_TOKENAMOUNT = "tokenAmount";
 
     public static final String FUNC_VERSION = "version";
 
@@ -60,6 +70,21 @@ public class ICfManagerSoftcap extends Contract {
 
     protected ICfManagerSoftcap(String contractAddress, Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
+    }
+
+    public RemoteFunctionCall<TransactionReceipt> changeOwnership(String newOwner) {
+        final Function function = new Function(
+                FUNC_CHANGEOWNERSHIP, 
+                Arrays.<Type>asList(new Address(160, newOwner)),
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function);
+    }
+
+    public RemoteFunctionCall<BigInteger> claimedAmount(String investor) {
+        final Function function = new Function(FUNC_CLAIMEDAMOUNT, 
+                Arrays.<Type>asList(new Address(160, investor)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public RemoteFunctionCall<CampaignCommonState> commonState() {
@@ -96,6 +121,20 @@ public class ICfManagerSoftcap extends Contract {
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<CfManagerSoftcapState>() {}));
         return executeRemoteCallSingleValueReturn(function, CfManagerSoftcapState.class);
+    }
+
+    public RemoteFunctionCall<BigInteger> investmentAmount(String investor) {
+        final Function function = new Function(FUNC_INVESTMENTAMOUNT, 
+                Arrays.<Type>asList(new Address(160, investor)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        return executeRemoteCallSingleValueReturn(function, BigInteger.class);
+    }
+
+    public RemoteFunctionCall<BigInteger> tokenAmount(String investor) {
+        final Function function = new Function(FUNC_TOKENAMOUNT, 
+                Arrays.<Type>asList(new Address(160, investor)),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public RemoteFunctionCall<String> version() {
@@ -154,6 +193,8 @@ public class ICfManagerSoftcap extends Contract {
 
         public String asset;
 
+        public String stablecoin;
+
         public BigInteger softCap;
 
         public Boolean finalized;
@@ -166,14 +207,15 @@ public class ICfManagerSoftcap extends Contract {
 
         public BigInteger tokensSold;
 
-        public CampaignCommonState(String flavor, String version, String contractAddress, String owner, String info, String asset, BigInteger softCap, Boolean finalized, Boolean canceled, BigInteger pricePerToken, BigInteger fundsRaised, BigInteger tokensSold) {
-            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Utf8String(info),new Address(asset),new Uint256(softCap),new Bool(finalized),new Bool(canceled),new Uint256(pricePerToken),new Uint256(fundsRaised),new Uint256(tokensSold));
+        public CampaignCommonState(String flavor, String version, String contractAddress, String owner, String info, String asset, String stablecoin, BigInteger softCap, Boolean finalized, Boolean canceled, BigInteger pricePerToken, BigInteger fundsRaised, BigInteger tokensSold) {
+            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Utf8String(info),new Address(asset),new Address(stablecoin),new Uint256(softCap),new Bool(finalized),new Bool(canceled),new Uint256(pricePerToken),new Uint256(fundsRaised),new Uint256(tokensSold));
             this.flavor = flavor;
             this.version = version;
             this.contractAddress = contractAddress;
             this.owner = owner;
             this.info = info;
             this.asset = asset;
+            this.stablecoin = stablecoin;
             this.softCap = softCap;
             this.finalized = finalized;
             this.canceled = canceled;
@@ -182,14 +224,15 @@ public class ICfManagerSoftcap extends Contract {
             this.tokensSold = tokensSold;
         }
 
-        public CampaignCommonState(Utf8String flavor, Utf8String version, Address contractAddress, Address owner, Utf8String info, Address asset, Uint256 softCap, Bool finalized, Bool canceled, Uint256 pricePerToken, Uint256 fundsRaised, Uint256 tokensSold) {
-            super(flavor,version,contractAddress,owner,info,asset,softCap,finalized,canceled,pricePerToken,fundsRaised,tokensSold);
+        public CampaignCommonState(Utf8String flavor, Utf8String version, Address contractAddress, Address owner, Utf8String info, Address asset, Address stablecoin, Uint256 softCap, Bool finalized, Bool canceled, Uint256 pricePerToken, Uint256 fundsRaised, Uint256 tokensSold) {
+            super(flavor,version,contractAddress,owner,info,asset,stablecoin,softCap,finalized,canceled,pricePerToken,fundsRaised,tokensSold);
             this.flavor = flavor.getValue();
             this.version = version.getValue();
             this.contractAddress = contractAddress.getValue();
             this.owner = owner.getValue();
             this.info = info.getValue();
             this.asset = asset.getValue();
+            this.stablecoin = stablecoin.getValue();
             this.softCap = softCap.getValue();
             this.finalized = finalized.getValue();
             this.canceled = canceled.getValue();
@@ -230,6 +273,8 @@ public class ICfManagerSoftcap extends Contract {
 
         public String issuer;
 
+        public String stablecoin;
+
         public BigInteger tokenPrice;
 
         public BigInteger softCap;
@@ -258,14 +303,15 @@ public class ICfManagerSoftcap extends Contract {
 
         public String info;
 
-        public CfManagerSoftcapState(String flavor, String version, String contractAddress, String owner, String asset, String issuer, BigInteger tokenPrice, BigInteger softCap, BigInteger minInvestment, BigInteger maxInvestment, Boolean whitelistRequired, Boolean finalized, Boolean canceled, BigInteger totalClaimableTokens, BigInteger totalInvestorsCount, BigInteger totalClaimsCount, BigInteger totalFundsRaised, BigInteger totalTokensSold, BigInteger totalTokensBalance, String info) {
-            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Address(asset),new Address(issuer),new Uint256(tokenPrice),new Uint256(softCap),new Uint256(minInvestment),new Uint256(maxInvestment),new Bool(whitelistRequired),new Bool(finalized),new Bool(canceled),new Uint256(totalClaimableTokens),new Uint256(totalInvestorsCount),new Uint256(totalClaimsCount),new Uint256(totalFundsRaised),new Uint256(totalTokensSold),new Uint256(totalTokensBalance),new Utf8String(info));
+        public CfManagerSoftcapState(String flavor, String version, String contractAddress, String owner, String asset, String issuer, String stablecoin, BigInteger tokenPrice, BigInteger softCap, BigInteger minInvestment, BigInteger maxInvestment, Boolean whitelistRequired, Boolean finalized, Boolean canceled, BigInteger totalClaimableTokens, BigInteger totalInvestorsCount, BigInteger totalClaimsCount, BigInteger totalFundsRaised, BigInteger totalTokensSold, BigInteger totalTokensBalance, String info) {
+            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Address(asset),new Address(issuer),new Address(stablecoin),new Uint256(tokenPrice),new Uint256(softCap),new Uint256(minInvestment),new Uint256(maxInvestment),new Bool(whitelistRequired),new Bool(finalized),new Bool(canceled),new Uint256(totalClaimableTokens),new Uint256(totalInvestorsCount),new Uint256(totalClaimsCount),new Uint256(totalFundsRaised),new Uint256(totalTokensSold),new Uint256(totalTokensBalance),new Utf8String(info));
             this.flavor = flavor;
             this.version = version;
             this.contractAddress = contractAddress;
             this.owner = owner;
             this.asset = asset;
             this.issuer = issuer;
+            this.stablecoin = stablecoin;
             this.tokenPrice = tokenPrice;
             this.softCap = softCap;
             this.minInvestment = minInvestment;
@@ -282,14 +328,15 @@ public class ICfManagerSoftcap extends Contract {
             this.info = info;
         }
 
-        public CfManagerSoftcapState(Utf8String flavor, Utf8String version, Address contractAddress, Address owner, Address asset, Address issuer, Uint256 tokenPrice, Uint256 softCap, Uint256 minInvestment, Uint256 maxInvestment, Bool whitelistRequired, Bool finalized, Bool canceled, Uint256 totalClaimableTokens, Uint256 totalInvestorsCount, Uint256 totalClaimsCount, Uint256 totalFundsRaised, Uint256 totalTokensSold, Uint256 totalTokensBalance, Utf8String info) {
-            super(flavor,version,contractAddress,owner,asset,issuer,tokenPrice,softCap,minInvestment,maxInvestment,whitelistRequired,finalized,canceled,totalClaimableTokens,totalInvestorsCount,totalClaimsCount,totalFundsRaised,totalTokensSold,totalTokensBalance,info);
+        public CfManagerSoftcapState(Utf8String flavor, Utf8String version, Address contractAddress, Address owner, Address asset, Address issuer, Address stablecoin, Uint256 tokenPrice, Uint256 softCap, Uint256 minInvestment, Uint256 maxInvestment, Bool whitelistRequired, Bool finalized, Bool canceled, Uint256 totalClaimableTokens, Uint256 totalInvestorsCount, Uint256 totalClaimsCount, Uint256 totalFundsRaised, Uint256 totalTokensSold, Uint256 totalTokensBalance, Utf8String info) {
+            super(flavor,version,contractAddress,owner,asset,issuer,stablecoin,tokenPrice,softCap,minInvestment,maxInvestment,whitelistRequired,finalized,canceled,totalClaimableTokens,totalInvestorsCount,totalClaimsCount,totalFundsRaised,totalTokensSold,totalTokensBalance,info);
             this.flavor = flavor.getValue();
             this.version = version.getValue();
             this.contractAddress = contractAddress.getValue();
             this.owner = owner.getValue();
             this.asset = asset.getValue();
             this.issuer = issuer.getValue();
+            this.stablecoin = stablecoin.getValue();
             this.tokenPrice = tokenPrice.getValue();
             this.softCap = softCap.getValue();
             this.minInvestment = minInvestment.getValue();

@@ -130,9 +130,9 @@ public class IIssuer extends Contract {
                 });
     }
 
-    public RemoteFunctionCall<Boolean> isWalletApproved(String _wallet) {
+    public RemoteFunctionCall<Boolean> isWalletApproved(String wallet) {
         final Function function = new Function(FUNC_ISWALLETAPPROVED, 
-                Arrays.<Type>asList(new Address(160, _wallet)),
+                Arrays.<Type>asList(new Address(160, wallet)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
@@ -207,23 +207,31 @@ public class IIssuer extends Contract {
 
         public String owner;
 
+        public String stablecoin;
+
+        public String walletApprover;
+
         public String info;
 
-        public IssuerCommonState(String flavor, String version, String contractAddress, String owner, String info) {
-            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Utf8String(info));
+        public IssuerCommonState(String flavor, String version, String contractAddress, String owner, String stablecoin, String walletApprover, String info) {
+            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Address(stablecoin),new Address(walletApprover),new Utf8String(info));
             this.flavor = flavor;
             this.version = version;
             this.contractAddress = contractAddress;
             this.owner = owner;
+            this.stablecoin = stablecoin;
+            this.walletApprover = walletApprover;
             this.info = info;
         }
 
-        public IssuerCommonState(Utf8String flavor, Utf8String version, Address contractAddress, Address owner, Utf8String info) {
-            super(flavor,version,contractAddress,owner,info);
+        public IssuerCommonState(Utf8String flavor, Utf8String version, Address contractAddress, Address owner, Address stablecoin, Address walletApprover, Utf8String info) {
+            super(flavor,version,contractAddress,owner,stablecoin,walletApprover,info);
             this.flavor = flavor.getValue();
             this.version = version.getValue();
             this.contractAddress = contractAddress.getValue();
             this.owner = owner.getValue();
+            this.stablecoin = stablecoin.getValue();
+            this.walletApprover = walletApprover.getValue();
             this.info = info.getValue();
         }
     }
