@@ -29,7 +29,7 @@ class BlockchainEventServiceTest {
     @Test
     fun mustBeAbleToGetAllEvents() {
         applicationProperties.chainMumbai.maxBlocks = 99_999
-        val startBlockNumber = 18457110L
+        val startBlockNumber = applicationProperties.chainMumbai.startBlockNumber
         val events = service.getAllEvents(
             startBlockNumber, startBlockNumber + applicationProperties.chainMumbai.maxBlocks,
             Chain.MATIC_TESTNET_MUMBAI.id
