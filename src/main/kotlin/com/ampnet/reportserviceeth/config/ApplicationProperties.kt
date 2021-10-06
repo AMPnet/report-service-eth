@@ -10,6 +10,7 @@ class ApplicationProperties {
     var grpc: GrpcProperties = GrpcProperties()
     val queue = QueueProperties()
     val chainEthereum = ChainProperties()
+    val chainGoerli = ChainProperties()
     val chainMatic = ChainProperties()
     val chainMumbai = ChainProperties()
     val chainHardhatTestnet = ChainProperties()

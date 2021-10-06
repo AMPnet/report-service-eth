@@ -5,6 +5,7 @@ enum class Chain(val id: Long, val rpcUrl: String, val infura: String?) {
     MATIC_MAIN(137, "https://polygon-rpc.com/", null),
     MATIC_TESTNET_MUMBAI(80001, "https://matic-mumbai.chainstacklabs.com/", null),
     ETHEREUM_MAIN(1, "https://cloudflare-eth.com/", "https://mainnet.infura.io/v3/"),
+    GOERLI_TESTNET(5, "https://goerli.prylabs.net/", "https://goerli.infura.io/v3/"),
     HARDHAT_TESTNET(31337, "http://hardhat:8545", null);
 
     companion object {

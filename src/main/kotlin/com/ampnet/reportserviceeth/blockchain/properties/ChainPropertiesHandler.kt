@@ -29,6 +29,7 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
             Chain.MATIC_MAIN -> applicationProperties.chainMatic
             Chain.MATIC_TESTNET_MUMBAI -> applicationProperties.chainMumbai
             Chain.ETHEREUM_MAIN -> applicationProperties.chainEthereum
+            Chain.GOERLI_TESTNET -> applicationProperties.chainGoerli
             Chain.HARDHAT_TESTNET -> applicationProperties.chainHardhatTestnet
         }
         return if (chainProperties.callerAddress.isBlank() ||
