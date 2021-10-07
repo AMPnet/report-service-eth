@@ -77,7 +77,7 @@ class ReportingControllerTest : ControllerTestBase() {
         suppose("There is an event") {
             testContext.event = createEvent(
                 userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT,
-                BigInteger.valueOf(700), txHash = txHash
+                BigInteger.valueOf(3412), txHash = txHash
             )
         }
         suppose("Blockchain service will return issuer state") {

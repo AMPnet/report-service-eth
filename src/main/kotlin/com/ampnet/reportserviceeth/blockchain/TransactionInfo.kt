@@ -17,7 +17,8 @@ data class TransactionInfo(
     val timestamp: LocalDateTime,
     val txHash: String,
     val asset: String,
-    val assetTokenSymbol: String
+    val assetTokenSymbol: String,
+    val decimals: BigInteger
 ) {
     /*
      * from - address of the wallet that reserved investment in the asset.
@@ -36,7 +37,8 @@ data class TransactionInfo(
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
         asset.name,
-        asset.symbol
+        asset.symbol,
+        asset.decimals
     )
 
     /*
@@ -56,7 +58,8 @@ data class TransactionInfo(
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
         asset.name,
-        asset.symbol
+        asset.symbol,
+        asset.decimals
     )
 
     /*
@@ -76,7 +79,8 @@ data class TransactionInfo(
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
         asset.name,
-        asset.symbol
+        asset.symbol,
+        asset.decimals
     )
 
     /*
@@ -96,7 +100,8 @@ data class TransactionInfo(
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
         asset.name,
-        asset.symbol
+        asset.symbol,
+        asset.decimals
     )
 
     /*
@@ -116,7 +121,8 @@ data class TransactionInfo(
         event.timestamp.toLocalDateTime(),
         txRecipient.transactionHash,
         asset.name,
-        asset.symbol
+        asset.symbol,
+        asset.decimals
     )
 
     constructor(event: Event) : this(
@@ -128,6 +134,7 @@ data class TransactionInfo(
         event.timestamp.toLocalDateTime(),
         event.hash,
         event.asset,
-        event.tokenSymbol
+        event.tokenSymbol,
+        event.decimals
     )
 }

@@ -33,7 +33,6 @@ class BlockchainEventServiceImpl(
     override fun getAllEvents(startBlockNumber: Long, endBlockNumber: Long, chainId: Long): List<Event> {
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
         val deployedContracts = getDeployedContractsForFetchingEvents(chainProperties)
-//        logger.debug { "Fetching events from chain: $chainId for contracts: ${deployedContracts.joinToString()}" }
         if (deployedContracts.isEmpty()) return emptyList()
 
         val ethFilter = EthFilter(

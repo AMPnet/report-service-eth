@@ -56,8 +56,13 @@ fun Long.toLocalDateTime(): LocalDateTime =
 fun BigInteger.toEther(): String = DecimalFormat(NUMBER_FORMAT)
     .format(Convert.fromWei(this.toBigDecimal(), Convert.Unit.ETHER))
 
-fun BigInteger.toMwei(): String = DecimalFormat(NUMBER_FORMAT)
-    .format(Convert.fromWei(this.toBigDecimal(), Convert.Unit.MWEI))
+fun BigInteger.formatWei(decimals: BigInteger): String = DecimalFormat(NUMBER_FORMAT)
+    .format(
+        Convert.fromWei(
+            this.toBigDecimal(),
+            Convert.Unit.values().first { it.weiFactor == decimals.toBigDecimal() }
+        )
+    )
 
 @Suppress("MagicNumber")
 fun Long.toTimestamp(): Long = this * 1000

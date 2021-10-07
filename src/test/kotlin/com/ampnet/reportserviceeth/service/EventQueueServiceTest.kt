@@ -25,6 +25,7 @@ import org.mockito.kotlin.timeout
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.web3j.utils.Convert
 import java.math.BigInteger
 import java.time.Instant
 import java.util.UUID
@@ -222,7 +223,8 @@ class EventQueueServiceTest : TestBase() {
         Event(
             UUID.randomUUID(), chain, "fromAddress", "toAddress", "contractAddress",
             "issuer", "txHash", transactionType, 10, "assetName", "symbol", 100, blockHash,
-            Instant.now().toEpochMilli(), BigInteger.TEN, null, null, null
+            Instant.now().toEpochMilli(), BigInteger.TEN, Convert.Unit.ETHER.weiFactor.toBigInteger(),
+            null, null, null
         )
 
     private class TestContext {

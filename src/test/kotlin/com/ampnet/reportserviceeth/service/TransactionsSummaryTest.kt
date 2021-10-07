@@ -14,6 +14,7 @@ import com.ampnet.reportserviceeth.service.data.UserInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
+import org.web3j.utils.Convert
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -80,7 +81,8 @@ class TransactionsSummaryTest : TestBase() {
         date,
         "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37",
         "asset",
-        "GMC"
+        "GMC",
+        Convert.Unit.ETHER.weiFactor.toBigInteger()
     )
 
     private fun createTransactions(): List<Transaction?> {
