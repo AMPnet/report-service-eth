@@ -47,12 +47,9 @@ class TransactionsSummary(
             ?: if (transactions.isEmpty()) LocalDateTime.now().formatToYearMonthDay(locale)
             else transactions.last().date.formatToYearMonthDay(locale)
 
-    private fun sumTransactionAmountsByType(type: TransactionType): BigInteger {
-        val sum = transactionsByType[type]?.sumOf { it.value } ?: BigInteger.ZERO
-        return sum
-    }
+    private fun sumTransactionAmountsByType(type: TransactionType): BigInteger =
+        transactionsByType[type]?.sumOf { it.value } ?: BigInteger.ZERO
 
     private fun getDecimals(type: TransactionType): BigInteger =
-        transactionsByType[type]?.get(0)?.decimals
-            ?: Convert.Unit.ETHER.weiFactor.toBigInteger()
+        transactionsByType[type]?.get(0)?.decimals ?: Convert.Unit.ETHER.weiFactor.toBigInteger()
 }
