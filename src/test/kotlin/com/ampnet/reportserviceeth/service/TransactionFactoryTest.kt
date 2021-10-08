@@ -6,7 +6,6 @@ import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.service.data.TransactionFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.web3j.utils.Convert
 import java.math.BigInteger
 import java.time.LocalDateTime
 

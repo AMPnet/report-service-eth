@@ -11,10 +11,7 @@ sealed interface Decimals {
 @JvmInline
 private value class RawDecimals(val value: BigInteger) : Decimals {
     override val factor: BigDecimal
-        get() {
-            println("value: $value")
-            return BigDecimal.TEN.pow(value.toInt())
-        }
+        get() = BigDecimal.TEN.pow(value.toInt())
 }
 
 @JvmInline
