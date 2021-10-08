@@ -57,7 +57,7 @@ abstract class ControllerTestBase : TestBase() {
     protected val issuer = "issuer-contract-address"
     protected val defaultChainId = Chain.MATIC_TESTNET_MUMBAI.id
     private val ethUnit = Convert.Unit.ETHER
-    protected val ethDecimals: BigInteger = ethUnit.weiFactor.toBigInteger()
+    protected val ethDecimals: BigInteger = BigInteger.valueOf(18)
 
     @Autowired
     protected lateinit var objectMapper: ObjectMapper

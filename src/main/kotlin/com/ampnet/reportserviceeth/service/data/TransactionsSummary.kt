@@ -2,8 +2,10 @@ package com.ampnet.reportserviceeth.service.data
 
 import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
+import com.ampnet.reportserviceeth.service.Decimals
 import com.ampnet.reportserviceeth.service.formatToYearMonthDay
 import com.ampnet.reportserviceeth.service.formatWei
+import com.ampnet.reportserviceeth.service.toDecimals
 import mu.KLogging
 import org.web3j.utils.Convert
 import java.math.BigInteger
@@ -50,6 +52,6 @@ class TransactionsSummary(
     private fun sumTransactionAmountsByType(type: TransactionType): BigInteger =
         transactionsByType[type]?.sumOf { it.value } ?: BigInteger.ZERO
 
-    private fun getDecimals(type: TransactionType): BigInteger =
-        transactionsByType[type]?.get(0)?.decimals ?: Convert.Unit.ETHER.weiFactor.toBigInteger()
+    private fun getDecimals(type: TransactionType): Decimals =
+        transactionsByType[type]?.get(0)?.decimals?.toDecimals() ?: Convert.Unit.ETHER.toDecimals()
 }

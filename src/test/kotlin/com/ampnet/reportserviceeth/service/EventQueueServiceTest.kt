@@ -223,7 +223,7 @@ class EventQueueServiceTest : TestBase() {
         Event(
             UUID.randomUUID(), chain, "fromAddress", "toAddress", "contractAddress",
             "issuer", "txHash", transactionType, 10, "assetName", "symbol", 100, blockHash,
-            Instant.now().toEpochMilli(), BigInteger.TEN, Convert.Unit.ETHER.weiFactor.toBigInteger(),
+            Instant.now().toEpochMilli(), BigInteger.TEN, BigInteger.valueOf(18),
             null, null, null
         )
 

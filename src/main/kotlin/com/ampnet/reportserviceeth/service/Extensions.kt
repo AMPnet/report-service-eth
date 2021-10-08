@@ -13,8 +13,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Locale
-import java.util.Optional
+import java.util.*
 
 const val NUMBER_FORMAT = "#,##0.00"
 
@@ -56,13 +55,8 @@ fun Long.toLocalDateTime(): LocalDateTime =
 fun BigInteger.toEther(): String = DecimalFormat(NUMBER_FORMAT)
     .format(Convert.fromWei(this.toBigDecimal(), Convert.Unit.ETHER))
 
-fun BigInteger.formatWei(decimals: BigInteger): String = DecimalFormat(NUMBER_FORMAT)
-    .format(
-        Convert.fromWei(
-            this.toBigDecimal(),
-            Convert.Unit.values().first { it.weiFactor == decimals.toBigDecimal() }
-        )
-    )
+fun BigInteger.formatWei(decimals: Decimals): String = DecimalFormat(NUMBER_FORMAT)
+    .format(this.toBigDecimal().divide(decimals.factor))
 
 @Suppress("MagicNumber")
 fun Long.toTimestamp(): Long = this * 1000

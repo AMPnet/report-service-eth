@@ -44,7 +44,8 @@ abstract class JpaServiceTestBase : TestBase() {
     protected val defaultAssetName = "asset_name"
     protected val defaultAssetSymbol = "SMB"
     private val ethUnit = Convert.Unit.ETHER
-    protected val ethDecimals: BigInteger = ethUnit.weiFactor.toBigInteger()
+    protected val ethRawDecimals: BigInteger = BigInteger.valueOf(18)
+    protected val ethDecimals: Decimals = ethUnit.toDecimals()
 
     @Mock
     protected lateinit var blockchainService: BlockchainService
@@ -86,7 +87,7 @@ abstract class JpaServiceTestBase : TestBase() {
         type, from, to,
         Convert.toWei(amount, ethUnit).toBigInteger(),
         Convert.toWei(amount, ethUnit).toBigInteger(),
-        date, txHash, "asset", "GMC", ethDecimals
+        date, txHash, "asset", "GMC", ethRawDecimals
     )
 
     protected fun createUserResponse(address: String, language: String = "en"): UserResponse =
@@ -122,7 +123,7 @@ abstract class JpaServiceTestBase : TestBase() {
             logIndex, defaultAssetName, defaultAssetSymbol, 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
             Convert.toWei(amount, ethUnit).toBigInteger(),
-            ethDecimals,
+            ethRawDecimals,
             Convert.toWei(amount, ethUnit).toBigInteger(),
             50L, BigInteger("500")
         )

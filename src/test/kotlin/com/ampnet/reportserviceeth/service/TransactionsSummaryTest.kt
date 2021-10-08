@@ -82,7 +82,7 @@ class TransactionsSummaryTest : TestBase() {
         "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37",
         "asset",
         "GMC",
-        Convert.Unit.ETHER.weiFactor.toBigInteger()
+        BigInteger.valueOf(18)
     )
 
     private fun createTransactions(): List<Transaction?> {
