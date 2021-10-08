@@ -43,6 +43,9 @@ abstract class JpaServiceTestBase : TestBase() {
     protected val chainId = Chain.MATIC_TESTNET_MUMBAI.id
     protected val defaultAssetName = "asset_name"
     protected val defaultAssetSymbol = "SMB"
+    private val ethUnit = Convert.Unit.ETHER
+    protected val ethRawDecimals: BigInteger = BigInteger.valueOf(18)
+    protected val ethDecimals: Decimals = ethUnit.toDecimals()
 
     @Mock
     protected lateinit var blockchainService: BlockchainService
@@ -82,9 +85,9 @@ abstract class JpaServiceTestBase : TestBase() {
         txHash: String = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
     ): TransactionInfo = TransactionInfo(
         type, from, to,
-        Convert.toWei(amount, Convert.Unit.MWEI).toBigInteger(),
-        Convert.toWei(amount, Convert.Unit.MWEI).toBigInteger(),
-        date, txHash, "asset", "GMC"
+        Convert.toWei(amount, ethUnit).toBigInteger(),
+        Convert.toWei(amount, ethUnit).toBigInteger(),
+        date, txHash, "asset", "GMC", ethRawDecimals
     )
 
     protected fun createUserResponse(address: String, language: String = "en"): UserResponse =
@@ -119,8 +122,9 @@ abstract class JpaServiceTestBase : TestBase() {
             contractAddress, issuerAddress, txHash, type,
             logIndex, defaultAssetName, defaultAssetSymbol, 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
-            Convert.toWei(amount, Convert.Unit.MWEI).toBigInteger(),
-            Convert.toWei(amount, Convert.Unit.MWEI).toBigInteger(),
+            Convert.toWei(amount, ethUnit).toBigInteger(),
+            ethRawDecimals,
+            Convert.toWei(amount, ethUnit).toBigInteger(),
             50L, BigInteger("500")
         )
 

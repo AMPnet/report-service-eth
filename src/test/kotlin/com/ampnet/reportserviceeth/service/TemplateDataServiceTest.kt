@@ -12,6 +12,7 @@ import com.ampnet.reportserviceeth.exception.ResourceNotFoundException
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.impl.TemplateDataServiceImpl
+import com.ampnet.reportserviceeth.toMwei
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -76,8 +77,12 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         verify("Template data service can get user transactions") {
             val txSummary = templateDataService.getUserTransactionsData(testContext.transactionsRequest)
             assertThat(txSummary.investments)
-                .isEqualTo(BigInteger.valueOf(testContext.reserveInvestment - testContext.cancelInvestment).toMwei())
-            assertThat(txSummary.revenueShare).isEqualTo(BigInteger.valueOf(testContext.sharePayout).toMwei())
+                .isEqualTo(
+                    BigInteger.valueOf(testContext.reserveInvestment - testContext.cancelInvestment)
+                        .formatWei(ethDecimals)
+                )
+            assertThat(txSummary.revenueShare)
+                .isEqualTo(BigInteger.valueOf(testContext.sharePayout).formatWei(ethDecimals))
 
             val transactions = txSummary.transactions
             assertThat(transactions).hasSize(3)
@@ -85,19 +90,19 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             assertThat(investTx.description).isEqualTo(defaultAssetName)
             assertThat(investTx.assetTokenSymbol).isEqualTo(defaultAssetSymbol)
             assertThat(investTx.txDate).isNotBlank
-            assertThat(investTx.valueInDollar).isEqualTo(investTx.value.toMwei())
+            assertThat(investTx.valueInDollar).isEqualTo(investTx.value.formatWei(ethDecimals))
 
             val cancelInvestmentTx = transactions.first { it.type == TransactionType.CANCEL_INVESTMENT }
             assertThat(cancelInvestmentTx.description).isEqualTo(defaultAssetName)
             assertThat(cancelInvestmentTx.assetTokenSymbol).isEqualTo(defaultAssetSymbol)
             assertThat(cancelInvestmentTx.txDate).isNotBlank
-            assertThat(cancelInvestmentTx.valueInDollar).isEqualTo(cancelInvestmentTx.value.toMwei())
+            assertThat(cancelInvestmentTx.valueInDollar).isEqualTo(cancelInvestmentTx.value.formatWei(ethDecimals))
 
             val sharePayoutTx = transactions.first { it.type == TransactionType.COMPLETED_INVESTMENT }
             assertThat(sharePayoutTx.description).isEqualTo(defaultAssetName)
             assertThat(sharePayoutTx.assetTokenSymbol).isEqualTo(defaultAssetSymbol)
             assertThat(sharePayoutTx.txDate).isNotBlank
-            assertThat(sharePayoutTx.valueInDollar).isEqualTo(sharePayoutTx.value.toMwei())
+            assertThat(sharePayoutTx.valueInDollar).isEqualTo(sharePayoutTx.value.formatWei(ethDecimals))
 
             assertThat(txSummary.logo).isEqualTo(applicationProperties.ipfs.ipfsUrl + ipfsCid)
         }
@@ -236,18 +241,19 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
                 when (it.userInfo.address) {
                     userAddress -> {
                         assertThat(it.investments).isEqualTo(
-                            BigInteger.valueOf(testContext.reserveInvestment - testContext.cancelInvestment).toMwei()
+                            BigInteger.valueOf(testContext.reserveInvestment - testContext.cancelInvestment)
+                                .formatWei(ethDecimals)
                         )
                         assertThat(it.revenueShare).isEqualTo(toPrintValue(testContext.sharePayout))
                     }
                     secondUserAddress -> {
                         assertThat(it.investments).isEqualTo(toPrintValue(testContext.reserveInvestment))
-                        assertThat(it.revenueShare).isEqualTo(BigInteger.ZERO.toMwei())
+                        assertThat(it.revenueShare).isEqualTo(BigInteger.ZERO.formatWei(ethDecimals))
                     }
                     thirdUserAddress -> {
                         assertThat(it.transactions).isEmpty()
-                        assertThat(it.investments).isEqualTo(BigInteger.ZERO.toMwei())
-                        assertThat(it.revenueShare).isEqualTo(BigInteger.ZERO.toMwei())
+                        assertThat(it.investments).isEqualTo(BigInteger.ZERO.formatWei(ethDecimals))
+                        assertThat(it.revenueShare).isEqualTo(BigInteger.ZERO.formatWei(ethDecimals))
                     }
                 }
             }

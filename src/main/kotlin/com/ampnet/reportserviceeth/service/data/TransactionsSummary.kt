@@ -2,9 +2,12 @@ package com.ampnet.reportserviceeth.service.data
 
 import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.controller.pojo.PeriodServiceRequest
+import com.ampnet.reportserviceeth.service.Decimals
 import com.ampnet.reportserviceeth.service.formatToYearMonthDay
-import com.ampnet.reportserviceeth.service.toMwei
+import com.ampnet.reportserviceeth.service.formatWei
+import com.ampnet.reportserviceeth.service.toDecimals
 import mu.KLogging
+import org.web3j.utils.Convert
 import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.Locale
@@ -28,11 +31,12 @@ class TransactionsSummary(
     }
     val period: String = getPeriod(periodRequest)
     val dateOfFinish: String = getDateOfFinish(transactions, periodRequest)
-    val revenueShare = sumTransactionAmountsByType(TransactionType.REVENUE_SHARE).toMwei()
+    val revenueShare = sumTransactionAmountsByType(TransactionType.REVENUE_SHARE)
+        .formatWei(getDecimals(TransactionType.REVENUE_SHARE))
     val investments = (
         sumTransactionAmountsByType(TransactionType.RESERVE_INVESTMENT) -
             sumTransactionAmountsByType(TransactionType.CANCEL_INVESTMENT)
-        ).toMwei()
+        ).formatWei(getDecimals(TransactionType.RESERVE_INVESTMENT))
 
     private fun getPeriod(periodRequest: PeriodServiceRequest): String {
         val fromPeriod = (periodRequest.from ?: userInfo.createdAt).formatToYearMonthDay(locale)
@@ -47,4 +51,7 @@ class TransactionsSummary(
 
     private fun sumTransactionAmountsByType(type: TransactionType): BigInteger =
         transactionsByType[type]?.sumOf { it.value } ?: BigInteger.ZERO
+
+    private fun getDecimals(type: TransactionType): Decimals =
+        transactionsByType[type]?.get(0)?.decimals?.toDecimals() ?: Convert.Unit.ETHER.toDecimals()
 }

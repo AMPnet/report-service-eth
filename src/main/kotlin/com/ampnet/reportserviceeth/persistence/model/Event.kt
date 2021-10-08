@@ -21,56 +21,59 @@ class Event(
     val uuid: UUID,
 
     @Column(nullable = false)
-    var chainId: Long,
+    val chainId: Long,
 
     @Column(nullable = false)
-    var fromAddress: String,
+    val fromAddress: String,
 
     @Column(nullable = false)
-    var toAddress: String,
+    val toAddress: String,
 
     @Column(nullable = false)
-    var contract: String,
+    val contract: String,
 
     @Column(nullable = false)
-    var issuer: String,
+    val issuer: String,
 
     @Column(nullable = false)
-    var hash: String,
+    val hash: String,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    var type: TransactionType,
+    val type: TransactionType,
 
     @Column(nullable = false)
-    var logIndex: Long,
+    val logIndex: Long,
 
     @Column(nullable = false)
-    var asset: String,
+    val asset: String,
 
     @Column(nullable = false)
-    var tokenSymbol: String,
+    val tokenSymbol: String,
 
     @Column(nullable = false)
-    var blockNumber: Long,
+    val blockNumber: Long,
 
     @Column(nullable = false)
-    var blockHash: String,
+    val blockHash: String,
 
     @Column(nullable = false)
-    var timestamp: Long,
+    val timestamp: Long,
 
     @Column(nullable = false)
-    var tokenValue: BigInteger,
+    val tokenValue: BigInteger,
+
+    @Column(nullable = false)
+    val decimals: BigInteger,
 
     @Column(nullable = true)
-    var tokenAmount: BigInteger?,
+    val tokenAmount: BigInteger?,
 
     @Column(nullable = true)
-    var payoutId: Long?,
+    val payoutId: Long?,
 
     @Column(nullable = true)
-    var revenue: BigInteger?
+    val revenue: BigInteger?
 ) {
     /*
      * from - address of the wallet that reserved invested in the asset.
@@ -98,6 +101,7 @@ class Event(
         event.timestamp.toLong(),
         event.tokenValue,
         event.tokenAmount,
+        asset.decimals,
         null,
         null
     )
@@ -128,6 +132,7 @@ class Event(
         event.timestamp.toLong(),
         event.tokenValue,
         event.tokenAmount,
+        asset.decimals,
         null,
         null
     )
@@ -158,6 +163,7 @@ class Event(
         event.timestamp.toLong(),
         event.tokenValue,
         event.tokenAmount,
+        asset.decimals,
         null,
         null
     )
@@ -187,6 +193,7 @@ class Event(
         log.blockHash,
         event.timestamp.toLong(),
         event.amount,
+        asset.decimals,
         null,
         event.payoutId.toLong(),
         event.amount
@@ -217,6 +224,7 @@ class Event(
         log.blockHash,
         event.timestamp.toLong(),
         event.amount,
+        asset.decimals,
         null,
         event.payoutId.toLong(),
         event.amount

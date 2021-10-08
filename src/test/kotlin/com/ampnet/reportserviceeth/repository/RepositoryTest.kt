@@ -5,9 +5,7 @@ import com.ampnet.reportserviceeth.blockchain.TransactionType
 import com.ampnet.reportserviceeth.blockchain.properties.Chain
 import com.ampnet.reportserviceeth.config.DatabaseCleanerService
 import com.ampnet.reportserviceeth.persistence.model.Event
-import com.ampnet.reportserviceeth.persistence.model.Task
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
-import com.ampnet.reportserviceeth.persistence.repository.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,9 +28,6 @@ import java.util.UUID
 class RepositoryTest : TestBase() {
 
     private lateinit var testContext: TestContext
-
-    @Autowired
-    private lateinit var taskRepository: TaskRepository
 
     @Autowired
     private lateinit var eventRepository: EventRepository
@@ -128,20 +123,15 @@ class RepositoryTest : TestBase() {
             contractAddress, issuerAddress, txHash, type,
             logIndex, "asset_name", "symbol", 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
-            BigInteger("500"), BigInteger("500"), 50L, BigInteger("500")
+            BigInteger("500"), BigInteger.ZERO, BigInteger("500"),
+            50L, BigInteger("500")
         )
         return if (save) eventRepository.save(event)
         else event
     }
 
-    private fun createTask(chain: Long = chainId, blockNumber: Long = 5075L): Task {
-        val task = Task(UUID.randomUUID(), chain, blockNumber, 1628065107449L)
-        return taskRepository.save(task)
-    }
-
     private class TestContext {
         lateinit var firstEvent: Event
         lateinit var secondEvent: Event
-        lateinit var latestTask: Task
     }
 }
