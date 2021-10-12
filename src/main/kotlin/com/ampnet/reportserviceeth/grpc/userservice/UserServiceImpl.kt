@@ -8,19 +8,21 @@ import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.GrpcException
 import com.ampnet.reportserviceeth.exception.InvalidRequestException
+import com.ampnet.reportserviceeth.persistence.repository.EventRepository
+import com.ampnet.reportserviceeth.service.data.IssuerCampaignRequest
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import io.grpc.StatusRuntimeException
 import mu.KLogging
 import net.devh.boot.grpc.client.channelfactory.GrpcChannelFactory
 import org.springframework.stereotype.Service
 import java.util.concurrent.TimeUnit
-import kotlin.jvm.Throws
 
 @Service
 class UserServiceImpl(
     private val grpcChannelFactory: GrpcChannelFactory,
     private val applicationProperties: ApplicationProperties,
-    private val blockchainService: BlockchainService
+    private val blockchainService: BlockchainService,
+    private val eventRepository: EventRepository
 ) : UserService {
 
     companion object : KLogging()
@@ -55,6 +57,16 @@ class UserServiceImpl(
     override fun getUsersForIssuer(issuerRequest: IssuerRequest): List<UserResponse> {
         val addresses = blockchainService.getWhitelistedAddress(issuerRequest)
         return getUsers(addresses.toSet())
+    }
+
+    @Throws(GrpcException::class)
+    override fun getUsersForIssuerAndCampaign(issuerCampaignRequest: IssuerCampaignRequest): List<UserResponse> {
+        val addresses = blockchainService.getWhitelistedAddress(issuerCampaignRequest.toIssuerRequest()).toSet()
+        val latestInvestors = eventRepository.findLatestSuccessfulInvestmentEventsByIssuerAndCampaign(
+            issuerAddress = issuerCampaignRequest.issuerAddress,
+            campaignAddress = issuerCampaignRequest.campaignAddress
+        ).map { it.fromAddress }.toSet()
+        return getUsers(addresses.intersect(latestInvestors))
     }
 
     private fun serviceWithTimeout() = serviceBlockingStub

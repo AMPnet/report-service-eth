@@ -28,4 +28,20 @@ interface EventRepository : JpaRepository<Event, UUID> {
     fun findForTxHash(txHash: String, issuer: String, address: String, chainId: Long): Event?
 
     fun findByChainId(chainId: Long): List<Event>
+
+    @Query(
+        nativeQuery = true,
+        value = "SELECT inner_table.* FROM ( " +
+            "  SELECT *, rank() OVER (PARTITION BY from_address ORDER BY timestamp DESC) AS rank " +
+            "  FROM event " +
+            "  WHERE issuer = :issuerAddress " +
+            "  AND contract = :campaignAddress " +
+            ") AS inner_table " +
+            "WHERE inner_table.rank = 1 " +
+            "AND (inner_table.type = 'RESERVE_INVESTMENT' OR inner_table.type = 'COMPLETED_INVESTMENT')"
+    )
+    fun findLatestSuccessfulInvestmentEventsByIssuerAndCampaign(
+        issuerAddress: String,
+        campaignAddress: String
+    ): List<Event>
 }

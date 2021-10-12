@@ -5,6 +5,7 @@ import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.service.XlsxService
+import com.ampnet.reportserviceeth.service.data.IssuerCampaignRequest
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.data.secondsToLocalDateTime
 import org.apache.poi.ss.usermodel.CellStyle
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.time.format.DateTimeFormatter
-import kotlin.jvm.Throws
 
 @Service
 class XlsxServiceImpl(private val userService: UserService) : XlsxService {
@@ -30,9 +30,19 @@ class XlsxServiceImpl(private val userService: UserService) : XlsxService {
 
     @Throws(InternalException::class)
     override fun generateXlsx(issuerRequest: IssuerRequest): ByteArray {
+        return generateXlsx(issuerRequest, userService::getUsersForIssuer)
+    }
+
+    @Throws(InternalException::class)
+    override fun generateXlsx(issuerCampaignRequest: IssuerCampaignRequest): ByteArray {
+        return generateXlsx(issuerCampaignRequest, userService::getUsersForIssuerAndCampaign)
+    }
+
+    @Throws(InternalException::class)
+    private fun <T> generateXlsx(request: T, fetchUsers: (T) -> List<UserResponse>): ByteArray {
         try {
             workbook = XSSFWorkbook()
-            val users = userService.getUsersForIssuer(issuerRequest)
+            val users = fetchUsers(request)
             writeHeaderLine()
             writeDataLines(users)
             val outputStream = ByteArrayOutputStream()

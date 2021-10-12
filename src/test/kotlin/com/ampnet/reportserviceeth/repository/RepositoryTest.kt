@@ -41,6 +41,8 @@ class RepositoryTest : TestBase() {
     private val chainId = Chain.MATIC_TESTNET_MUMBAI.id
     private val userAddress = "0x8f52B0cC50967fc59C6289f8FDB3E356EdeEBD23"
     private val secondUserAddress = "0xd43e088622404A5A21267033EC200383d39C22ca"
+    private val thirdUserAddress = "0xd43e088622404A5A21267033EC200383d39C22cc"
+    private val fourthUserAddress = "0xd43e088622404A5A21267033EC200383d39C22cd"
     private val issuer = "0x5013F6ce0f9Beb07Be528E408352D03f3FCa1857"
     private val projectWallet: String = "0xFeC646017105fA2A4FFDc773e9c539Eda5af724a"
 
@@ -102,6 +104,87 @@ class RepositoryTest : TestBase() {
             val event = eventRepository.findForTxHash(txHash, issuer, userAddress, chainId)
                 ?: fail("event missing")
             assertThat(event.type).isEqualTo(TransactionType.CANCEL_INVESTMENT)
+        }
+    }
+
+    @Test
+    fun mustReturnLatestSuccessfulInvestmentEventsByIssuerAndCampaign() {
+        val firstUserEvents = TestContext()
+        val secondUserEvents = TestContext()
+        val thirdUserEvents = TestContext()
+        val olderEventTime = LocalDateTime.now()
+        val newerEventTime = LocalDateTime.now().plusDays(1)
+
+        suppose("First user has cancelled investment") {
+            firstUserEvents.firstEvent = createEvent(
+                type = TransactionType.RESERVE_INVESTMENT,
+                localDateTime = olderEventTime
+            )
+            firstUserEvents.secondEvent = createEvent(
+                type = TransactionType.CANCEL_INVESTMENT,
+                localDateTime = newerEventTime
+            )
+        }
+
+        suppose("Second user has not cancelled investment") {
+            secondUserEvents.firstEvent = createEvent(
+                from = secondUserAddress,
+                type = TransactionType.RESERVE_INVESTMENT,
+                localDateTime = olderEventTime
+            )
+            secondUserEvents.secondEvent = createEvent(
+                from = secondUserAddress,
+                type = TransactionType.RESERVE_INVESTMENT,
+                localDateTime = newerEventTime
+            )
+        }
+
+        suppose("Third user has canceled investment and then invested again") {
+            thirdUserEvents.firstEvent = createEvent(
+                from = thirdUserAddress,
+                type = TransactionType.CANCEL_INVESTMENT,
+                localDateTime = olderEventTime
+            )
+            thirdUserEvents.secondEvent = createEvent(
+                from = thirdUserAddress,
+                type = TransactionType.COMPLETED_INVESTMENT,
+                localDateTime = newerEventTime
+            )
+        }
+
+        suppose("There are events from another issuer") {
+            createEvent(
+                from = fourthUserAddress,
+                issuerAddress = "Ox-another-issuer",
+                txHash = txHash,
+                blockHash = "535"
+            )
+            createEvent(
+                from = fourthUserAddress,
+                issuerAddress = "Ox-some-other-issuer",
+                txHash = txHash,
+                blockHash = "536"
+            )
+        }
+
+        verify("Repository returns correct latest successful investment events") {
+            val events = eventRepository.findLatestSuccessfulInvestmentEventsByIssuerAndCampaign(issuer, projectWallet)
+            assertThat(events).hasSize(2)
+
+            assertThat(events.map { it.uuid }).containsExactlyInAnyOrder(
+                secondUserEvents.secondEvent.uuid,
+                thirdUserEvents.secondEvent.uuid
+            )
+            assertThat(events.map { it.issuer }.toSet()).containsExactlyInAnyOrder(issuer)
+            assertThat(events.map { it.contract }.toSet()).containsExactlyInAnyOrder(projectWallet)
+            assertThat(events.map { it.fromAddress }).containsExactlyInAnyOrder(
+                secondUserAddress,
+                thirdUserAddress
+            )
+            assertThat(events.map { it.type }).containsExactlyInAnyOrder(
+                TransactionType.COMPLETED_INVESTMENT,
+                TransactionType.RESERVE_INVESTMENT
+            )
         }
     }
 
