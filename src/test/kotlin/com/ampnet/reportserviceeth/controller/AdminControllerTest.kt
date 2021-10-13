@@ -4,6 +4,7 @@ import com.ampnet.identityservice.proto.UserResponse
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.security.WithMockCrowdfundUser
+import com.ampnet.reportserviceeth.service.data.IssuerCampaignRequest
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.impl.toDateString
 import org.apache.poi.ss.usermodel.Row
@@ -21,6 +22,7 @@ import java.time.LocalDate
 class AdminControllerTest : ControllerTestBase() {
 
     private val userAccountsSummaryPath = "/admin/$defaultChainId/$issuer/report"
+    private val campaignUserAccountsSummaryPath = "/admin/$defaultChainId/$issuer/$campaign/report"
 
     private lateinit var testContext: TestContext
 
@@ -145,7 +147,7 @@ class AdminControllerTest : ControllerTestBase() {
 
     @Test
     @WithMockCrowdfundUser
-    fun mustHandleExceptionFromBlockchainService() {
+    fun mustHandleExceptionFromBlockchainServiceWhenFetchingXlsxReport() {
         suppose("Blockchain service will return issuer owner address") {
             given(blockchainService.getIssuerOwner(IssuerRequest(issuer, defaultChainId)))
                 .willThrow(InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "Failed"))
@@ -154,6 +156,82 @@ class AdminControllerTest : ControllerTestBase() {
         verify("Platform manager can get pdf with all user accounts summary") {
             val result = mockMvc.perform(
                 MockMvcRequestBuilders.get("$userAccountsSummaryPath/xlsx")
+            )
+                .andExpect(MockMvcResultMatchers.status().isBadGateway)
+                .andReturn()
+            verifyResponseErrorCode(result, ErrorCode.INT_JSON_RPC_BLOCKCHAIN)
+        }
+    }
+
+    @Test
+    @WithMockCrowdfundUser
+    fun mustBeAbleToDownloadCampaignXlsxForVerifiedUsers() {
+        suppose("User service will return a list of users") {
+            val user = createUserResponse(userAddress)
+            val secondUser = createUserResponse(secondUserAddress)
+            val thirdUser = createUserResponse(thirdUserAddress)
+            testContext.users = listOf(user, secondUser, thirdUser)
+            Mockito.`when`(
+                userService.getUsersForIssuerAndCampaign(IssuerCampaignRequest(issuer, campaign, defaultChainId))
+            )
+                .thenReturn(listOf(user, secondUser, thirdUser))
+        }
+        suppose("Blockchain service will return issuer owner address") {
+            Mockito.`when`(blockchainService.getIssuerOwner(IssuerRequest(issuer, defaultChainId)))
+                .thenReturn(userAddress)
+        }
+
+        verify("Platform manager can get campaign XLSX report") {
+            val result = mockMvc.perform(
+                MockMvcRequestBuilders.get("$campaignUserAccountsSummaryPath/xlsx")
+            )
+                .andExpect(MockMvcResultMatchers.status().isOk)
+                .andReturn()
+
+            val content = result.response.contentAsByteArray
+            val wb = WorkbookFactory.create(ByteArrayInputStream(content))
+            assertThat(wb.numberOfSheets).isEqualTo(1)
+            val sheet = wb.getSheetAt(0)
+            assertThat(sheet.lastRowNum).isEqualTo(3)
+
+            for (i in 1..sheet.lastRowNum) {
+                verifyCellUser(sheet.getRow(i), testContext.users[i - 1])
+            }
+
+            // Uncomment to generate file locally.
+//             File(getDownloadDirectory("test-xlsx.xlsx")).writeBytes(content)
+        }
+    }
+
+    @Test
+    @WithMockCrowdfundUser
+    fun mustNotBeAbleToGetCampaignXlsxReportForOtherIssuer() {
+        suppose("Blockchain service will return issuer owner address") {
+            Mockito.`when`(blockchainService.getIssuerOwner(IssuerRequest(issuer, defaultChainId)))
+                .thenReturn(secondUserAddress)
+        }
+
+        verify("Other issuer cannot fetch campaign XLSX report") {
+            val result = mockMvc.perform(
+                MockMvcRequestBuilders.get("$campaignUserAccountsSummaryPath/xlsx")
+            )
+                .andExpect(MockMvcResultMatchers.status().isBadRequest)
+                .andReturn()
+            verifyResponseErrorCode(result, ErrorCode.USER_NOT_ISSUER)
+        }
+    }
+
+    @Test
+    @WithMockCrowdfundUser
+    fun mustHandleExceptionFromBlockchainServiceWhenCampaignFetchingXlsxReport() {
+        suppose("Blockchain service will return issuer owner address") {
+            given(blockchainService.getIssuerOwner(IssuerRequest(issuer, defaultChainId)))
+                .willThrow(InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "Failed"))
+        }
+
+        verify("Fetching campaign XLSX report returns RPC error code") {
+            val result = mockMvc.perform(
+                MockMvcRequestBuilders.get("$campaignUserAccountsSummaryPath/xlsx")
             )
                 .andExpect(MockMvcResultMatchers.status().isBadGateway)
                 .andReturn()

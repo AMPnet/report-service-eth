@@ -70,3 +70,10 @@ Issuer owner can download the xlsx report with users list.
 .Request
 include::{snippets}/AdminControllerTest/mustBeAbleToDownloadXlsxForVerifiedUsers/http-request.adoc[]
 Response is xlsx file data.
+
+=== Campaign investors report
+Issuer owner can download the xlsx report with investors list for some campaign.
+
+.Request
+include::{snippets}/AdminControllerTest/mustBeAbleToDownloadCampaignXlsxForVerifiedUsers/http-request.adoc[]
+Response is xlsx file data.
