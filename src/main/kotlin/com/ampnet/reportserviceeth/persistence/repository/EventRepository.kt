@@ -27,6 +27,11 @@ interface EventRepository : JpaRepository<Event, UUID> {
     )
     fun findForTxHash(txHash: String, issuer: String, address: String, chainId: Long): Event?
 
+    @Deprecated(
+        message = "Only use in tests! This query is very slow and it can cause out-of-memory errors. " +
+            "If this becomes necessary for production code then add index for `chainId` column in " +
+            "the event table and add pagination here."
+    )
     fun findByChainId(chainId: Long): List<Event>
 
     @Query(
