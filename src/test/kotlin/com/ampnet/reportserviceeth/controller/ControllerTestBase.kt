@@ -47,17 +47,18 @@ import java.util.UUID
 @SpringBootTest
 abstract class ControllerTestBase : TestBase() {
 
-    protected val userAddress = "0x8f52B0cC50967fc59C6289f8FDB3E356EdeEBD23"
-    protected val secondUserAddress = "0xd43e088622404A5A21267033EC200383d39C22ca"
-    protected val thirdUserAddress = "0x5BF28A1E60Eb56107FAd2dE1F2AA51FC7A60C690"
-    protected val projectWallet: String = "0xFeC646017105fA2A4FFDc773e9c539Eda5af724a"
-    protected val txHash = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
-    protected val issuerInfo = "QmQ1wY6jd5uqAcPbdANR6BDqQt8fqEoCc64ypC6dvwnmTb"
-    protected val ipfsHash = "QmYuSijGgZAnBadguWUjLTYyfbvpaUBoWRfQMveo6XfzP3"
-    protected val issuer = "issuer-contract-address"
-    protected val defaultChainId = Chain.MATIC_TESTNET_MUMBAI.id
+    protected final val userAddress = "0x8f52B0cC50967fc59C6289f8FDB3E356EdeEBD23"
+    protected final val secondUserAddress = "0xd43e088622404A5A21267033EC200383d39C22ca"
+    protected final val thirdUserAddress = "0x5BF28A1E60Eb56107FAd2dE1F2AA51FC7A60C690"
+    protected final val projectWallet: String = "0xFeC646017105fA2A4FFDc773e9c539Eda5af724a"
+    protected final val txHash = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
+    protected final val issuerInfo = "QmQ1wY6jd5uqAcPbdANR6BDqQt8fqEoCc64ypC6dvwnmTb"
+    protected final val ipfsHash = "QmYuSijGgZAnBadguWUjLTYyfbvpaUBoWRfQMveo6XfzP3"
+    protected final val issuer = "issuer-contract-address"
+    protected final val campaign = "campaign-contract-address"
+    protected final val defaultChainId = Chain.MATIC_TESTNET_MUMBAI.id
     private val ethUnit = Convert.Unit.ETHER
-    protected val ethDecimals: BigInteger = BigInteger.valueOf(18)
+    protected final val ethDecimals: BigInteger = BigInteger.valueOf(18)
 
     @Autowired
     protected lateinit var objectMapper: ObjectMapper

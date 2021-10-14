@@ -6,6 +6,7 @@ import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.service.ReportingService
 import com.ampnet.reportserviceeth.service.XlsxService
+import com.ampnet.reportserviceeth.service.data.IssuerCampaignRequest
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import mu.KLogging
 import org.springframework.format.annotation.DateTimeFormat
@@ -54,16 +55,34 @@ class AdminController(
         logger.info { "Received request to get users xlsx report for issuer: $issuer" }
         verifyUserIsIssuerOwner(user, issuer, chainId)
         val xlsxReport = xlsxService.generateXlsx(IssuerRequest(issuer, chainId))
-        val httpHeaders = HttpHeaders().apply {
-            contentType = MediaType.APPLICATION_OCTET_STREAM
-        }
-        logger.info { "Successfully generate xlsx report" }
-        return ResponseEntity(xlsxReport, httpHeaders, HttpStatus.OK)
+        logger.info { "Successfully generated xlsx report for issuer: $issuer" }
+        return createXlsxResponseEntity(xlsxReport)
+    }
+
+    @GetMapping("/admin/{chainId}/{issuer}/{campaign}/report/xlsx")
+    fun getXlsxReportForCampaign(
+        @PathVariable chainId: Long,
+        @PathVariable issuer: String,
+        @PathVariable campaign: String
+    ): ResponseEntity<ByteArray> {
+        val user = ControllerUtils.getAddressFromSecurityContext()
+        logger.info { "Received request to get users xlsx report for issuer: $issuer and campaign: $campaign" }
+        verifyUserIsIssuerOwner(user, issuer, chainId)
+        val xlsxReport = xlsxService.generateXlsx(IssuerCampaignRequest(issuer, campaign, chainId))
+        logger.info { "Successfully generated xlsx report for issuer: $issuer and campaign: $campaign" }
+        return createXlsxResponseEntity(xlsxReport)
     }
 
     private fun verifyUserIsIssuerOwner(address: String, issuer: String, chainId: Long) {
         val issuerOwner = blockchainService.getIssuerOwner(IssuerRequest(issuer, chainId))
         if (address.lowercase() != issuerOwner.lowercase())
             throw InvalidRequestException(ErrorCode.USER_NOT_ISSUER, "Issuer owner is address: $issuerOwner")
+    }
+
+    private fun createXlsxResponseEntity(xlsxReport: ByteArray): ResponseEntity<ByteArray> {
+        val httpHeaders = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_OCTET_STREAM
+        }
+        return ResponseEntity(xlsxReport, httpHeaders, HttpStatus.OK)
     }
 }
