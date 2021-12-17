@@ -65,6 +65,8 @@ class AdminControllerTest : ControllerTestBase() {
 
             val pdfContent = result.response.contentAsByteArray
             verifyPdfFormat(pdfContent)
+
+            // Uncomment to generate file locally.
 //             File(getDownloadDirectory("usersAccountsSummary.pdf")).writeBytes(pdfContent)
         }
     }
@@ -240,11 +242,17 @@ class AdminControllerTest : ControllerTestBase() {
     }
 
     private fun verifyCellUser(row: Row, user: UserResponse) {
-        assertThat(row.getCell(0).stringCellValue).isEqualTo(user.address)
-        assertThat(row.getCell(1).stringCellValue).isEqualTo(user.email)
-        assertThat(row.getCell(2).stringCellValue).isEqualTo(user.firstName)
-        assertThat(row.getCell(3).stringCellValue).isEqualTo(user.lastName)
-        assertThat(row.getCell(4).stringCellValue).isEqualTo(user.createdAt.toDateString())
+        var column = 0
+        assertThat(row.getCell(column++).stringCellValue).isEqualTo(user.address)
+        assertThat(row.getCell(column++).stringCellValue).isEqualTo(user.email)
+        assertThat(row.getCell(column++).stringCellValue).isEqualTo(user.firstName)
+        assertThat(row.getCell(column++).stringCellValue).isEqualTo(user.lastName)
+        assertThat(row.getCell(column++).stringCellValue).isEqualTo(user.createdAt.toDateString())
+        assertThat(row.getCell(column++).stringCellValue).isEqualTo(user.dateOfBirth)
+        assertThat(row.getCell(column++).stringCellValue).isEqualTo(user.documentNumber)
+        assertThat(row.getCell(column++).stringCellValue).isEqualTo(user.documentValidFrom)
+        assertThat(row.getCell(column++).stringCellValue).isEqualTo(user.documentValidUntil)
+        assertThat(row.getCell(column).stringCellValue).isEqualTo(user.personalNumber)
     }
 
     private class TestContext {

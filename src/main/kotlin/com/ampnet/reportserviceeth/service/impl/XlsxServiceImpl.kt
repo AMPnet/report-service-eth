@@ -68,7 +68,12 @@ class XlsxServiceImpl(private val userService: UserService) : XlsxService {
         createCell(row, columnCount++, "E-mail", style)
         createCell(row, columnCount++, "First Name", style)
         createCell(row, columnCount++, "Last Name", style)
-        createCell(row, columnCount, "Registration Date", style)
+        createCell(row, columnCount++, "Registration Date", style)
+        createCell(row, columnCount++, "Date of Birth", style)
+        createCell(row, columnCount++, "Document Number", style)
+        createCell(row, columnCount++, "Date of Issue", style)
+        createCell(row, columnCount++, "Date of Expiry", style)
+        createCell(row, columnCount, "Personal Number", style)
     }
 
     private fun writeDataLines(users: List<UserResponse>) {
@@ -83,7 +88,12 @@ class XlsxServiceImpl(private val userService: UserService) : XlsxService {
             createCell(row, columnCount++, user.email, style)
             createCell(row, columnCount++, user.firstName, style)
             createCell(row, columnCount++, user.lastName, style)
-            createCell(row, columnCount, user.createdAt.toDateString(), style)
+            createCell(row, columnCount++, user.createdAt.toDateString(), style)
+            createCell(row, columnCount++, user.dateOfBirth, style)
+            createCell(row, columnCount++, user.documentNumber, style)
+            createCell(row, columnCount++, user.documentValidFrom, style)
+            createCell(row, columnCount++, user.documentValidUntil, style)
+            createCell(row, columnCount, user.personalNumber, style)
         }
         for (i in 0..columnCount) {
             sheet.autoSizeColumn(i, true)
