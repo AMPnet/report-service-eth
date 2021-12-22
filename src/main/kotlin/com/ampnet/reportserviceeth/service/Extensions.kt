@@ -5,7 +5,6 @@ import mu.KotlinLogging
 import org.web3j.protocol.core.RemoteFunctionCall
 import org.web3j.protocol.core.Request
 import org.web3j.protocol.core.Response
-import org.web3j.utils.Convert
 import java.io.IOException
 import java.math.BigInteger
 import java.text.DecimalFormat
@@ -52,9 +51,6 @@ fun BigInteger.toLocalDateTime(): LocalDateTime =
 
 fun Long.toLocalDateTime(): LocalDateTime =
     LocalDateTime.ofInstant(Instant.ofEpochSecond(this), ZoneId.systemDefault())
-
-fun BigInteger.toEther(): String = DecimalFormat(NUMBER_FORMAT)
-    .format(Convert.fromWei(this.toBigDecimal(), Convert.Unit.ETHER))
 
 fun BigInteger.formatWei(decimals: Decimals): String = DecimalFormat(NUMBER_FORMAT)
     .format(this.toBigDecimal().divide(decimals.factor))

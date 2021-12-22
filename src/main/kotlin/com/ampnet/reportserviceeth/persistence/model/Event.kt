@@ -73,7 +73,10 @@ class Event(
     val payoutId: Long?,
 
     @Column(nullable = true)
-    val revenue: BigInteger?
+    val revenue: BigInteger?,
+
+    @Column(nullable = false)
+    val stableCoinDecimals: BigInteger
 ) {
     /*
      * from - address of the wallet that reserved invested in the asset.
@@ -83,7 +86,8 @@ class Event(
         event: TransactionEvents.InvestEventResponse,
         chainId: Long,
         log: Log,
-        asset: IAssetCommon.AssetCommonState
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
     ) : this(
         uuid = UUID.randomUUID(),
         chainId = chainId,
@@ -103,7 +107,8 @@ class Event(
         decimals = asset.decimals,
         tokenAmount = event.tokenAmount,
         payoutId = null,
-        revenue = null
+        revenue = null,
+        stableCoinDecimals = stableCoinDecimals
     )
 
     /*
@@ -114,7 +119,8 @@ class Event(
         event: TransactionEvents.CancelInvestmentEventResponse,
         chainId: Long,
         log: Log,
-        asset: IAssetCommon.AssetCommonState
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
     ) : this(
         uuid = UUID.randomUUID(),
         chainId = chainId,
@@ -134,7 +140,8 @@ class Event(
         decimals = asset.decimals,
         tokenAmount = event.tokenAmount,
         payoutId = null,
-        revenue = null
+        revenue = null,
+        stableCoinDecimals = stableCoinDecimals
     )
 
     /*
@@ -145,7 +152,8 @@ class Event(
         event: TransactionEvents.ClaimEventResponse,
         chainId: Long,
         log: Log,
-        asset: IAssetCommon.AssetCommonState
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
     ) : this(
         uuid = UUID.randomUUID(),
         chainId = chainId,
@@ -165,7 +173,8 @@ class Event(
         decimals = asset.decimals,
         tokenAmount = event.tokenAmount,
         payoutId = null,
-        revenue = null
+        revenue = null,
+        stableCoinDecimals = stableCoinDecimals
     )
 
     /*
@@ -176,7 +185,8 @@ class Event(
         event: TransactionEvents.CreatePayoutEventResponse,
         chainId: Long,
         log: Log,
-        asset: IAssetCommon.AssetCommonState
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
     ) : this(
         uuid = UUID.randomUUID(),
         chainId = chainId,
@@ -196,7 +206,8 @@ class Event(
         decimals = asset.decimals,
         tokenAmount = null,
         payoutId = event.payoutId.toLong(),
-        revenue = event.amount
+        revenue = event.amount,
+        stableCoinDecimals = stableCoinDecimals
     )
 
     /*
@@ -207,7 +218,8 @@ class Event(
         event: TransactionEvents.ReleaseEventResponse,
         chainId: Long,
         log: Log,
-        asset: IAssetCommon.AssetCommonState
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
     ) : this(
         uuid = UUID.randomUUID(),
         chainId = chainId,
@@ -227,6 +239,7 @@ class Event(
         decimals = asset.decimals,
         tokenAmount = null,
         payoutId = event.payoutId.toLong(),
-        revenue = event.amount
+        revenue = event.amount,
+        stableCoinDecimals = stableCoinDecimals
     )
 }

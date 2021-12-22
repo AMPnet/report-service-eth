@@ -1,0 +1,1 @@
+ALTER TABLE event ADD COLUMN stable_coin_decimals NUMERIC NOT NULL DEFAULT 6;

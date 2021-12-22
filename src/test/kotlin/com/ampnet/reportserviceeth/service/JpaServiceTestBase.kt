@@ -44,8 +44,10 @@ abstract class JpaServiceTestBase : TestBase() {
     protected val defaultAssetName = "asset_name"
     protected val defaultAssetSymbol = "SMB"
     private val ethUnit = Convert.Unit.ETHER
-    protected val ethRawDecimals: BigInteger = BigInteger.valueOf(18)
-    protected val ethDecimals: Decimals = ethUnit.toDecimals()
+    private val ethRawDecimals: BigInteger = BigInteger.valueOf(18)
+    private val stableCoinUnit = Convert.Unit.MWEI
+    protected val stableCoinRawDecimals: BigInteger = BigInteger.valueOf(6)
+    protected val stableCoinDecimals: Decimals = stableCoinRawDecimals.toDecimals()
 
     @Mock
     protected lateinit var blockchainService: BlockchainService
@@ -85,9 +87,9 @@ abstract class JpaServiceTestBase : TestBase() {
         txHash: String = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
     ): TransactionInfo = TransactionInfo(
         type, from, to,
+        Convert.toWei(amount, stableCoinUnit).toBigInteger(),
         Convert.toWei(amount, ethUnit).toBigInteger(),
-        Convert.toWei(amount, ethUnit).toBigInteger(),
-        date, txHash, "asset", "GMC", ethRawDecimals
+        date, txHash, "asset", "GMC", ethRawDecimals, stableCoinRawDecimals
     )
 
     protected fun createUserResponse(address: String, language: String = "en"): UserResponse =
@@ -108,7 +110,7 @@ abstract class JpaServiceTestBase : TestBase() {
         from: String = userAddress,
         to: String = projectWallet,
         type: TransactionType = TransactionType.COMPLETED_INVESTMENT,
-        amount: String = "1005000",
+        amount: String = "100.50",
         txHash: String = "txHash",
         chain: Long = chainId,
         contractAddress: String = projectWallet,
@@ -122,10 +124,10 @@ abstract class JpaServiceTestBase : TestBase() {
             contractAddress, issuerAddress, txHash, type,
             logIndex, defaultAssetName, defaultAssetSymbol, 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
-            Convert.toWei(amount, ethUnit).toBigInteger(),
+            Convert.toWei(amount, stableCoinUnit).toBigInteger(),
             ethRawDecimals,
             Convert.toWei(amount, ethUnit).toBigInteger(),
-            50L, BigInteger("500")
+            50L, BigInteger("500"), stableCoinRawDecimals
         )
 
     protected fun generateIssuerCommonState() =

@@ -53,5 +53,5 @@ class TransactionsSummary(
         transactionsByType[type]?.sumOf { it.value } ?: BigInteger.ZERO
 
     private fun getDecimals(type: TransactionType): Decimals =
-        transactionsByType[type]?.firstOrNull()?.decimals?.toDecimals() ?: Convert.Unit.ETHER.toDecimals()
+        transactionsByType[type]?.firstOrNull()?.stableCoinDecimals?.toDecimals() ?: Convert.Unit.ETHER.toDecimals()
 }

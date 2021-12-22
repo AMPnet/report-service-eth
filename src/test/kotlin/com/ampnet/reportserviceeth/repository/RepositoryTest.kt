@@ -207,7 +207,7 @@ class RepositoryTest : TestBase() {
             logIndex, "asset_name", "symbol", 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
             BigInteger("500"), BigInteger.ZERO, BigInteger("500"),
-            50L, BigInteger("500")
+            50L, BigInteger("500"), BigInteger.valueOf(6)
         )
         return if (save) eventRepository.save(event)
         else event

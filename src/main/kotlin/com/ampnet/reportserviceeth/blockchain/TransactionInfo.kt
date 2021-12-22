@@ -18,7 +18,8 @@ data class TransactionInfo(
     val txHash: String,
     val asset: String,
     val assetTokenSymbol: String,
-    val decimals: BigInteger
+    val decimals: BigInteger,
+    val stableCoinDecimals: BigInteger
 ) {
     /*
      * from - address of the wallet that reserved investment in the asset.
@@ -27,7 +28,8 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.InvestEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAssetCommon.AssetCommonState
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
     ) : this(
         TransactionType.RESERVE_INVESTMENT,
         event.investor,
@@ -38,7 +40,8 @@ data class TransactionInfo(
         txRecipient.transactionHash,
         asset.name,
         asset.symbol,
-        asset.decimals
+        asset.decimals,
+        stableCoinDecimals
     )
 
     /*
@@ -48,7 +51,8 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.CancelInvestmentEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAssetCommon.AssetCommonState
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
     ) : this(
         TransactionType.CANCEL_INVESTMENT,
         event.investor,
@@ -59,7 +63,8 @@ data class TransactionInfo(
         txRecipient.transactionHash,
         asset.name,
         asset.symbol,
-        asset.decimals
+        asset.decimals,
+        stableCoinDecimals
     )
 
     /*
@@ -69,7 +74,8 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.ClaimEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAssetCommon.AssetCommonState
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
     ) : this(
         TransactionType.COMPLETED_INVESTMENT,
         event.investor,
@@ -80,7 +86,8 @@ data class TransactionInfo(
         txRecipient.transactionHash,
         asset.name,
         asset.symbol,
-        asset.decimals
+        asset.decimals,
+        stableCoinDecimals
     )
 
     /*
@@ -90,7 +97,8 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.CreatePayoutEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAssetCommon.AssetCommonState
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
     ) : this(
         TransactionType.CREATE_PAYOUT,
         event.creator,
@@ -101,7 +109,8 @@ data class TransactionInfo(
         txRecipient.transactionHash,
         asset.name,
         asset.symbol,
-        asset.decimals
+        asset.decimals,
+        stableCoinDecimals
     )
 
     /*
@@ -111,7 +120,8 @@ data class TransactionInfo(
     constructor(
         event: TransactionEvents.ReleaseEventResponse,
         txRecipient: TransactionReceipt,
-        asset: IAssetCommon.AssetCommonState
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
     ) : this(
         TransactionType.REVENUE_SHARE,
         txRecipient.to,
@@ -122,7 +132,8 @@ data class TransactionInfo(
         txRecipient.transactionHash,
         asset.name,
         asset.symbol,
-        asset.decimals
+        asset.decimals,
+        stableCoinDecimals
     )
 
     constructor(event: Event) : this(
@@ -135,6 +146,7 @@ data class TransactionInfo(
         event.hash,
         event.asset,
         event.tokenSymbol,
-        event.decimals
+        event.decimals,
+        event.stableCoinDecimals
     )
 }
