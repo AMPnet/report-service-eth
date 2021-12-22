@@ -13,7 +13,6 @@ import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.service.IpfsService
-import com.ampnet.reportserviceeth.toWei
 import com.ampnet.reportserviceth.contract.IIssuerCommon
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -210,8 +209,8 @@ abstract class ControllerTestBase : TestBase() {
         from: String = userAddress,
         to: String = projectWallet,
         type: TransactionType = TransactionType.COMPLETED_INVESTMENT,
-        amount: BigInteger = BigInteger.valueOf(702),
-        value: BigInteger = BigInteger.valueOf(143),
+        amount: String = "70.23",
+        value: String = "12.64",
         contractAddress: String = projectWallet,
         issuerAddress: String = issuer,
         txHash: String = UUID.randomUUID().toString(),
@@ -226,16 +225,18 @@ abstract class ControllerTestBase : TestBase() {
             contractAddress, issuerAddress, txHash, type,
             logIndex, "project_name", "symbol", 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
-            value.toWei(ethUnit), ethDecimals, amount.toWei(stableCoinUnit), 50L, BigInteger.valueOf(500),
-            stableCoinDecimals
+            Convert.toWei(amount, stableCoinUnit).toBigInteger(),
+            ethDecimals,
+            Convert.toWei(amount, ethUnit).toBigInteger(),
+            50L, BigInteger.valueOf(500), stableCoinDecimals
         )
         return if (saveToDb) eventRepository.save(event)
         else event
     }
 
     protected fun createEventsResponse(): List<Event> {
-        val investment = BigInteger.valueOf(2423)
-        val amount = BigInteger.valueOf(5254)
+        val investment = "280.43"
+        val amount = "543.10"
         val invests = MutableList(2) {
             createEvent(userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT, investment, amount)
         }
