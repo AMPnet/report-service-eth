@@ -18,6 +18,14 @@ interface TransactionEvents {
         uint256 tokenValue,
         uint256 timestamp
     );
+    event Finalize(
+        address indexed owner,
+        address asset,
+        uint256 fundsRaised,
+        uint256 tokensSold,
+        uint256 tokensRefund,
+        uint256 timestamp
+    );
     event CancelInvestment(
         address indexed investor,
         address asset,

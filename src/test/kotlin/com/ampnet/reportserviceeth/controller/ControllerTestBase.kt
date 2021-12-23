@@ -13,7 +13,6 @@ import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.service.IpfsService
-import com.ampnet.reportserviceeth.toWei
 import com.ampnet.reportserviceth.contract.IIssuerCommon
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -57,8 +56,10 @@ abstract class ControllerTestBase : TestBase() {
     protected final val issuer = "issuer-contract-address"
     protected final val campaign = "campaign-contract-address"
     protected final val defaultChainId = Chain.MATIC_TESTNET_MUMBAI.id
-    private val ethUnit = Convert.Unit.ETHER
-    protected final val ethDecimals: BigInteger = BigInteger.valueOf(18)
+    private final val ethUnit = Convert.Unit.ETHER
+    private final val ethDecimals: BigInteger = BigInteger.valueOf(18)
+    private final val stableCoinUnit = Convert.Unit.MWEI
+    private final val stableCoinDecimals: BigInteger = BigInteger.valueOf(6)
 
     @Autowired
     protected lateinit var objectMapper: ObjectMapper
@@ -165,10 +166,10 @@ abstract class ControllerTestBase : TestBase() {
         amount: String = "70"
     ): TransactionInfo = TransactionInfo(
         type, from, to,
-        Convert.toWei(amount, ethUnit).toBigInteger(),
+        Convert.toWei(amount, stableCoinUnit).toBigInteger(),
         Convert.toWei(amount, ethUnit).toBigInteger(),
         LocalDateTime.now(), "0xafd91eb7096efdc4e8ef331a83bc512f279b80730dfbd62824df92e4e504f2f8",
-        "Gold mine in Chile", "GMC", ethDecimals
+        "Gold mine in Chile", "GMC", ethDecimals, stableCoinDecimals
     )
 
     protected fun getDownloadDirectory(name: String): String =
@@ -208,8 +209,8 @@ abstract class ControllerTestBase : TestBase() {
         from: String = userAddress,
         to: String = projectWallet,
         type: TransactionType = TransactionType.COMPLETED_INVESTMENT,
-        amount: BigInteger = BigInteger.valueOf(702),
-        value: BigInteger = BigInteger.valueOf(143),
+        amount: String = "70.23",
+        value: String = "12.64",
         contractAddress: String = projectWallet,
         issuerAddress: String = issuer,
         txHash: String = UUID.randomUUID().toString(),
@@ -224,15 +225,18 @@ abstract class ControllerTestBase : TestBase() {
             contractAddress, issuerAddress, txHash, type,
             logIndex, "project_name", "symbol", 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
-            value.toWei(ethUnit), ethDecimals, amount.toWei(ethUnit), 50L, BigInteger.valueOf(500)
+            Convert.toWei(amount, stableCoinUnit).toBigInteger(),
+            ethDecimals.toShort(),
+            Convert.toWei(amount, ethUnit).toBigInteger(),
+            50L, BigInteger.valueOf(500), stableCoinDecimals.toShort()
         )
         return if (saveToDb) eventRepository.save(event)
         else event
     }
 
     protected fun createEventsResponse(): List<Event> {
-        val investment = BigInteger.valueOf(2423)
-        val amount = BigInteger.valueOf(5254)
+        val investment = "280.43"
+        val amount = "543.10"
         val invests = MutableList(2) {
             createEvent(userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT, investment, amount)
         }

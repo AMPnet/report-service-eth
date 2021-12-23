@@ -8,7 +8,9 @@ import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.sendSafely
 import com.ampnet.reportserviceth.contract.IAssetCommon
 import com.ampnet.reportserviceth.contract.ICampaignFactoryCommon
+import com.ampnet.reportserviceth.contract.IIssuerCommon
 import com.ampnet.reportserviceth.contract.ISnapshotDistributorFactoryCommon
+import com.ampnet.reportserviceth.contract.IToken
 import com.ampnet.reportserviceth.contract.TransactionEvents
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
@@ -20,7 +22,6 @@ import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.gas.DefaultGasProvider
 import java.math.BigInteger
-import kotlin.jvm.Throws
 
 private val logger = KotlinLogging.logger {}
 
@@ -122,27 +123,32 @@ class BlockchainEventServiceImpl(
         skipException { contract.getInvestEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
             val asset = getAsset(it.asset, chainProperties)
-            events.add(Event(it, chainId, log, asset))
+            val stableCoinPrecision = getStableCoinPrecision(asset.issuer, chainProperties)
+            events.add(Event(it, chainId, log, asset, stableCoinPrecision))
         }
         skipException { contract.getCancelInvestmentEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
             val asset = getAsset(it.asset, chainProperties)
-            events.add(Event(it, chainId, log, asset))
+            val stableCoinPrecision = getStableCoinPrecision(asset.issuer, chainProperties)
+            events.add(Event(it, chainId, log, asset, stableCoinPrecision))
         }
         skipException { contract.getClaimEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
             val asset = getAsset(it.asset, chainProperties)
-            events.add(Event(it, chainId, log, asset))
+            val stableCoinPrecision = getStableCoinPrecision(asset.issuer, chainProperties)
+            events.add(Event(it, chainId, log, asset, stableCoinPrecision))
         }
         skipException { contract.getCreatePayoutEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
             val asset = getAsset(it.asset, chainProperties)
-            events.add(Event(it, chainId, log, asset))
+            val stableCoinPrecision = getStableCoinPrecision(asset.issuer, chainProperties)
+            events.add(Event(it, chainId, log, asset, stableCoinPrecision))
         }
         skipException { contract.getReleaseEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
             val asset = getAsset(it.asset, chainProperties)
-            events.add(Event(it, chainId, log, asset))
+            val stableCoinPrecision = getStableCoinPrecision(asset.issuer, chainProperties)
+            events.add(Event(it, chainId, log, asset, stableCoinPrecision))
         }
         return events
     }
@@ -152,4 +158,24 @@ class BlockchainEventServiceImpl(
             ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
             "Cannot find the log for contract address: ${event.log.address} inside the logsMap."
         )
+
+    private fun getStableCoinPrecision(
+        issuerAddress: String,
+        chainProperties: ChainPropertiesWithServices
+    ): BigInteger {
+        val issuer = IIssuerCommon.load(
+            issuerAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
+        )
+        val stableCoinAddress = issuer.commonState().sendSafely()?.stablecoin
+        val stableCoin = IToken.load(
+            stableCoinAddress,
+            chainProperties.web3j,
+            chainProperties.transactionManager,
+            DefaultGasProvider()
+        )
+        return stableCoin.decimals()?.sendSafely() ?: throw InternalException(
+            ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
+            "Cannot get stable coin decimals for issuer address: $issuerAddress"
+        )
+    }
 }

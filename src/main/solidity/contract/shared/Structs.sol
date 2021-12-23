@@ -108,66 +108,6 @@ contract Structs {
         address provider;
     }
 
-    struct AssetTransferableFactoryParams {
-        address creator;
-        address issuer;
-        address apxRegistry;
-        string mappedName;
-        address nameRegistry;
-        uint256 initialTokenSupply;
-        bool whitelistRequiredForRevenueClaim;
-        bool whitelistRequiredForLiquidationClaim;
-        string name;
-        string symbol;
-        string info;
-        address childChainManager;
-    }
-
-    struct AssetFactoryParams {
-        address creator;
-        address issuer;
-        address apxRegistry;
-        address nameRegistry;
-        string mappedName;
-        uint256 initialTokenSupply;
-        bool transferable;
-        bool whitelistRequiredForRevenueClaim;
-        bool whitelistRequiredForLiquidationClaim;
-        string name;
-        string symbol;
-        string info;
-    }
-
-    struct AssetConstructorParams {
-        string flavor;
-        string version;
-        address owner;
-        address issuer;
-        address apxRegistry;
-        uint256 initialTokenSupply;
-        bool transferable;
-        bool whitelistRequiredForRevenueClaim;
-        bool whitelistRequiredForLiquidationClaim;
-        string name;
-        string symbol;
-        string info;
-    }
-
-    struct AssetTransferableConstructorParams {
-        string flavor;
-        string version;
-        address owner;
-        address issuer;
-        address apxRegistry;
-        uint256 initialTokenSupply;
-        bool whitelistRequiredForRevenueClaim;
-        bool whitelistRequiredForLiquidationClaim;
-        string name;
-        string symbol;
-        string info;
-        address childChainManager;
-    }
-
     struct AssetState {
         string flavor;
         string version;
@@ -226,6 +166,30 @@ contract Structs {
         address stablecoin;
         address walletApprover;
         string info;
+    }
+
+    struct CfManagerState {
+        string flavor;
+        string version;
+        address contractAddress;
+        address owner;
+        address asset;
+        address issuer;
+        address stablecoin;
+        uint256 tokenPrice;
+        uint256 softCap;
+        uint256 minInvestment;
+        uint256 maxInvestment;
+        bool whitelistRequired;
+        bool finalized;
+        bool canceled;
+        uint256 totalClaimableTokens;
+        uint256 totalInvestorsCount;
+        uint256 totalFundsRaised;
+        uint256 totalTokensSold;
+        uint256 totalTokensBalance;
+        string info;
+        address feeManager;
     }
 
     struct CfManagerSoftcapState {

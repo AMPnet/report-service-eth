@@ -69,9 +69,9 @@ public class ISnapshotDistributorFactoryCommon extends Contract {
                 });
     }
 
-    public RemoteFunctionCall<List> getInstancesForAsset(String assset) {
+    public RemoteFunctionCall<List> getInstancesForAsset(String asset) {
         final Function function = new Function(FUNC_GETINSTANCESFORASSET, 
-                Arrays.<Type>asList(new Address(160, assset)),
+                Arrays.<Type>asList(new Address(160, asset)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<Address>>() {}));
         return new RemoteFunctionCall<List>(function,
                 new Callable<List>() {

@@ -12,13 +12,11 @@ import com.ampnet.reportserviceeth.exception.ResourceNotFoundException
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.impl.TemplateDataServiceImpl
-import com.ampnet.reportserviceeth.toMwei
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
-import org.web3j.utils.Convert
 import java.math.BigInteger
 import java.time.LocalDateTime
 
@@ -48,16 +46,16 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             testContext.events = listOf(
                 createEvent(
                     userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT,
-                    testContext.reserveInvestment.toString()
+                    testContext.reserveInvestment
                 ),
                 createEvent(
                     projectWallet, userAddress, TransactionType.CANCEL_INVESTMENT,
-                    testContext.cancelInvestment.toString()
+                    testContext.cancelInvestment
                 ),
                 createEvent(
-                    projectWallet, userAddress, TransactionType.COMPLETED_INVESTMENT,
-                    testContext.completeInvestment.toString(), "Ox23",
-                ),
+                    projectWallet, userWallet, TransactionType.REVENUE_SHARE,
+                    testContext.sharePayout
+                )
             )
             testContext.transactionsRequest = TransactionsServiceRequest(
                 userAddress, chainId, issuer, PeriodServiceRequest(null, null)
@@ -76,13 +74,8 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
 
         verify("Template data service can get user transactions") {
             val txSummary = templateDataService.getUserTransactionsData(testContext.transactionsRequest)
-            assertThat(txSummary.investments)
-                .isEqualTo(
-                    BigInteger.valueOf(testContext.reserveInvestment - testContext.cancelInvestment)
-                        .formatWei(ethDecimals)
-                )
-            assertThat(txSummary.revenueShare)
-                .isEqualTo(BigInteger.valueOf(testContext.sharePayout).formatWei(ethDecimals))
+            assertThat(txSummary.investments).isEqualTo("0.54")
+            assertThat(txSummary.revenueShare).isEqualTo(testContext.sharePayout)
 
             val transactions = txSummary.transactions
             assertThat(transactions).hasSize(3)
@@ -90,19 +83,20 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             assertThat(investTx.description).isEqualTo(defaultAssetName)
             assertThat(investTx.assetTokenSymbol).isEqualTo(defaultAssetSymbol)
             assertThat(investTx.txDate).isNotBlank
-            assertThat(investTx.valueInDollar).isEqualTo(investTx.value.formatWei(ethDecimals))
+            assertThat(investTx.valueInDollar).isEqualTo(investTx.value.formatWei(stableCoinRawDecimals.toDecimals()))
 
             val cancelInvestmentTx = transactions.first { it.type == TransactionType.CANCEL_INVESTMENT }
             assertThat(cancelInvestmentTx.description).isEqualTo(defaultAssetName)
             assertThat(cancelInvestmentTx.assetTokenSymbol).isEqualTo(defaultAssetSymbol)
             assertThat(cancelInvestmentTx.txDate).isNotBlank
-            assertThat(cancelInvestmentTx.valueInDollar).isEqualTo(cancelInvestmentTx.value.formatWei(ethDecimals))
+            assertThat(cancelInvestmentTx.valueInDollar)
+                .isEqualTo(cancelInvestmentTx.value.formatWei(stableCoinDecimals))
 
-            val sharePayoutTx = transactions.first { it.type == TransactionType.COMPLETED_INVESTMENT }
+            val sharePayoutTx = transactions.first { it.type == TransactionType.REVENUE_SHARE }
             assertThat(sharePayoutTx.description).isEqualTo(defaultAssetName)
             assertThat(sharePayoutTx.assetTokenSymbol).isEqualTo(defaultAssetSymbol)
             assertThat(sharePayoutTx.txDate).isNotBlank
-            assertThat(sharePayoutTx.valueInDollar).isEqualTo(sharePayoutTx.value.formatWei(ethDecimals))
+            assertThat(sharePayoutTx.valueInDollar).isEqualTo(sharePayoutTx.value.formatWei(stableCoinDecimals))
 
             assertThat(txSummary.logo).isEqualTo(applicationProperties.ipfs.ipfsUrl + ipfsCid)
         }
@@ -221,7 +215,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
                 .thenReturn(
                     listOf(
                         createTransaction(
-                            secondUserAddress, projectWallet, testContext.reserveInvestment.toString(),
+                            secondUserAddress, projectWallet, testContext.reserveInvestment,
                             TransactionType.RESERVE_INVESTMENT
                         )
                     )
@@ -240,20 +234,17 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             transactionsSummaryList.forEach {
                 when (it.userInfo.address) {
                     userAddress -> {
-                        assertThat(it.investments).isEqualTo(
-                            BigInteger.valueOf(testContext.reserveInvestment - testContext.cancelInvestment)
-                                .formatWei(ethDecimals)
-                        )
-                        assertThat(it.revenueShare).isEqualTo(toPrintValue(testContext.sharePayout))
+                        assertThat(it.investments).isEqualTo("0.54")
+                        assertThat(it.revenueShare).isEqualTo(testContext.sharePayout)
                     }
                     secondUserAddress -> {
-                        assertThat(it.investments).isEqualTo(toPrintValue(testContext.reserveInvestment))
-                        assertThat(it.revenueShare).isEqualTo(BigInteger.ZERO.formatWei(ethDecimals))
+                        assertThat(it.investments).isEqualTo(testContext.reserveInvestment)
+                        assertThat(it.revenueShare).isEqualTo(BigInteger.ZERO.formatWei(stableCoinDecimals))
                     }
                     thirdUserAddress -> {
                         assertThat(it.transactions).isEmpty()
-                        assertThat(it.investments).isEqualTo(BigInteger.ZERO.formatWei(ethDecimals))
-                        assertThat(it.revenueShare).isEqualTo(BigInteger.ZERO.formatWei(ethDecimals))
+                        assertThat(it.investments).isEqualTo(BigInteger.ZERO.formatWei(stableCoinDecimals))
+                        assertThat(it.revenueShare).isEqualTo(BigInteger.ZERO.formatWei(stableCoinDecimals))
                     }
                 }
             }
@@ -296,37 +287,34 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         }
     }
 
-    private fun toPrintValue(amount: Long) =
-        Convert.toWei(amount.toString(), Convert.Unit.MWEI).toBigInteger().toMwei()
-
     private fun createEventsFlow(): List<Event> =
         listOf(
             createEvent(
                 userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT,
-                testContext.reserveInvestment.toString()
+                testContext.reserveInvestment
             ),
             createEvent(
                 projectWallet, userWallet, TransactionType.COMPLETED_INVESTMENT,
-                testContext.completeInvestment.toString()
+                testContext.completeInvestment
             ),
             createEvent(
                 projectWallet, userWallet, TransactionType.CANCEL_INVESTMENT,
-                testContext.cancelInvestment.toString()
+                testContext.cancelInvestment
             ),
         )
 
     private fun createTransactionFlow(): List<TransactionInfo> =
         listOf(
             createTransaction(
-                userWallet, projectWallet, testContext.reserveInvestment.toString(),
+                userWallet, projectWallet, testContext.reserveInvestment,
                 TransactionType.RESERVE_INVESTMENT
             ),
             createTransaction(
-                projectWallet, userWallet, testContext.sharePayout.toString(),
+                projectWallet, userWallet, testContext.sharePayout,
                 TransactionType.REVENUE_SHARE
             ),
             createTransaction(
-                projectWallet, userWallet, testContext.cancelInvestment.toString(),
+                projectWallet, userWallet, testContext.cancelInvestment,
                 TransactionType.CANCEL_INVESTMENT
             )
         )
@@ -339,9 +327,9 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         lateinit var user: UserResponse
         lateinit var secondUser: UserResponse
         lateinit var thirdUser: UserResponse
-        val reserveInvestment = 20000L
-        val cancelInvestment = 20000L
-        val completeInvestment = 20000L
-        val sharePayout = 1050L
+        val reserveInvestment = "200.54"
+        val cancelInvestment = "200.00"
+        val completeInvestment = "200.54"
+        val sharePayout = "100.69"
     }
 }

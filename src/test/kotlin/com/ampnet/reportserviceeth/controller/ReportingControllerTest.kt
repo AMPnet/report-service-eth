@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.math.BigInteger
 import java.time.LocalDate
 
 class ReportingControllerTest : ControllerTestBase() {
@@ -76,8 +75,7 @@ class ReportingControllerTest : ControllerTestBase() {
         }
         suppose("There is an event") {
             testContext.event = createEvent(
-                userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT,
-                BigInteger.valueOf(3412), txHash = txHash
+                userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT, txHash = txHash
             )
         }
         suppose("Blockchain service will return issuer state") {
