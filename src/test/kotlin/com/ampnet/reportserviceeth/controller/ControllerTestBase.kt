@@ -226,9 +226,9 @@ abstract class ControllerTestBase : TestBase() {
             logIndex, "project_name", "symbol", 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
             Convert.toWei(amount, stableCoinUnit).toBigInteger(),
-            ethDecimals,
+            ethDecimals.toShort(),
             Convert.toWei(amount, ethUnit).toBigInteger(),
-            50L, BigInteger.valueOf(500), stableCoinDecimals
+            50L, BigInteger.valueOf(500), stableCoinDecimals.toShort()
         )
         return if (saveToDb) eventRepository.save(event)
         else event

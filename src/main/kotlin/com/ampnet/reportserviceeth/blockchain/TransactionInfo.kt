@@ -146,7 +146,7 @@ data class TransactionInfo(
         event.hash,
         event.asset,
         event.tokenSymbol,
-        event.decimals,
-        event.stableCoinDecimals
+        BigInteger.valueOf(event.decimals.toLong()),
+        BigInteger.valueOf(event.stableCoinDecimals.toLong())
     )
 }

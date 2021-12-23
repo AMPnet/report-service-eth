@@ -125,9 +125,9 @@ abstract class JpaServiceTestBase : TestBase() {
             logIndex, defaultAssetName, defaultAssetSymbol, 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
             Convert.toWei(amount, stableCoinUnit).toBigInteger(),
-            ethRawDecimals,
+            ethRawDecimals.toShort(),
             Convert.toWei(amount, ethUnit).toBigInteger(),
-            50L, BigInteger("500"), stableCoinRawDecimals
+            50L, BigInteger("500"), stableCoinRawDecimals.toShort()
         )
 
     protected fun generateIssuerCommonState() =

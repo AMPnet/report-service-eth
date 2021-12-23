@@ -64,7 +64,7 @@ class Event(
     val tokenValue: BigInteger,
 
     @Column(nullable = false)
-    val decimals: BigInteger,
+    val decimals: Short,
 
     @Column(nullable = true)
     val tokenAmount: BigInteger?,
@@ -76,7 +76,7 @@ class Event(
     val revenue: BigInteger?,
 
     @Column(nullable = false)
-    val stableCoinDecimals: BigInteger
+    val stableCoinDecimals: Short
 ) {
     /*
      * from - address of the wallet that reserved invested in the asset.
@@ -104,11 +104,11 @@ class Event(
         blockHash = log.blockHash,
         timestamp = event.timestamp.toLong(),
         tokenValue = event.tokenValue,
-        decimals = asset.decimals,
+        decimals = asset.decimals.toShort(),
         tokenAmount = event.tokenAmount,
         payoutId = null,
         revenue = null,
-        stableCoinDecimals = stableCoinDecimals
+        stableCoinDecimals = stableCoinDecimals.toShort()
     )
 
     /*
@@ -137,11 +137,11 @@ class Event(
         blockHash = log.blockHash,
         timestamp = event.timestamp.toLong(),
         tokenValue = event.tokenValue,
-        decimals = asset.decimals,
+        decimals = asset.decimals.toShort(),
         tokenAmount = event.tokenAmount,
         payoutId = null,
         revenue = null,
-        stableCoinDecimals = stableCoinDecimals
+        stableCoinDecimals = stableCoinDecimals.toShort()
     )
 
     /*
@@ -170,11 +170,11 @@ class Event(
         blockHash = log.blockHash,
         timestamp = event.timestamp.toLong(),
         tokenValue = event.tokenValue,
-        decimals = asset.decimals,
+        decimals = asset.decimals.toShort(),
         tokenAmount = event.tokenAmount,
         payoutId = null,
         revenue = null,
-        stableCoinDecimals = stableCoinDecimals
+        stableCoinDecimals = stableCoinDecimals.toShort()
     )
 
     /*
@@ -203,11 +203,11 @@ class Event(
         blockHash = log.blockHash,
         timestamp = event.timestamp.toLong(),
         tokenValue = event.amount,
-        decimals = asset.decimals,
+        decimals = asset.decimals.toShort(),
         tokenAmount = null,
         payoutId = event.payoutId.toLong(),
         revenue = event.amount,
-        stableCoinDecimals = stableCoinDecimals
+        stableCoinDecimals = stableCoinDecimals.toShort()
     )
 
     /*
@@ -236,10 +236,10 @@ class Event(
         blockHash = log.blockHash,
         timestamp = event.timestamp.toLong(),
         tokenValue = event.amount,
-        decimals = asset.decimals,
+        decimals = asset.decimals.toShort(),
         tokenAmount = null,
         payoutId = event.payoutId.toLong(),
         revenue = event.amount,
-        stableCoinDecimals = stableCoinDecimals
+        stableCoinDecimals = stableCoinDecimals.toShort()
     )
 }

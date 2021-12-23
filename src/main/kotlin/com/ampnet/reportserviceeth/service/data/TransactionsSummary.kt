@@ -32,11 +32,11 @@ class TransactionsSummary(
     val period: String = getPeriod(periodRequest)
     val dateOfFinish: String = getDateOfFinish(transactions, periodRequest)
     val revenueShare = sumTransactionAmountsByType(TransactionType.REVENUE_SHARE)
-        .formatWei(getDecimals(TransactionType.REVENUE_SHARE))
+        .formatWei(getStableCoinDecimals(TransactionType.REVENUE_SHARE))
     val investments = (
         sumTransactionAmountsByType(TransactionType.RESERVE_INVESTMENT) -
             sumTransactionAmountsByType(TransactionType.CANCEL_INVESTMENT)
-        ).formatWei(getDecimals(TransactionType.RESERVE_INVESTMENT))
+        ).formatWei(getStableCoinDecimals(TransactionType.RESERVE_INVESTMENT))
 
     private fun getPeriod(periodRequest: PeriodServiceRequest): String {
         val fromPeriod = (periodRequest.from ?: userInfo.createdAt).formatToYearMonthDay(locale)
@@ -52,6 +52,6 @@ class TransactionsSummary(
     private fun sumTransactionAmountsByType(type: TransactionType): BigInteger =
         transactionsByType[type]?.sumOf { it.value } ?: BigInteger.ZERO
 
-    private fun getDecimals(type: TransactionType): Decimals =
-        transactionsByType[type]?.firstOrNull()?.stableCoinDecimals?.toDecimals() ?: Convert.Unit.ETHER.toDecimals()
+    private fun getStableCoinDecimals(type: TransactionType): Decimals =
+        transactionsByType[type]?.firstOrNull()?.stableCoinDecimals?.toDecimals() ?: Convert.Unit.MWEI.toDecimals()
 }
