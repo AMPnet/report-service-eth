@@ -44,6 +44,6 @@ class ChainProperties {
 }
 
 class IpfsProperties {
-    var frontendApi = "https://staging.ampnet.io/api/ipfs/issuer"
+    var frontendApi: String? = null
     var ipfsUrl = "https://ampnet.mypinata.cloud/ipfs/"
 }

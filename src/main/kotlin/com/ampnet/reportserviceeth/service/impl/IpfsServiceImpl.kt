@@ -18,13 +18,14 @@ class IpfsServiceImpl(
     companion object : KLogging()
 
     override fun getLogoUrl(issuerInfoHash: String): String? {
-        val request = UriComponentsBuilder.fromUriString(applicationProperties.ipfs.frontendApi)
+        val url = applicationProperties.ipfs.frontendApi ?: return null
+        val request = UriComponentsBuilder.fromUriString(url)
             .queryParam("hash", issuerInfoHash).build().toUri()
         return try {
             val response = restTemplate.postForEntity<IssuerInfoResponse>(request)
             if (response.statusCode.is2xxSuccessful) {
                 response.body?.logo ?: run {
-                    logger.error { "Missing body in response to: $request" }
+                    logger.warn { "Missing body in response to: $request" }
                     null
                 }
             } else {
