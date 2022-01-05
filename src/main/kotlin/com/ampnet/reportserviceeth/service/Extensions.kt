@@ -26,12 +26,12 @@ fun <S, T : Response<*>?> Request<S, T>.sendSafely(): T? {
     try {
         val value = this.send()
         if (value?.hasError() == true) {
-            logger.warn { "Errors: ${value.error.message}" }
+            logger.error { "Errors: ${value.error.message}" }
             return null
         }
         return value
     } catch (ex: IOException) {
-        logger.warn("Failed blockchain call", ex)
+        logger.warn("Failed web3 blockchain call", ex)
         return null
     }
 }
@@ -41,7 +41,7 @@ fun <T> RemoteFunctionCall<T>.sendSafely(): T? {
     return try {
         this.send()
     } catch (ex: Exception) {
-        logger.warn("Failed smart contract call", ex)
+        logger.warn("Failed our smart contract call", ex)
         null
     }
 }

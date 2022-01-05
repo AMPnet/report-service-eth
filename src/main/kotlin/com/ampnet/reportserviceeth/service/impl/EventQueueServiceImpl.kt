@@ -56,7 +56,6 @@ class EventQueueServiceImpl(
                 startBlockNumber, latestBlockNumber.toLong(), chainProperties
             )
             if (startBlockNumber >= endBlockNumber) {
-//                logger.debug { "End block: $endBlockNumber is smaller than start block: $startBlockNumber" }
                 return
             }
             val events = blockchainEventService.getAllEvents(startBlockNumber, endBlockNumber, chain.id)
@@ -70,7 +69,7 @@ class EventQueueServiceImpl(
             } ?: Task(chain.id, endBlockNumber)
             taskRepository.save(updatedTask)
         } catch (ex: Throwable) {
-            logger.error { "Failed to fetch blockchain events: ${ex.message}" }
+            logger.warn { "Failed to fetch blockchain events: ${ex.message}" }
         }
     }
 
