@@ -22,6 +22,7 @@ import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.gas.DefaultGasProvider
 import java.math.BigInteger
+import java.util.concurrent.ConcurrentHashMap
 
 private val logger = KotlinLogging.logger {}
 
@@ -31,8 +32,8 @@ class BlockchainEventServiceImpl(
 ) : BlockchainEventService {
 
     private data class CacheKey(val address: String, val chainId: Long)
-    private val assetCache: MutableMap<CacheKey, IAssetCommon.AssetCommonState> = mutableMapOf()
-    private val stableCoinPrecisionCache: MutableMap<CacheKey, BigInteger> = mutableMapOf()
+    private val assetCache: MutableMap<CacheKey, IAssetCommon.AssetCommonState> = ConcurrentHashMap()
+    private val stableCoinPrecisionCache: MutableMap<CacheKey, BigInteger> = ConcurrentHashMap()
 
     @Throws(InternalException::class)
     override fun getAllEvents(startBlockNumber: Long, endBlockNumber: Long, chainId: Long): List<Event> {
