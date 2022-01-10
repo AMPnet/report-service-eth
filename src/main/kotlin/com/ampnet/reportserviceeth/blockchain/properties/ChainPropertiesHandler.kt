@@ -48,7 +48,7 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
         )
         val web3j = Web3j.build(HttpService(getChainRpcUrl(chain)))
         return ChainPropertiesWithServices(
-            web3j, ReadonlyTransactionManager(web3j, chainProperties.callerAddress), chainProperties
+            web3j, ReadonlyTransactionManager(web3j, chainProperties.callerAddress), chainProperties, chain.id
         )
     }
 

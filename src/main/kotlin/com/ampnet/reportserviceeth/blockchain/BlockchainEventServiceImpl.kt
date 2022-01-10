@@ -22,6 +22,7 @@ import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.gas.DefaultGasProvider
 import java.math.BigInteger
+import java.util.concurrent.ConcurrentHashMap
 
 private val logger = KotlinLogging.logger {}
 
@@ -29,6 +30,10 @@ private val logger = KotlinLogging.logger {}
 class BlockchainEventServiceImpl(
     private val chainPropertiesHandler: ChainPropertiesHandler
 ) : BlockchainEventService {
+
+    private data class CacheKey(val address: String, val chainId: Long)
+    private val assetCache: MutableMap<CacheKey, IAssetCommon.AssetCommonState> = ConcurrentHashMap()
+    private val stableCoinPrecisionCache: MutableMap<CacheKey, BigInteger> = ConcurrentHashMap()
 
     @Throws(InternalException::class)
     override fun getAllEvents(startBlockNumber: Long, endBlockNumber: Long, chainId: Long): List<Event> {
@@ -91,19 +96,6 @@ class BlockchainEventServiceImpl(
         }
     }
 
-    private fun getAsset(
-        contractAddress: String,
-        chainProperties: ChainPropertiesWithServices
-    ): IAssetCommon.AssetCommonState {
-        val assetContract = IAssetCommon.load(
-            contractAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
-        )
-        return assetContract.commonState().sendSafely() ?: throw InternalException(
-            ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-            "Cannot find the asset for address: $contractAddress"
-        )
-    }
-
     private fun generateEvents(
         logs: List<Log>,
         chainProperties: ChainPropertiesWithServices,
@@ -159,10 +151,29 @@ class BlockchainEventServiceImpl(
             "Cannot find the log for contract address: ${event.log.address} inside the logsMap."
         )
 
+    private fun getAsset(
+        contractAddress: String,
+        chainProperties: ChainPropertiesWithServices
+    ): IAssetCommon.AssetCommonState {
+        val cacheKey = CacheKey(contractAddress, chainProperties.chainId)
+        assetCache[cacheKey]?.let { return it }
+        val assetContract = IAssetCommon.load(
+            contractAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
+        )
+        val commonState = assetContract.commonState().sendSafely() ?: throw InternalException(
+            ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
+            "Cannot find the asset for address: $contractAddress"
+        )
+        assetCache[cacheKey] = commonState
+        return commonState
+    }
+
     private fun getStableCoinPrecision(
         issuerAddress: String,
         chainProperties: ChainPropertiesWithServices
     ): BigInteger {
+        val cacheKey = CacheKey(issuerAddress, chainProperties.chainId)
+        stableCoinPrecisionCache[cacheKey]?.let { return it }
         val issuer = IIssuerCommon.load(
             issuerAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
@@ -173,9 +184,11 @@ class BlockchainEventServiceImpl(
             chainProperties.transactionManager,
             DefaultGasProvider()
         )
-        return stableCoin.decimals()?.sendSafely() ?: throw InternalException(
+        val stableCoinPrecision = stableCoin.decimals()?.sendSafely() ?: throw InternalException(
             ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
             "Cannot get stable coin decimals for issuer address: $issuerAddress"
         )
+        stableCoinPrecisionCache[cacheKey] = stableCoinPrecision
+        return stableCoinPrecision
     }
 }
