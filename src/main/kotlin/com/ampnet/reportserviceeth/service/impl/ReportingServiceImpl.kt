@@ -10,7 +10,6 @@ import com.ampnet.reportserviceeth.service.TemplateService
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.util.ChainId
 import com.ampnet.reportserviceeth.util.ContractAddress
-import com.ampnet.reportserviceeth.util.WalletAddress
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
 import mu.KLogging
 import org.springframework.stereotype.Service
