@@ -2,6 +2,7 @@ package com.ampnet.reportserviceeth.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
+import java.math.BigInteger
 
 @Configuration
 @ConfigurationProperties(prefix = "com.ampnet.reportserviceeth")
@@ -38,9 +39,9 @@ class ChainProperties {
     var callerAddress: String = "0x0000000000000000000000000000000000000000"
     var cfManagerFactoryAddresses: List<String> = emptyList()
     var snapshotDistributorAddresses: List<String> = emptyList()
-    var startBlockNumber: Long = 1
-    var numOfConfirmations: Long = 10
-    var maxBlocks: Long = 1000
+    var startBlockNumber: BigInteger = BigInteger.ONE
+    var numOfConfirmations: BigInteger = BigInteger.TEN
+    var maxBlocks: BigInteger = BigInteger.valueOf(1000L)
 }
 
 class IpfsProperties {

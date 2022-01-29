@@ -9,9 +9,11 @@ import com.ampnet.reportserviceeth.config.ChainProperties
 import com.ampnet.reportserviceeth.persistence.model.Task
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.persistence.repository.TaskRepository
+import com.ampnet.reportserviceeth.util.BlockNumber
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigInteger
 import java.time.Instant
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -48,14 +50,16 @@ class EventQueueServiceImpl(
     @Transactional
     @Suppress("TooGenericExceptionCaught")
     fun processTask(chain: Chain, chainProperties: ChainProperties) {
-        val task = taskRepository.findByChainId(chain.id)
-        val startBlockNumber = task?.let { it.blockNumber + 1 } ?: chainProperties.startBlockNumber
+        val task = taskRepository.findByChainId(chain.id.value)
+        val startBlockNumber = BlockNumber(
+            task?.let { BigInteger.valueOf(it.blockNumber + 1L) } ?: chainProperties.startBlockNumber
+        )
         try {
             val latestBlockNumber = blockchainService.getBlockNumber(chain.id)
             val endBlockNumber = calculateEndBlockNumber(
-                startBlockNumber, latestBlockNumber.toLong(), chainProperties
+                startBlockNumber, latestBlockNumber, chainProperties
             )
-            if (startBlockNumber >= endBlockNumber) {
+            if (startBlockNumber.value >= endBlockNumber.value) {
                 return
             }
             val events = blockchainEventService.getAllEvents(startBlockNumber, endBlockNumber, chain.id)
@@ -64,9 +68,9 @@ class EventQueueServiceImpl(
                 eventRepository.saveAll(events)
             }
             val updatedTask = task?.apply {
-                this.blockNumber = endBlockNumber
+                this.blockNumber = endBlockNumber.value.longValueExact()
                 this.timestamp = Instant.now().toEpochMilli()
-            } ?: Task(chain.id, endBlockNumber)
+            } ?: Task(chain.id.value, endBlockNumber.value.longValueExact())
             taskRepository.save(updatedTask)
         } catch (ex: Throwable) {
             logger.warn { "Failed to fetch blockchain events: ${ex.message}" }
@@ -74,15 +78,16 @@ class EventQueueServiceImpl(
     }
 
     private fun calculateEndBlockNumber(
-        startBlockNumber: Long,
-        latestBlockNumber: Long,
+        startBlockNumber: BlockNumber,
+        latestBlockNumber: BlockNumber,
         chainProperties: ChainProperties
-    ): Long =
-        if (
-            (latestBlockNumber - chainProperties.numOfConfirmations - startBlockNumber) > chainProperties.maxBlocks
-        ) {
-            startBlockNumber + chainProperties.maxBlocks
+    ): BlockNumber {
+        val diff = latestBlockNumber.value - chainProperties.numOfConfirmations - startBlockNumber.value
+
+        return if (diff > chainProperties.maxBlocks) {
+            BlockNumber(startBlockNumber.value + chainProperties.maxBlocks)
         } else {
-            latestBlockNumber - chainProperties.numOfConfirmations
+            BlockNumber(latestBlockNumber.value - chainProperties.numOfConfirmations)
         }
+    }
 }

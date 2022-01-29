@@ -13,7 +13,7 @@ import java.time.LocalDate
 
 class ReportingControllerTest : ControllerTestBase() {
 
-    private val reportPath = "/report/$defaultChainId/$issuer/user/"
+    private val reportPath = "/report/${defaultChainId.value}/${issuer.value}/user/"
     private val transaction = "transaction"
     private val transactions = "transactions"
 
@@ -75,7 +75,7 @@ class ReportingControllerTest : ControllerTestBase() {
         }
         suppose("There is an event") {
             testContext.event = createEvent(
-                userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT, txHash = txHash
+                userAddress, projectWallet.asWallet(), TransactionType.RESERVE_INVESTMENT, txHash = txHash
             )
         }
         suppose("Blockchain service will return issuer state") {
@@ -90,7 +90,7 @@ class ReportingControllerTest : ControllerTestBase() {
         verify("User can get pdf with single transaction") {
             val result = mockMvc.perform(
                 get(userTransactionPath)
-                    .param("txHash", txHash)
+                    .param("txHash", txHash.value)
             )
                 .andExpect(status().isOk)
                 .andReturn()

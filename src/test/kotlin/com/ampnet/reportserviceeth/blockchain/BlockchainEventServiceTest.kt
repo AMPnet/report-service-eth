@@ -3,6 +3,7 @@ package com.ampnet.reportserviceeth.blockchain
 import com.ampnet.reportserviceeth.blockchain.properties.Chain
 import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesHandler
 import com.ampnet.reportserviceeth.config.ApplicationProperties
+import com.ampnet.reportserviceeth.util.BlockNumber
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.math.BigInteger
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -28,10 +30,10 @@ class BlockchainEventServiceTest {
 
     @Test
     fun mustBeAbleToGetAllEvents() {
-        applicationProperties.chainMumbai.maxBlocks = 99_999
+        applicationProperties.chainMumbai.maxBlocks = BigInteger.valueOf(99_999L)
         val startBlockNumber = applicationProperties.chainMumbai.startBlockNumber
         val events = service.getAllEvents(
-            startBlockNumber, startBlockNumber + applicationProperties.chainMumbai.maxBlocks,
+            BlockNumber(startBlockNumber), BlockNumber(startBlockNumber + applicationProperties.chainMumbai.maxBlocks),
             Chain.MATIC_TESTNET_MUMBAI.id
         )
         assertThat(events).isNotEmpty

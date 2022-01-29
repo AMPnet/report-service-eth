@@ -15,11 +15,11 @@ class EventServiceImpl(private val eventRepository: EventRepository) : EventServ
         val from = request.period.from?.toEpochSecond(ZoneOffset.UTC)
         val to = request.period.to?.toEpochSecond(ZoneOffset.UTC)
         return eventRepository
-            .findForAddressInPeriod(request.address.lowercase(), request.chainId, request.issuer.lowercase(), from, to)
+            .findForAddressInPeriod(request.address.value, request.chainId.value, request.issuer.value, from, to)
     }
 
     override fun getTransaction(request: TransactionServiceRequest): Event? =
         eventRepository.findForTxHash(
-            request.txHash, request.issuer.lowercase(), request.address.lowercase(), request.chainId
+            request.txHash.value, request.issuer.value, request.address.value, request.chainId.value
         )
 }

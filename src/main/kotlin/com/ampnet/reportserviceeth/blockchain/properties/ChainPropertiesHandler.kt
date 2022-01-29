@@ -5,6 +5,7 @@ import com.ampnet.reportserviceeth.config.ChainProperties
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.exception.InvalidRequestException
+import com.ampnet.reportserviceeth.util.ChainId
 import org.springframework.stereotype.Service
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
@@ -13,15 +14,13 @@ import org.web3j.tx.ReadonlyTransactionManager
 @Service
 class ChainPropertiesHandler(private val applicationProperties: ApplicationProperties) {
 
-    private val blockchainPropertiesMap = mutableMapOf<Long, ChainPropertiesWithServices>()
+    private val blockchainPropertiesMap = mutableMapOf<ChainId, ChainPropertiesWithServices>()
 
     @Throws(InvalidRequestException::class)
-    fun getBlockchainProperties(chainId: Long): ChainPropertiesWithServices {
-        blockchainPropertiesMap[chainId]?.let { return it }
-        val chain = getChain(chainId)
-        val properties = generateBlockchainProperties(chain)
-        blockchainPropertiesMap[chainId] = properties
-        return properties
+    fun getBlockchainProperties(chainId: ChainId): ChainPropertiesWithServices {
+        return blockchainPropertiesMap.computeIfAbsent(chainId) {
+            generateBlockchainProperties(getChain(it))
+        }
     }
 
     fun getChainProperties(chain: Chain): ChainProperties? {
@@ -52,7 +51,7 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
         )
     }
 
-    private fun getChain(chainId: Long) = Chain.fromId(chainId)
+    private fun getChain(chainId: ChainId) = Chain.fromId(chainId)
         ?: throw InternalException(ErrorCode.BLOCKCHAIN_ID, "Blockchain id: $chainId not supported")
 
     internal fun getChainRpcUrl(chain: Chain): String =

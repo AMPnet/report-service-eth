@@ -1,5 +1,12 @@
 package com.ampnet.reportserviceeth.service.data
 
-data class IssuerCampaignRequest(val issuerAddress: String, val campaignAddress: String, val chainId: Long) {
+import com.ampnet.reportserviceeth.util.ChainId
+import com.ampnet.reportserviceeth.util.ContractAddress
+
+data class IssuerCampaignRequest(
+    val issuerAddress: ContractAddress,
+    val campaignAddress: ContractAddress,
+    val chainId: ChainId
+) {
     fun toIssuerRequest() = IssuerRequest(issuerAddress, chainId)
 }
