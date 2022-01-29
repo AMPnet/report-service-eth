@@ -48,7 +48,7 @@ class TxHistoryControllerTest : ControllerTestBase() {
 
         verify("User can get his transaction history") {
             val result = mockMvc.perform(
-                get("$path/$defaultChainId/$defaultIssuerAddress")
+                get("$path/${defaultChainId.value}/${defaultIssuerAddress.value}")
             )
                 .andExpect(status().isOk)
                 .andReturn()
