@@ -8,6 +8,8 @@ import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.service.ReportingService
 import com.ampnet.reportserviceeth.service.TemplateService
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
+import com.ampnet.reportserviceeth.util.ChainId
+import com.ampnet.reportserviceeth.util.ContractAddress
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
 import mu.KLogging
 import org.springframework.stereotype.Service
@@ -36,8 +38,8 @@ class ReportingServiceImpl(
     }
 
     override fun generatePdfReportForAllActiveUsers(
-        address: String,
-        chainId: Long,
+        address: ContractAddress,
+        chainId: ChainId,
         periodRequest: PeriodServiceRequest
     ): ByteArray {
         val template = templateService.generateTemplateForAllActiveUsers(IssuerRequest(address, chainId), periodRequest)

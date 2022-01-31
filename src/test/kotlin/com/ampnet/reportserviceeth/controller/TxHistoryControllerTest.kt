@@ -7,6 +7,7 @@ import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.security.WithMockCrowdfundUser
 import com.ampnet.reportserviceeth.service.data.EventServiceResponse
+import com.ampnet.reportserviceeth.util.ContractAddress
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -19,7 +20,7 @@ import java.time.LocalDateTime
 class TxHistoryControllerTest : ControllerTestBase() {
 
     private val path = "/tx_history"
-    private val defaultIssuerAddress = "0xissuer-address"
+    private val defaultIssuerAddress = ContractAddress("0xissuer-address")
     private lateinit var testContext: TestContext
 
     @BeforeEach
@@ -42,12 +43,12 @@ class TxHistoryControllerTest : ControllerTestBase() {
             createEvent(userAddress, secondUserAddress, chain = Chain.ETHEREUM_MAIN.id)
         }
         suppose("There is event for other issuer") {
-            createEvent(userAddress, defaultIssuerAddress, issuerAddress = "0xother-issuer")
+            createEvent(userAddress, defaultIssuerAddress.asWallet(), issuerAddress = ContractAddress("0xother-issuer"))
         }
 
         verify("User can get his transaction history") {
             val result = mockMvc.perform(
-                get("$path/$defaultChainId/$defaultIssuerAddress")
+                get("$path/${defaultChainId.value}/${defaultIssuerAddress.value}")
             )
                 .andExpect(status().isOk)
                 .andReturn()
@@ -71,12 +72,12 @@ class TxHistoryControllerTest : ControllerTestBase() {
             createEvent(issuerAddress = defaultIssuerAddress, localDateTime = LocalDateTime.now().minusDays(10))
         }
         suppose("There is event for other issuer") {
-            createEvent(userAddress, defaultIssuerAddress, issuerAddress = "0xother-issuer")
+            createEvent(userAddress, defaultIssuerAddress.asWallet(), issuerAddress = ContractAddress("0xother-issuer"))
         }
 
         verify("User will get transaction history only for specified period") {
             val result = mockMvc.perform(
-                get("$path/$defaultChainId/$defaultIssuerAddress")
+                get("$path/${defaultChainId.value}/${defaultIssuerAddress.value}")
                     .param("from", LocalDate.now().minusDays(5).toString())
                     .param("to", LocalDate.now().minusDays(1).toString())
             )
@@ -94,7 +95,7 @@ class TxHistoryControllerTest : ControllerTestBase() {
     fun mustReturnErrorForInvalidChainId() {
         verify("Controller will return bad request") {
             val result = mockMvc.perform(
-                get("$path/-1/$defaultIssuerAddress")
+                get("$path/-1/${defaultIssuerAddress.value}")
             )
                 .andExpect(status().isBadRequest)
                 .andReturn()

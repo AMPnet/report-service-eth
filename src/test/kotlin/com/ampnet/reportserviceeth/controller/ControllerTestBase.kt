@@ -13,6 +13,10 @@ import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.service.IpfsService
+import com.ampnet.reportserviceeth.util.ChainId
+import com.ampnet.reportserviceeth.util.ContractAddress
+import com.ampnet.reportserviceeth.util.TransactionHash
+import com.ampnet.reportserviceeth.util.WalletAddress
 import com.ampnet.reportserviceth.contract.IIssuerCommon
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -46,15 +50,15 @@ import java.util.UUID
 @SpringBootTest
 abstract class ControllerTestBase : TestBase() {
 
-    protected final val userAddress = "0x8f52B0cC50967fc59C6289f8FDB3E356EdeEBD23"
-    protected final val secondUserAddress = "0xd43e088622404A5A21267033EC200383d39C22ca"
-    protected final val thirdUserAddress = "0x5BF28A1E60Eb56107FAd2dE1F2AA51FC7A60C690"
-    protected final val projectWallet: String = "0xFeC646017105fA2A4FFDc773e9c539Eda5af724a"
-    protected final val txHash = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
+    protected final val userAddress = WalletAddress("0x8f52B0cC50967fc59C6289f8FDB3E356EdeEBD23")
+    protected final val secondUserAddress = WalletAddress("0xd43e088622404A5A21267033EC200383d39C22ca")
+    protected final val thirdUserAddress = WalletAddress("0x5BF28A1E60Eb56107FAd2dE1F2AA51FC7A60C690")
+    protected final val projectWallet = ContractAddress("0xFeC646017105fA2A4FFDc773e9c539Eda5af724a")
+    protected final val txHash = TransactionHash("0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37")
     protected final val issuerInfo = "QmQ1wY6jd5uqAcPbdANR6BDqQt8fqEoCc64ypC6dvwnmTb"
     protected final val ipfsHash = "QmYuSijGgZAnBadguWUjLTYyfbvpaUBoWRfQMveo6XfzP3"
-    protected final val issuer = "issuer-contract-address"
-    protected final val campaign = "campaign-contract-address"
+    protected final val issuer = ContractAddress("issuer-contract-address")
+    protected final val campaign = ContractAddress("campaign-contract-address")
     protected final val defaultChainId = Chain.MATIC_TESTNET_MUMBAI.id
     private final val ethUnit = Convert.Unit.ETHER
     private final val ethDecimals: BigInteger = BigInteger.valueOf(18)
@@ -106,9 +110,9 @@ abstract class ControllerTestBase : TestBase() {
         assert(response.errCode == expectedErrorCode)
     }
 
-    protected fun createUserResponse(address: String): UserResponse =
+    protected fun createUserResponse(address: WalletAddress): UserResponse =
         UserResponse.newBuilder()
-            .setAddress(address)
+            .setAddress(address.value)
             .setFirstName("first name")
             .setLastName("last Name")
             .setCreatedAt(ZonedDateTime.now().minusDays(11).toEpochSecond())
@@ -180,8 +184,8 @@ abstract class ControllerTestBase : TestBase() {
         val invests = MutableList(2) {
             createTransaction(
                 TransactionType.RESERVE_INVESTMENT,
-                userAddress,
-                projectWallet,
+                userAddress.value,
+                projectWallet.value,
                 amount = investment
             )
         }
@@ -189,16 +193,16 @@ abstract class ControllerTestBase : TestBase() {
             MutableList(2) {
                 createTransaction(
                     TransactionType.REVENUE_SHARE,
-                    projectWallet,
-                    userAddress,
+                    projectWallet.value,
+                    userAddress.value,
                     amount = "500"
                 )
             }
         val cancelInvestments = MutableList(1) {
             createTransaction(
                 TransactionType.CANCEL_INVESTMENT,
-                projectWallet,
-                userAddress,
+                projectWallet.value,
+                userAddress.value,
                 amount = investment
             )
         }
@@ -206,23 +210,23 @@ abstract class ControllerTestBase : TestBase() {
     }
 
     protected fun createEvent(
-        from: String = userAddress,
-        to: String = projectWallet,
+        from: WalletAddress = userAddress,
+        to: WalletAddress = projectWallet.asWallet(),
         type: TransactionType = TransactionType.COMPLETED_INVESTMENT,
         amount: String = "70.23",
         value: String = "12.64",
-        contractAddress: String = projectWallet,
-        issuerAddress: String = issuer,
-        txHash: String = UUID.randomUUID().toString(),
-        chain: Long = defaultChainId,
+        contractAddress: ContractAddress = projectWallet,
+        issuerAddress: ContractAddress = issuer,
+        txHash: TransactionHash = TransactionHash(UUID.randomUUID().toString()),
+        chain: ChainId = defaultChainId,
         logIndex: Long = 134L,
         blockHash: String = "blockHash",
         localDateTime: LocalDateTime = LocalDateTime.now(),
         saveToDb: Boolean = true
     ): Event {
         val event = Event(
-            UUID.randomUUID(), chain, from.lowercase(), to.lowercase(),
-            contractAddress, issuerAddress, txHash, type,
+            UUID.randomUUID(), chain.value, from.value, to.value,
+            contractAddress.value, issuerAddress.value, txHash.value, type,
             logIndex, "project_name", "symbol", 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
             Convert.toWei(amount, stableCoinUnit).toBigInteger(),
@@ -238,13 +242,13 @@ abstract class ControllerTestBase : TestBase() {
         val investment = "280.43"
         val amount = "543.10"
         val invests = MutableList(2) {
-            createEvent(userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT, investment, amount)
+            createEvent(userAddress, projectWallet.asWallet(), TransactionType.RESERVE_INVESTMENT, investment, amount)
         }
         val cancelInvestments = MutableList(1) {
-            createEvent(userAddress, projectWallet, TransactionType.CANCEL_INVESTMENT, investment, amount)
+            createEvent(userAddress, projectWallet.asWallet(), TransactionType.CANCEL_INVESTMENT, investment, amount)
         }
         val revenueShares = MutableList(2) {
-            createEvent(projectWallet, userAddress, TransactionType.REVENUE_SHARE, investment, amount)
+            createEvent(projectWallet.asWallet(), userAddress, TransactionType.REVENUE_SHARE, investment, amount)
         }
         return invests + cancelInvestments + revenueShares
     }

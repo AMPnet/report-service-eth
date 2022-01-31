@@ -12,6 +12,10 @@ import com.ampnet.reportserviceeth.config.JsonConfig
 import com.ampnet.reportserviceeth.grpc.userservice.UserService
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.impl.TranslationServiceImpl
+import com.ampnet.reportserviceeth.util.ChainId
+import com.ampnet.reportserviceeth.util.ContractAddress
+import com.ampnet.reportserviceeth.util.TransactionHash
+import com.ampnet.reportserviceeth.util.WalletAddress
 import com.ampnet.reportserviceth.contract.IIssuerCommon
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.extension.ExtendWith
@@ -32,14 +36,14 @@ import java.util.UUID
 @Import(JsonConfig::class, RestTemplate::class, ApplicationProperties::class)
 abstract class JpaServiceTestBase : TestBase() {
 
-    protected val userAddress = "0x8f52B0cC50967fc59C6289f8FDB3E356EdeEBD23"
-    protected val secondUserAddress = "0xd43e088622404A5A21267033EC200383d39C22ca"
-    protected val thirdUserAddress = "0x5BF28A1E60Eb56107FAd2dE1F2AA51FC7A60C690"
-    protected val userWallet: String = "0x520eC1D2f24740B85c6A30fB9e56298dAd540FDb"
-    protected val projectWallet: String = "0xFeC646017105fA2A4FFDc773e9c539Eda5af724a"
-    protected val txHash = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
+    protected val userAddress = WalletAddress("0x8f52B0cC50967fc59C6289f8FDB3E356EdeEBD23")
+    protected val secondUserAddress = WalletAddress("0xd43e088622404A5A21267033EC200383d39C22ca")
+    protected val thirdUserAddress = WalletAddress("0x5BF28A1E60Eb56107FAd2dE1F2AA51FC7A60C690")
+    protected val userWallet = WalletAddress("0x520eC1D2f24740B85c6A30fB9e56298dAd540FDb")
+    protected val projectWallet = ContractAddress("0xFeC646017105fA2A4FFDc773e9c539Eda5af724a")
+    protected val txHash = TransactionHash("0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37")
     protected val ipfsCid = "QmYuSijGgZAnBadguWUjLTYyfbvpaUBoWRfQMveo6XfzP3"
-    protected val issuer = "0x5013F6ce0f9Beb07Be528E408352D03f3FCa1857"
+    protected val issuer = ContractAddress("0x5013F6ce0f9Beb07Be528E408352D03f3FCa1857")
     protected val chainId = Chain.MATIC_TESTNET_MUMBAI.id
     protected val defaultAssetName = "asset_name"
     protected val defaultAssetSymbol = "SMB"
@@ -79,22 +83,22 @@ abstract class JpaServiceTestBase : TestBase() {
     }
 
     protected fun createTransaction(
-        from: String,
-        to: String,
+        from: WalletAddress,
+        to: WalletAddress,
         amount: String,
         type: TransactionType,
         date: LocalDateTime = LocalDateTime.now().minusDays(1),
-        txHash: String = "0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37"
+        txHash: TransactionHash = TransactionHash("0x07b12471d1eac43a429cd38df96671621763f03bdde047697c62c22f5ff9bd37")
     ): TransactionInfo = TransactionInfo(
-        type, from, to,
+        type, from.value, to.toString(),
         Convert.toWei(amount, stableCoinUnit).toBigInteger(),
         Convert.toWei(amount, ethUnit).toBigInteger(),
-        date, txHash, "asset", "GMC", ethRawDecimals, stableCoinRawDecimals
+        date, txHash.value, "asset", "GMC", ethRawDecimals, stableCoinRawDecimals
     )
 
-    protected fun createUserResponse(address: String, language: String = "en"): UserResponse =
+    protected fun createUserResponse(address: WalletAddress, language: String = "en"): UserResponse =
         UserResponse.newBuilder()
-            .setAddress(address)
+            .setAddress(address.value)
             .setFirstName("first name")
             .setLastName("last Name")
             .setCreatedAt(ZonedDateTime.now().minusDays(11).toEpochSecond())
@@ -107,21 +111,21 @@ abstract class JpaServiceTestBase : TestBase() {
             .build()
 
     protected fun createEvent(
-        from: String = userAddress,
-        to: String = projectWallet,
+        from: WalletAddress = userAddress,
+        to: WalletAddress = projectWallet.asWallet(),
         type: TransactionType = TransactionType.COMPLETED_INVESTMENT,
         amount: String = "100.50",
-        txHash: String = "txHash",
-        chain: Long = chainId,
-        contractAddress: String = projectWallet,
-        issuerAddress: String = issuer,
+        txHash: TransactionHash = TransactionHash("txHash"),
+        chain: ChainId = chainId,
+        contractAddress: ContractAddress = projectWallet,
+        issuerAddress: ContractAddress = issuer,
         logIndex: Long = 134L,
         blockHash: String = "blockHash",
         localDateTime: LocalDateTime = LocalDateTime.now(),
     ) =
         Event(
-            UUID.randomUUID(), chain, from, to,
-            contractAddress, issuerAddress, txHash, type,
+            UUID.randomUUID(), chain.value, from.value, to.value,
+            contractAddress.value, issuerAddress.value, txHash.value, type,
             logIndex, defaultAssetName, defaultAssetSymbol, 500045L, blockHash,
             localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() / 1000,
             Convert.toWei(amount, stableCoinUnit).toBigInteger(),

@@ -13,13 +13,15 @@ import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.persistence.model.Task
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.persistence.repository.TaskRepository
+import com.ampnet.reportserviceeth.util.BlockNumber
+import com.ampnet.reportserviceeth.util.ChainId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
+import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mockito
-import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.timeout
 import org.springframework.beans.factory.annotation.Autowired
@@ -62,8 +64,14 @@ class EventQueueServiceTest : TestBase() {
         databaseCleanerService.deleteAllTasks()
         databaseCleanerService.deleteAllEvents()
         Mockito.clearInvocations(blockchainEventService)
-        given(blockchainService.getBlockNumber(any())).willReturn(BigInteger.valueOf(-1))
-        given(blockchainEventService.getAllEvents(any(), any(), any())).willReturn(emptyList())
+        given(blockchainService.getBlockNumber(ChainId(anyLong()))).willReturn(BlockNumber(-1L))
+        given(
+            blockchainEventService.getAllEvents(
+                anyValueClass(BlockNumber(0L)),
+                anyValueClass(BlockNumber(0L)),
+                ChainId(anyLong())
+            )
+        ).willReturn(emptyList())
     }
 
     @AfterEach
@@ -75,13 +83,16 @@ class EventQueueServiceTest : TestBase() {
     @Test
     fun mustSaveEventsOnExistingTask() {
         suppose("There is an existing task") {
-            testContext.task = taskRepository.save(Task(defaultChainId, startBlockNumber))
+            testContext.task = taskRepository.save(Task(defaultChainId.value, startBlockNumber))
         }
         suppose("Blockchain service will return two events") {
             given(
                 blockchainEventService.getAllEvents(
-                    startBlockNumber + 1,
-                    lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations, defaultChainId
+                    BlockNumber(startBlockNumber + 1L).mockito(),
+                    BlockNumber(
+                        lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations.toLong()
+                    ).mockito(),
+                    defaultChainId.mockito()
                 )
             ).willReturn(
                 listOf(
@@ -91,7 +102,8 @@ class EventQueueServiceTest : TestBase() {
             )
         }
         suppose("Blockchain service will return latest block number") {
-            given(blockchainService.getBlockNumber(defaultChainId)).willReturn(BigInteger.valueOf(lastBlockNumber))
+            given(blockchainService.getBlockNumber(defaultChainId.mockito()))
+                .willReturn(BlockNumber(lastBlockNumber))
         }
 
         verify("Service will save events and update the task") {
@@ -99,9 +111,9 @@ class EventQueueServiceTest : TestBase() {
             val tasks = taskRepository.findAll()
             val onlyTask = tasks.first()
             assertThat(tasks).hasSize(1)
-            assertThat(onlyTask.chainId).isEqualTo(defaultChainId)
+            assertThat(onlyTask.chainId).isEqualTo(defaultChainId.value)
             assertThat(onlyTask.blockNumber).isEqualTo(
-                lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations
+                lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations.toLong()
             )
             assertThat(onlyTask.timestamp).isGreaterThanOrEqualTo(testContext.task.timestamp)
 
@@ -113,15 +125,17 @@ class EventQueueServiceTest : TestBase() {
     @Test
     fun mustSaveEventsFromMultipleChains() {
         suppose("There is an existing task for two chains") {
-            testContext.task = taskRepository.save(Task(defaultChainId, startBlockNumber))
-            testContext.anotherTask = taskRepository.save(Task(maticChainId, startBlockNumber))
+            testContext.task = taskRepository.save(Task(defaultChainId.value, startBlockNumber))
+            testContext.anotherTask = taskRepository.save(Task(maticChainId.value, startBlockNumber))
         }
         suppose("Blockchain service will return two events for mumbai testnet") {
             given(
                 blockchainEventService.getAllEvents(
-                    startBlockNumber + 1,
-                    lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations,
-                    defaultChainId
+                    BlockNumber(startBlockNumber + 1L).mockito(),
+                    BlockNumber(
+                        lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations.toLong()
+                    ).mockito(),
+                    defaultChainId.mockito()
                 )
             ).willReturn(
                 listOf(
@@ -133,9 +147,11 @@ class EventQueueServiceTest : TestBase() {
         suppose("Blockchain service will return two events for matic mainnet") {
             given(
                 blockchainEventService.getAllEvents(
-                    startBlockNumber + 1,
-                    lastBlockNumber - applicationProperties.chainMatic.numOfConfirmations,
-                    maticChainId
+                    BlockNumber(startBlockNumber + 1L).mockito(),
+                    BlockNumber(
+                        lastBlockNumber - applicationProperties.chainMatic.numOfConfirmations.toLong()
+                    ).mockito(),
+                    maticChainId.mockito()
                 )
             ).willReturn(
                 listOf(
@@ -145,7 +161,7 @@ class EventQueueServiceTest : TestBase() {
             )
         }
         suppose("Blockchain service will return latest block number for both chains") {
-            given(blockchainService.getBlockNumber(any())).willReturn(BigInteger.valueOf(lastBlockNumber))
+            given(blockchainService.getBlockNumber(anyValueClass(ChainId(0L)))).willReturn(BlockNumber(lastBlockNumber))
         }
 
         verify("Service will save events and update tasks") {
@@ -154,26 +170,26 @@ class EventQueueServiceTest : TestBase() {
 
             val tasks = taskRepository.findAll()
             assertThat(tasks).hasSize(2)
-            val mumbaiTask = taskRepository.findByChainId(defaultChainId) ?: fail("Cannot find the task")
-            assertThat(mumbaiTask.chainId).isEqualTo(defaultChainId)
+            val mumbaiTask = taskRepository.findByChainId(defaultChainId.value) ?: fail("Cannot find the task")
+            assertThat(mumbaiTask.chainId).isEqualTo(defaultChainId.value)
             assertThat(mumbaiTask.blockNumber).isEqualTo(
-                lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations
+                lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations.toLong()
             )
             assertThat(mumbaiTask.timestamp).isGreaterThanOrEqualTo(testContext.task.timestamp)
 
-            val maticTask = taskRepository.findByChainId(maticChainId)
+            val maticTask = taskRepository.findByChainId(maticChainId.value)
                 ?: fail("Cannot find the task")
-            assertThat(maticTask.chainId).isEqualTo(maticChainId)
+            assertThat(maticTask.chainId).isEqualTo(maticChainId.value)
             assertThat(maticTask.blockNumber).isEqualTo(
-                lastBlockNumber - applicationProperties.chainMatic.numOfConfirmations
+                lastBlockNumber - applicationProperties.chainMatic.numOfConfirmations.toLong()
             )
             assertThat(maticTask.timestamp).isGreaterThanOrEqualTo(testContext.anotherTask.timestamp)
 
             val events = eventRepository.findAll()
             assertThat(events).hasSize(4)
-            @Suppress("DEPRECATION") val mumbaiEvents = eventRepository.findByChainId(defaultChainId)
+            @Suppress("DEPRECATION") val mumbaiEvents = eventRepository.findByChainId(defaultChainId.value)
             assertThat(mumbaiEvents).hasSize(2)
-            @Suppress("DEPRECATION") val maticEvents = eventRepository.findByChainId(maticChainId)
+            @Suppress("DEPRECATION") val maticEvents = eventRepository.findByChainId(maticChainId.value)
             assertThat(maticEvents).hasSize(2)
         }
     }
@@ -181,17 +197,20 @@ class EventQueueServiceTest : TestBase() {
     @Test
     fun mustNotSaveTaskOrEventOnExceptionThrown() {
         suppose("There is an existing task") {
-            testContext.task = taskRepository.save(Task(defaultChainId, startBlockNumber))
+            testContext.task = taskRepository.save(Task(defaultChainId.value, startBlockNumber))
         }
         suppose("Blockchain service will return latest block number") {
-            given(blockchainService.getBlockNumber(defaultChainId))
-                .willReturn(BigInteger.valueOf(lastBlockNumber))
+            given(blockchainService.getBlockNumber(defaultChainId.mockito()))
+                .willReturn(BlockNumber(lastBlockNumber))
         }
         suppose("Blockchain service will return two events") {
             given(
                 blockchainEventService.getAllEvents(
-                    startBlockNumber + 1,
-                    lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations, defaultChainId
+                    BlockNumber(startBlockNumber + 1L).mockito(),
+                    BlockNumber(
+                        lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations.toLong()
+                    ).mockito(),
+                    defaultChainId.mockito()
                 )
             ).willAnswer { throw InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "blockchain exception") }
         }
@@ -200,7 +219,7 @@ class EventQueueServiceTest : TestBase() {
             waitUntilTasksAreProcessed()
             val tasks = taskRepository.findAll()
             val task = tasks.first()
-            assertThat(task.chainId).isEqualTo(defaultChainId)
+            assertThat(task.chainId).isEqualTo(defaultChainId.value)
             assertThat(task.blockNumber).isEqualTo(startBlockNumber)
 
             val events = eventRepository.findAll()
@@ -208,19 +227,19 @@ class EventQueueServiceTest : TestBase() {
         }
     }
 
-    private fun waitUntilTasksAreProcessed(chainId: Long = defaultChainId) {
+    private fun waitUntilTasksAreProcessed(chainId: ChainId = defaultChainId) {
         Mockito.verify(blockchainEventService, timeout(10000).atLeastOnce())
             .getAllEvents(
-                startBlockNumber + 1,
-                lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations,
-                chainId
+                BlockNumber(startBlockNumber + 1).mockito(),
+                BlockNumber(lastBlockNumber - applicationProperties.chainMumbai.numOfConfirmations.toLong()).mockito(),
+                chainId.mockito()
             )
         Thread.sleep(applicationProperties.queue.polling / 2)
     }
 
-    private fun createEvent(transactionType: TransactionType, blockHash: String, chain: Long = defaultChainId) =
+    private fun createEvent(transactionType: TransactionType, blockHash: String, chain: ChainId = defaultChainId) =
         Event(
-            UUID.randomUUID(), chain, "fromAddress", "toAddress", "contractAddress",
+            UUID.randomUUID(), chain.value, "fromAddress", "toAddress", "contractAddress",
             "issuer", "txHash", transactionType, 10, "assetName", "symbol", 100, blockHash,
             Instant.now().toEpochMilli(), BigInteger.TEN, 18,
             null, null, null, 6

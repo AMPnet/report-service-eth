@@ -5,6 +5,7 @@ import com.ampnet.reportserviceeth.blockchain.properties.ChainPropertiesHandler
 import com.ampnet.reportserviceeth.config.ApplicationProperties
 import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
+import com.ampnet.reportserviceeth.util.ChainId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -15,7 +16,7 @@ class ChainPropertiesHandlerTest {
     fun mustThrowExceptionForInvalidChainId() {
         val chainPropertiesHandler = ChainPropertiesHandler(ApplicationProperties())
         val exception = assertThrows<InternalException> {
-            chainPropertiesHandler.getBlockchainProperties(-1)
+            chainPropertiesHandler.getBlockchainProperties(ChainId(-1L))
         }
         assertThat(exception.errorCode).isEqualTo(ErrorCode.BLOCKCHAIN_ID)
     }

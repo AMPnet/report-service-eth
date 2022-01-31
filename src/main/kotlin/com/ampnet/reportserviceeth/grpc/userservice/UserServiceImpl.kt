@@ -11,6 +11,7 @@ import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.persistence.repository.EventRepository
 import com.ampnet.reportserviceeth.service.data.IssuerCampaignRequest
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
+import com.ampnet.reportserviceeth.util.WalletAddress
 import io.grpc.StatusRuntimeException
 import mu.KLogging
 import net.devh.boot.grpc.client.channelfactory.GrpcChannelFactory
@@ -33,16 +34,16 @@ class UserServiceImpl(
     }
 
     @Throws(GrpcException::class)
-    override fun getUser(address: String): UserResponse = getUsers(setOf(address)).firstOrNull()
+    override fun getUser(address: WalletAddress): UserResponse = getUsers(setOf(address)).firstOrNull()
         ?: throw InvalidRequestException(ErrorCode.USER_MISSING_INFO, "Missing user for address: $address")
 
     @Throws(GrpcException::class)
-    override fun getUsers(addresses: Set<String>): List<UserResponse> {
+    override fun getUsers(addresses: Set<WalletAddress>): List<UserResponse> {
         if (addresses.isEmpty()) return emptyList()
         logger.debug { "Fetching users for addresses: $addresses" }
         try {
             val request = GetUsersRequest.newBuilder()
-                .addAllAddresses(addresses)
+                .addAllAddresses(addresses.map { it.value })
                 .build()
             val response = serviceWithTimeout().getUsers(request).usersList
             logger.debug { "Fetched users: ${response.size}" }
@@ -63,9 +64,9 @@ class UserServiceImpl(
     override fun getUsersForIssuerAndCampaign(issuerCampaignRequest: IssuerCampaignRequest): List<UserResponse> {
         val addresses = blockchainService.getWhitelistedAddress(issuerCampaignRequest.toIssuerRequest()).toSet()
         val latestInvestors = eventRepository.findLatestSuccessfulInvestmentEventsByIssuerAndCampaign(
-            issuerAddress = issuerCampaignRequest.issuerAddress,
-            campaignAddress = issuerCampaignRequest.campaignAddress
-        ).map { it.fromAddress }.toSet()
+            issuerAddress = issuerCampaignRequest.issuerAddress.value,
+            campaignAddress = issuerCampaignRequest.campaignAddress.value
+        ).map { WalletAddress(it.fromAddress) }.toSet()
         return getUsers(addresses.intersect(latestInvestors))
     }
 

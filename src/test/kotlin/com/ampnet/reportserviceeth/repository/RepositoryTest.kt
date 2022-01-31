@@ -83,7 +83,7 @@ class RepositoryTest : TestBase() {
 
         verify("Repository returns correct events") {
             val events = eventRepository.findForAddressInPeriod(
-                userAddress, chainId, issuer, LocalDateTime.now().minusDays(1).toEpochSecond(ZoneOffset.UTC), null
+                userAddress, chainId.value, issuer, LocalDateTime.now().minusDays(1).toEpochSecond(ZoneOffset.UTC), null
             )
             assertThat(events).hasSize(2)
         }
@@ -101,7 +101,7 @@ class RepositoryTest : TestBase() {
         }
 
         verify("Repository returns correct event") {
-            val event = eventRepository.findForTxHash(txHash, issuer, userAddress, chainId)
+            val event = eventRepository.findForTxHash(txHash, issuer, userAddress, chainId.value)
                 ?: fail("event missing")
             assertThat(event.type).isEqualTo(TransactionType.CANCEL_INVESTMENT)
         }
@@ -195,7 +195,7 @@ class RepositoryTest : TestBase() {
         txHash: String = UUID.randomUUID().toString(),
         issuerAddress: String = issuer,
         type: TransactionType = TransactionType.COMPLETED_INVESTMENT,
-        chain: Long = chainId,
+        chain: Long = chainId.value,
         logIndex: Long = 134L,
         blockHash: String = "blockHash",
         localDateTime: LocalDateTime = LocalDateTime.now(),

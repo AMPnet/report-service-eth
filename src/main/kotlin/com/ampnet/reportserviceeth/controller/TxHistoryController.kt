@@ -8,6 +8,8 @@ import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InvalidRequestException
 import com.ampnet.reportserviceeth.service.EventService
 import com.ampnet.reportserviceeth.service.data.EventServiceResponse
+import com.ampnet.reportserviceeth.util.ChainId
+import com.ampnet.reportserviceeth.util.ContractAddress
 import mu.KLogging
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
@@ -24,11 +26,12 @@ class TxHistoryController(private val eventService: EventService) {
 
     @GetMapping("/tx_history/{chainId}/{issuer}")
     fun getTransactionForChain(
-        @PathVariable chainId: Long,
+        @PathVariable("chainId") rawChainId: Long,
         @PathVariable issuer: String,
         @RequestParam(name = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) from: LocalDate?,
         @RequestParam(name = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) to: LocalDate?
     ): ResponseEntity<TxHistoryResponse> {
+        val chainId = ChainId(rawChainId)
         if (Chain.fromId(chainId) == null) {
             throw InvalidRequestException(ErrorCode.BLOCKCHAIN_ID, "Invalid blockchain id: $chainId")
         }
@@ -37,7 +40,7 @@ class TxHistoryController(private val eventService: EventService) {
             "Received request to get transactions for address: $address on chain: $chainId for issuer: $issuer"
         }
         val period = PeriodServiceRequest(from, to)
-        val request = TransactionsServiceRequest(address, chainId, issuer, period)
+        val request = TransactionsServiceRequest(address, chainId, ContractAddress(issuer), period)
         val events = eventService.getTransactions(request).map { EventServiceResponse(it) }
         return ResponseEntity.ok(TxHistoryResponse(events))
     }

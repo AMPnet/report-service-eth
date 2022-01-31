@@ -21,8 +21,9 @@ import java.time.LocalDate
 
 class AdminControllerTest : ControllerTestBase() {
 
-    private val userAccountsSummaryPath = "/admin/$defaultChainId/$issuer/report"
-    private val campaignUserAccountsSummaryPath = "/admin/$defaultChainId/$issuer/$campaign/report"
+    private val userAccountsSummaryPath = "/admin/${defaultChainId.value}/${issuer.value}/report"
+    private val campaignUserAccountsSummaryPath =
+        "/admin/${defaultChainId.value}/${issuer.value}/${campaign.value}/report"
 
     private lateinit var testContext: TestContext
 

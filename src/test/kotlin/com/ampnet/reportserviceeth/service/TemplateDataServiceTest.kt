@@ -12,6 +12,7 @@ import com.ampnet.reportserviceeth.exception.ResourceNotFoundException
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.data.IssuerRequest
 import com.ampnet.reportserviceeth.service.impl.TemplateDataServiceImpl
+import com.ampnet.reportserviceeth.util.WalletAddress
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -45,15 +46,15 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         suppose("Event service will return transactions for wallet") {
             testContext.events = listOf(
                 createEvent(
-                    userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT,
+                    userAddress, projectWallet.asWallet(), TransactionType.RESERVE_INVESTMENT,
                     testContext.reserveInvestment
                 ),
                 createEvent(
-                    projectWallet, userAddress, TransactionType.CANCEL_INVESTMENT,
+                    projectWallet.asWallet(), userAddress, TransactionType.CANCEL_INVESTMENT,
                     testContext.cancelInvestment
                 ),
                 createEvent(
-                    projectWallet, userWallet, TransactionType.REVENUE_SHARE,
+                    projectWallet.asWallet(), userWallet, TransactionType.REVENUE_SHARE,
                     testContext.sharePayout
                 )
             )
@@ -106,8 +107,8 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
     fun mustGenerateCorrectSingleTransactionSummary() {
         suppose("Event service will return event for txHash, userAddress, chainId and issuer") {
             testContext.event = createEvent(
-                userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT,
-                testContext.reserveInvestment.toString(), txHash,
+                userAddress, projectWallet.asWallet(), TransactionType.RESERVE_INVESTMENT,
+                testContext.reserveInvestment, txHash,
             )
             testContext.transactionRequest = TransactionServiceRequest(userAddress, txHash, chainId, issuer)
             Mockito.`when`(eventService.getTransaction(testContext.transactionRequest))
@@ -142,8 +143,8 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
     fun mustGenerateSingleReportInEnglishOnInvalidLanguage() {
         suppose("Event service will return event for txHash, userAddress, chainId and issuer") {
             testContext.event = createEvent(
-                userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT,
-                testContext.reserveInvestment.toString()
+                userAddress, projectWallet.asWallet(), TransactionType.RESERVE_INVESTMENT,
+                testContext.reserveInvestment
             )
             testContext.transactionRequest = TransactionServiceRequest(userAddress, txHash, chainId, issuer)
             Mockito.`when`(eventService.getTransaction(testContext.transactionRequest))
@@ -187,7 +188,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
         suppose("Blockchain service will return transactions for wallet") {
             testContext.events = createEventsFlow()
             testContext.transactionsRequest = TransactionsServiceRequest(
-                testContext.user.address, chainId, issuer, PeriodServiceRequest(null, null)
+                WalletAddress(testContext.user.address), chainId, issuer, PeriodServiceRequest(null, null)
             )
             Mockito.`when`(eventService.getTransactions(testContext.transactionsRequest))
                 .thenReturn(testContext.events)
@@ -215,7 +216,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
                 .thenReturn(
                     listOf(
                         createTransaction(
-                            secondUserAddress, projectWallet, testContext.reserveInvestment,
+                            secondUserAddress, projectWallet.asWallet(), testContext.reserveInvestment,
                             TransactionType.RESERVE_INVESTMENT
                         )
                     )
@@ -232,7 +233,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
             assertThat(transactionsSummaryList).hasSize(3)
             assertThat(usersAccountsSummary.logo).isNull()
             transactionsSummaryList.forEach {
-                when (it.userInfo.address) {
+                when (WalletAddress(it.userInfo.address)) {
                     userAddress -> {
                         assertThat(it.investments).isEqualTo("0.54")
                         assertThat(it.revenueShare).isEqualTo(testContext.sharePayout)
@@ -274,7 +275,7 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
                 .thenReturn(listOf(testContext.user))
         }
         suppose("Blockchain service will return empty list") {
-            Mockito.`when`(blockchainService.getTransactions(testContext.user.address, chainId))
+            Mockito.`when`(blockchainService.getTransactions(WalletAddress(testContext.user.address), chainId))
                 .thenReturn(emptyList())
         }
 
@@ -290,15 +291,15 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
     private fun createEventsFlow(): List<Event> =
         listOf(
             createEvent(
-                userAddress, projectWallet, TransactionType.RESERVE_INVESTMENT,
+                userAddress, projectWallet.asWallet(), TransactionType.RESERVE_INVESTMENT,
                 testContext.reserveInvestment
             ),
             createEvent(
-                projectWallet, userWallet, TransactionType.COMPLETED_INVESTMENT,
+                projectWallet.asWallet(), userWallet, TransactionType.COMPLETED_INVESTMENT,
                 testContext.completeInvestment
             ),
             createEvent(
-                projectWallet, userWallet, TransactionType.CANCEL_INVESTMENT,
+                projectWallet.asWallet(), userWallet, TransactionType.CANCEL_INVESTMENT,
                 testContext.cancelInvestment
             ),
         )
@@ -306,15 +307,15 @@ class TemplateDataServiceTest : JpaServiceTestBase() {
     private fun createTransactionFlow(): List<TransactionInfo> =
         listOf(
             createTransaction(
-                userWallet, projectWallet, testContext.reserveInvestment,
+                userWallet, projectWallet.asWallet(), testContext.reserveInvestment,
                 TransactionType.RESERVE_INVESTMENT
             ),
             createTransaction(
-                projectWallet, userWallet, testContext.sharePayout,
+                projectWallet.asWallet(), userWallet, testContext.sharePayout,
                 TransactionType.REVENUE_SHARE
             ),
             createTransaction(
-                projectWallet, userWallet, testContext.cancelInvestment,
+                projectWallet.asWallet(), userWallet, testContext.cancelInvestment,
                 TransactionType.CANCEL_INVESTMENT
             )
         )

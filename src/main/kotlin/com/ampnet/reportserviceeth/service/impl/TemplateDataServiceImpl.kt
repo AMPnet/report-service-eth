@@ -22,6 +22,9 @@ import com.ampnet.reportserviceeth.service.data.TransactionsSummary
 import com.ampnet.reportserviceeth.service.data.Translations
 import com.ampnet.reportserviceeth.service.data.UserInfo
 import com.ampnet.reportserviceeth.service.data.UsersAccountsSummary
+import com.ampnet.reportserviceeth.util.ChainId
+import com.ampnet.reportserviceeth.util.ContractAddress
+import com.ampnet.reportserviceeth.util.WalletAddress
 import mu.KLogging
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -39,7 +42,7 @@ class TemplateDataServiceImpl(
 
     companion object : KLogging()
 
-    private val logoUrlMap = mutableMapOf<String, String>()
+    private val logoUrlMap = mutableMapOf<ContractAddress, String>()
 
     override fun getUserTransactionsData(request: TransactionsServiceRequest): TransactionsSummary {
         val transactions = eventService.getTransactions(request)
@@ -75,7 +78,7 @@ class TemplateDataServiceImpl(
         val userTransactions = users.parallelStream().asSequence().associateBy(
             { it.address },
             {
-                blockchainService.getTransactions(it.address, issuerRequest.chainId)
+                blockchainService.getTransactions(WalletAddress(it.address), issuerRequest.chainId)
                     .filter { tx -> inTimePeriod(periodRequest, tx.timestamp) }
             }
         )
@@ -119,7 +122,7 @@ class TemplateDataServiceImpl(
         ?.mapNotNull { TransactionFactory.createTransaction(it) }
         .orEmpty()
 
-    private fun getLogoUrl(chainId: Long, issuer: String): String? {
+    private fun getLogoUrl(chainId: ChainId, issuer: ContractAddress): String? {
         logoUrlMap[issuer]?.let { return it }
         val logoUrl = blockchainService.getIssuerCommonState(chainId, issuer)?.let { issuerState ->
             ipfsService.getLogoUrl(issuerState.info)?.let { logoHash ->

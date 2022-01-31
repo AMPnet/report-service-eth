@@ -6,6 +6,9 @@ import com.ampnet.reportserviceeth.exception.ErrorCode
 import com.ampnet.reportserviceeth.exception.InternalException
 import com.ampnet.reportserviceeth.persistence.model.Event
 import com.ampnet.reportserviceeth.service.sendSafely
+import com.ampnet.reportserviceeth.util.BlockNumber
+import com.ampnet.reportserviceeth.util.ChainId
+import com.ampnet.reportserviceeth.util.ContractAddress
 import com.ampnet.reportserviceth.contract.IAssetCommon
 import com.ampnet.reportserviceth.contract.ICampaignFactoryCommon
 import com.ampnet.reportserviceth.contract.IIssuerCommon
@@ -31,19 +34,24 @@ class BlockchainEventServiceImpl(
     private val chainPropertiesHandler: ChainPropertiesHandler
 ) : BlockchainEventService {
 
-    private data class CacheKey(val address: String, val chainId: Long)
+    private data class CacheKey(val address: ContractAddress, val chainId: ChainId)
+
     private val assetCache: MutableMap<CacheKey, IAssetCommon.AssetCommonState> = ConcurrentHashMap()
     private val stableCoinPrecisionCache: MutableMap<CacheKey, BigInteger> = ConcurrentHashMap()
 
     @Throws(InternalException::class)
-    override fun getAllEvents(startBlockNumber: Long, endBlockNumber: Long, chainId: Long): List<Event> {
+    override fun getAllEvents(
+        startBlockNumber: BlockNumber,
+        endBlockNumber: BlockNumber,
+        chainId: ChainId
+    ): List<Event> {
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
         val deployedContracts = getDeployedContractsForFetchingEvents(chainProperties)
         if (deployedContracts.isEmpty()) return emptyList()
 
         val ethFilter = EthFilter(
-            DefaultBlockParameter.valueOf(BigInteger.valueOf(startBlockNumber)),
-            DefaultBlockParameter.valueOf(BigInteger.valueOf(endBlockNumber)),
+            DefaultBlockParameter.valueOf(startBlockNumber.value),
+            DefaultBlockParameter.valueOf(endBlockNumber.value),
             deployedContracts
         )
         val ethLog: EthLog = chainProperties.web3j.ethGetLogs(ethFilter).sendSafely()
@@ -99,7 +107,7 @@ class BlockchainEventServiceImpl(
     private fun generateEvents(
         logs: List<Log>,
         chainProperties: ChainPropertiesWithServices,
-        chainId: Long
+        chainId: ChainId
     ): List<Event> {
         val events = mutableListOf<Event>()
         val txReceipt = TransactionReceipt().apply { this.logs = logs }
@@ -114,33 +122,33 @@ class BlockchainEventServiceImpl(
         val logsMap: Map<Log, Log> = logs.associateWith { it }
         skipException { contract.getInvestEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(it.asset, chainProperties)
-            val stableCoinPrecision = getStableCoinPrecision(asset.issuer, chainProperties)
-            events.add(Event(it, chainId, log, asset, stableCoinPrecision))
+            val asset = getAsset(ContractAddress(it.asset), chainProperties)
+            val stableCoinPrecision = getStableCoinPrecision(ContractAddress(asset.issuer), chainProperties)
+            events.add(Event(it, chainId.value, log, asset, stableCoinPrecision))
         }
         skipException { contract.getCancelInvestmentEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(it.asset, chainProperties)
-            val stableCoinPrecision = getStableCoinPrecision(asset.issuer, chainProperties)
-            events.add(Event(it, chainId, log, asset, stableCoinPrecision))
+            val asset = getAsset(ContractAddress(it.asset), chainProperties)
+            val stableCoinPrecision = getStableCoinPrecision(ContractAddress(asset.issuer), chainProperties)
+            events.add(Event(it, chainId.value, log, asset, stableCoinPrecision))
         }
         skipException { contract.getClaimEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(it.asset, chainProperties)
-            val stableCoinPrecision = getStableCoinPrecision(asset.issuer, chainProperties)
-            events.add(Event(it, chainId, log, asset, stableCoinPrecision))
+            val asset = getAsset(ContractAddress(it.asset), chainProperties)
+            val stableCoinPrecision = getStableCoinPrecision(ContractAddress(asset.issuer), chainProperties)
+            events.add(Event(it, chainId.value, log, asset, stableCoinPrecision))
         }
         skipException { contract.getCreatePayoutEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(it.asset, chainProperties)
-            val stableCoinPrecision = getStableCoinPrecision(asset.issuer, chainProperties)
-            events.add(Event(it, chainId, log, asset, stableCoinPrecision))
+            val asset = getAsset(ContractAddress(it.asset), chainProperties)
+            val stableCoinPrecision = getStableCoinPrecision(ContractAddress(asset.issuer), chainProperties)
+            events.add(Event(it, chainId.value, log, asset, stableCoinPrecision))
         }
         skipException { contract.getReleaseEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(it.asset, chainProperties)
-            val stableCoinPrecision = getStableCoinPrecision(asset.issuer, chainProperties)
-            events.add(Event(it, chainId, log, asset, stableCoinPrecision))
+            val asset = getAsset(ContractAddress(it.asset), chainProperties)
+            val stableCoinPrecision = getStableCoinPrecision(ContractAddress(asset.issuer), chainProperties)
+            events.add(Event(it, chainId.value, log, asset, stableCoinPrecision))
         }
         return events
     }
@@ -152,13 +160,13 @@ class BlockchainEventServiceImpl(
         )
 
     private fun getAsset(
-        contractAddress: String,
+        contractAddress: ContractAddress,
         chainProperties: ChainPropertiesWithServices
     ): IAssetCommon.AssetCommonState {
         val cacheKey = CacheKey(contractAddress, chainProperties.chainId)
         assetCache[cacheKey]?.let { return it }
         val assetContract = IAssetCommon.load(
-            contractAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
+            contractAddress.value, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
         val commonState = assetContract.commonState().sendSafely() ?: throw InternalException(
             ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
@@ -169,13 +177,13 @@ class BlockchainEventServiceImpl(
     }
 
     private fun getStableCoinPrecision(
-        issuerAddress: String,
+        issuerAddress: ContractAddress,
         chainProperties: ChainPropertiesWithServices
     ): BigInteger {
         val cacheKey = CacheKey(issuerAddress, chainProperties.chainId)
         stableCoinPrecisionCache[cacheKey]?.let { return it }
         val issuer = IIssuerCommon.load(
-            issuerAddress, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
+            issuerAddress.value, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
         val stableCoinAddress = issuer.commonState().sendSafely()?.stablecoin
         val stableCoin = IToken.load(
