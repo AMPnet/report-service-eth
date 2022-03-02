@@ -52,4 +52,26 @@ interface TransactionEvents {
         uint256 amount,
         uint256 timestamp
     );
+    event PayoutCreated(
+        uint256 payoutId,
+        address indexed payoutOwner,
+        address asset,
+        address rewardAsset,
+        uint256 totalRewardAmount
+    );
+    event PayoutCanceled(
+        uint256 payoutId,
+        address indexed payoutOwner,
+        address asset,
+        address rewardAsset,
+        uint256 remainingRewardAmount
+    );
+    event PayoutClaimed(
+        uint256 payoutId,
+        address indexed wallet,
+        address asset,
+        uint256 balance,
+        address rewardAsset,
+        uint256 payoutAmount
+    );
 }
