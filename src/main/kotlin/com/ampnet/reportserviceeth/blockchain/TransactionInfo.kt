@@ -31,17 +31,17 @@ data class TransactionInfo(
         asset: IAssetCommon.AssetCommonState,
         stableCoinDecimals: BigInteger
     ) : this(
-        TransactionType.RESERVE_INVESTMENT,
-        event.investor,
-        txRecipient.to,
-        event.tokenValue,
-        event.tokenAmount,
-        event.timestamp.toLocalDateTime(),
-        txRecipient.transactionHash,
-        asset.name,
-        asset.symbol,
-        asset.decimals,
-        stableCoinDecimals
+        type = TransactionType.RESERVE_INVESTMENT,
+        from = event.investor,
+        to = txRecipient.to,
+        tokenValue = event.tokenValue,
+        tokenAmount = event.tokenAmount,
+        timestamp = event.timestamp.toLocalDateTime(),
+        txHash = txRecipient.transactionHash,
+        asset = asset.name,
+        assetTokenSymbol = asset.symbol,
+        decimals = asset.decimals,
+        stableCoinDecimals = stableCoinDecimals
     )
 
     /*
@@ -54,17 +54,17 @@ data class TransactionInfo(
         asset: IAssetCommon.AssetCommonState,
         stableCoinDecimals: BigInteger
     ) : this(
-        TransactionType.CANCEL_INVESTMENT,
-        event.investor,
-        txRecipient.to,
-        event.tokenValue,
-        event.tokenAmount,
-        event.timestamp.toLocalDateTime(),
-        txRecipient.transactionHash,
-        asset.name,
-        asset.symbol,
-        asset.decimals,
-        stableCoinDecimals
+        type = TransactionType.CANCEL_INVESTMENT,
+        from = event.investor,
+        to = txRecipient.to,
+        tokenValue = event.tokenValue,
+        tokenAmount = event.tokenAmount,
+        timestamp = event.timestamp.toLocalDateTime(),
+        txHash = txRecipient.transactionHash,
+        asset = asset.name,
+        assetTokenSymbol = asset.symbol,
+        decimals = asset.decimals,
+        stableCoinDecimals = stableCoinDecimals
     )
 
     /*
@@ -77,17 +77,17 @@ data class TransactionInfo(
         asset: IAssetCommon.AssetCommonState,
         stableCoinDecimals: BigInteger
     ) : this(
-        TransactionType.COMPLETED_INVESTMENT,
-        event.investor,
-        txRecipient.to,
-        event.tokenValue,
-        event.tokenAmount,
-        event.timestamp.toLocalDateTime(),
-        txRecipient.transactionHash,
-        asset.name,
-        asset.symbol,
-        asset.decimals,
-        stableCoinDecimals
+        type = TransactionType.COMPLETED_INVESTMENT,
+        from = event.investor,
+        to = txRecipient.to,
+        tokenValue = event.tokenValue,
+        tokenAmount = event.tokenAmount,
+        timestamp = event.timestamp.toLocalDateTime(),
+        txHash = txRecipient.transactionHash,
+        asset = asset.name,
+        assetTokenSymbol = asset.symbol,
+        decimals = asset.decimals,
+        stableCoinDecimals = stableCoinDecimals
     )
 
     /*
@@ -95,22 +95,68 @@ data class TransactionInfo(
      * to - address of the PayoutManager contract.
      */
     constructor(
-        event: TransactionEvents.CreatePayoutEventResponse,
+        event: TransactionEvents.PayoutCreatedEventResponse,
         txRecipient: TransactionReceipt,
         asset: IAssetCommon.AssetCommonState,
         stableCoinDecimals: BigInteger
     ) : this(
-        TransactionType.CREATE_PAYOUT,
-        event.creator,
-        txRecipient.to,
-        event.amount,
-        null,
-        event.timestamp.toLocalDateTime(),
-        txRecipient.transactionHash,
-        asset.name,
-        asset.symbol,
-        asset.decimals,
-        stableCoinDecimals
+        type = TransactionType.CREATE_PAYOUT,
+        from = event.payoutOwner,
+        to = txRecipient.to,
+        tokenValue = event.totalRewardAmount,
+        tokenAmount = event.totalRewardAmount,
+        timestamp = event.timestamp.toLocalDateTime(),
+        txHash = txRecipient.transactionHash,
+        asset = asset.name,
+        assetTokenSymbol = asset.symbol,
+        decimals = asset.decimals,
+        stableCoinDecimals = stableCoinDecimals
+    )
+
+    /*
+     * from - address of the PayoutManager contract.
+     * to - address of the payout manager's wallet which created the PayoutManager contract.
+     */
+    constructor(
+        event: TransactionEvents.PayoutCanceledEventResponse,
+        txRecipient: TransactionReceipt,
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
+    ) : this(
+        type = TransactionType.CANCEL_PAYOUT,
+        from = txRecipient.to,
+        to = event.payoutOwner,
+        tokenValue = event.remainingRewardAmount,
+        tokenAmount = event.remainingRewardAmount,
+        timestamp = event.timestamp.toLocalDateTime(),
+        txHash = txRecipient.transactionHash,
+        asset = asset.name,
+        assetTokenSymbol = asset.symbol,
+        decimals = asset.decimals,
+        stableCoinDecimals = stableCoinDecimals
+    )
+
+    /*
+     * from - address of the PayoutManager contract.
+     * to - address of the claiming investor.
+     */
+    constructor(
+        event: TransactionEvents.PayoutClaimedEventResponse,
+        txRecipient: TransactionReceipt,
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
+    ) : this(
+        type = TransactionType.REVENUE_SHARE,
+        from = txRecipient.to,
+        to = event.wallet,
+        tokenValue = event.payoutAmount,
+        tokenAmount = event.payoutAmount,
+        timestamp = event.timestamp.toLocalDateTime(),
+        txHash = txRecipient.transactionHash,
+        asset = asset.name,
+        assetTokenSymbol = asset.symbol,
+        decimals = asset.decimals,
+        stableCoinDecimals = stableCoinDecimals
     )
 
     /*
@@ -123,30 +169,30 @@ data class TransactionInfo(
         asset: IAssetCommon.AssetCommonState,
         stableCoinDecimals: BigInteger
     ) : this(
-        TransactionType.REVENUE_SHARE,
-        txRecipient.to,
-        event.investor,
-        event.amount,
-        null,
-        event.timestamp.toLocalDateTime(),
-        txRecipient.transactionHash,
-        asset.name,
-        asset.symbol,
-        asset.decimals,
-        stableCoinDecimals
+        type = TransactionType.REVENUE_SHARE,
+        from = txRecipient.to,
+        to = event.investor,
+        tokenValue = event.amount,
+        tokenAmount = null,
+        timestamp = event.timestamp.toLocalDateTime(),
+        txHash = txRecipient.transactionHash,
+        asset = asset.name,
+        assetTokenSymbol = asset.symbol,
+        decimals = asset.decimals,
+        stableCoinDecimals = stableCoinDecimals
     )
 
     constructor(event: Event) : this(
-        event.type,
-        event.fromAddress,
-        event.toAddress,
-        event.tokenValue,
-        event.tokenAmount,
-        event.timestamp.toLocalDateTime(),
-        event.hash,
-        event.asset,
-        event.tokenSymbol,
-        BigInteger.valueOf(event.decimals.toLong()),
-        BigInteger.valueOf(event.stableCoinDecimals.toLong())
+        type = event.type,
+        from = event.fromAddress,
+        to = event.toAddress,
+        tokenValue = event.tokenValue,
+        tokenAmount = event.tokenAmount,
+        timestamp = event.timestamp.toLocalDateTime(),
+        txHash = event.hash,
+        asset = event.asset,
+        assetTokenSymbol = event.tokenSymbol,
+        decimals = BigInteger.valueOf(event.decimals.toLong()),
+        stableCoinDecimals = BigInteger.valueOf(event.stableCoinDecimals.toLong())
     )
 }

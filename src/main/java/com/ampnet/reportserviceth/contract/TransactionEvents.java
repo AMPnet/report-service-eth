@@ -44,10 +44,6 @@ public class TransactionEvents extends Contract {
             Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}));
     ;
 
-    public static final Event CREATEPAYOUT_EVENT = new Event("CreatePayout", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}));
-    ;
-
     public static final Event FINALIZE_EVENT = new Event("Finalize", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}));
     ;
@@ -57,15 +53,15 @@ public class TransactionEvents extends Contract {
     ;
 
     public static final Event PAYOUTCANCELED_EVENT = new Event("PayoutCanceled", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Address>(true) {}, new TypeReference<Address>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}));
+            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Address>(true) {}, new TypeReference<Address>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}));
     ;
 
     public static final Event PAYOUTCLAIMED_EVENT = new Event("PayoutClaimed", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Address>(true) {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}));
+            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Address>(true) {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}));
     ;
 
     public static final Event PAYOUTCREATED_EVENT = new Event("PayoutCreated", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Address>(true) {}, new TypeReference<Address>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}));
+            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Address>(true) {}, new TypeReference<Address>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}));
     ;
 
     public static final Event RELEASE_EVENT = new Event("Release", 
@@ -172,45 +168,6 @@ public class TransactionEvents extends Contract {
         return claimEventFlowable(filter);
     }
 
-    public List<CreatePayoutEventResponse> getCreatePayoutEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(CREATEPAYOUT_EVENT, transactionReceipt);
-        ArrayList<CreatePayoutEventResponse> responses = new ArrayList<CreatePayoutEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
-            CreatePayoutEventResponse typedResponse = new CreatePayoutEventResponse();
-            typedResponse.log = eventValues.getLog();
-            typedResponse.creator = (String) eventValues.getIndexedValues().get(0).getValue();
-            typedResponse.asset = (String) eventValues.getNonIndexedValues().get(0).getValue();
-            typedResponse.payoutId = (BigInteger) eventValues.getNonIndexedValues().get(1).getValue();
-            typedResponse.amount = (BigInteger) eventValues.getNonIndexedValues().get(2).getValue();
-            typedResponse.timestamp = (BigInteger) eventValues.getNonIndexedValues().get(3).getValue();
-            responses.add(typedResponse);
-        }
-        return responses;
-    }
-
-    public Flowable<CreatePayoutEventResponse> createPayoutEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(new Function<Log, CreatePayoutEventResponse>() {
-            @Override
-            public CreatePayoutEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(CREATEPAYOUT_EVENT, log);
-                CreatePayoutEventResponse typedResponse = new CreatePayoutEventResponse();
-                typedResponse.log = log;
-                typedResponse.creator = (String) eventValues.getIndexedValues().get(0).getValue();
-                typedResponse.asset = (String) eventValues.getNonIndexedValues().get(0).getValue();
-                typedResponse.payoutId = (BigInteger) eventValues.getNonIndexedValues().get(1).getValue();
-                typedResponse.amount = (BigInteger) eventValues.getNonIndexedValues().get(2).getValue();
-                typedResponse.timestamp = (BigInteger) eventValues.getNonIndexedValues().get(3).getValue();
-                return typedResponse;
-            }
-        });
-    }
-
-    public Flowable<CreatePayoutEventResponse> createPayoutEventFlowable(DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) {
-        EthFilter filter = new EthFilter(startBlock, endBlock, getContractAddress());
-        filter.addSingleTopic(EventEncoder.encode(CREATEPAYOUT_EVENT));
-        return createPayoutEventFlowable(filter);
-    }
-
     public List<FinalizeEventResponse> getFinalizeEvents(TransactionReceipt transactionReceipt) {
         List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(FINALIZE_EVENT, transactionReceipt);
         ArrayList<FinalizeEventResponse> responses = new ArrayList<FinalizeEventResponse>(valueList.size());
@@ -302,6 +259,7 @@ public class TransactionEvents extends Contract {
             typedResponse.asset = (String) eventValues.getNonIndexedValues().get(1).getValue();
             typedResponse.rewardAsset = (String) eventValues.getNonIndexedValues().get(2).getValue();
             typedResponse.remainingRewardAmount = (BigInteger) eventValues.getNonIndexedValues().get(3).getValue();
+            typedResponse.timestamp = (BigInteger) eventValues.getNonIndexedValues().get(4).getValue();
             responses.add(typedResponse);
         }
         return responses;
@@ -319,6 +277,7 @@ public class TransactionEvents extends Contract {
                 typedResponse.asset = (String) eventValues.getNonIndexedValues().get(1).getValue();
                 typedResponse.rewardAsset = (String) eventValues.getNonIndexedValues().get(2).getValue();
                 typedResponse.remainingRewardAmount = (BigInteger) eventValues.getNonIndexedValues().get(3).getValue();
+                typedResponse.timestamp = (BigInteger) eventValues.getNonIndexedValues().get(4).getValue();
                 return typedResponse;
             }
         });
@@ -342,6 +301,7 @@ public class TransactionEvents extends Contract {
             typedResponse.balance = (BigInteger) eventValues.getNonIndexedValues().get(2).getValue();
             typedResponse.rewardAsset = (String) eventValues.getNonIndexedValues().get(3).getValue();
             typedResponse.payoutAmount = (BigInteger) eventValues.getNonIndexedValues().get(4).getValue();
+            typedResponse.timestamp = (BigInteger) eventValues.getNonIndexedValues().get(5).getValue();
             responses.add(typedResponse);
         }
         return responses;
@@ -360,6 +320,7 @@ public class TransactionEvents extends Contract {
                 typedResponse.balance = (BigInteger) eventValues.getNonIndexedValues().get(2).getValue();
                 typedResponse.rewardAsset = (String) eventValues.getNonIndexedValues().get(3).getValue();
                 typedResponse.payoutAmount = (BigInteger) eventValues.getNonIndexedValues().get(4).getValue();
+                typedResponse.timestamp = (BigInteger) eventValues.getNonIndexedValues().get(5).getValue();
                 return typedResponse;
             }
         });
@@ -382,6 +343,7 @@ public class TransactionEvents extends Contract {
             typedResponse.asset = (String) eventValues.getNonIndexedValues().get(1).getValue();
             typedResponse.rewardAsset = (String) eventValues.getNonIndexedValues().get(2).getValue();
             typedResponse.totalRewardAmount = (BigInteger) eventValues.getNonIndexedValues().get(3).getValue();
+            typedResponse.timestamp = (BigInteger) eventValues.getNonIndexedValues().get(4).getValue();
             responses.add(typedResponse);
         }
         return responses;
@@ -399,6 +361,7 @@ public class TransactionEvents extends Contract {
                 typedResponse.asset = (String) eventValues.getNonIndexedValues().get(1).getValue();
                 typedResponse.rewardAsset = (String) eventValues.getNonIndexedValues().get(2).getValue();
                 typedResponse.totalRewardAmount = (BigInteger) eventValues.getNonIndexedValues().get(3).getValue();
+                typedResponse.timestamp = (BigInteger) eventValues.getNonIndexedValues().get(4).getValue();
                 return typedResponse;
             }
         });
@@ -544,18 +507,6 @@ public class TransactionEvents extends Contract {
         public BigInteger timestamp;
     }
 
-    public static class CreatePayoutEventResponse extends BaseEventResponse {
-        public String creator;
-
-        public String asset;
-
-        public BigInteger payoutId;
-
-        public BigInteger amount;
-
-        public BigInteger timestamp;
-    }
-
     public static class FinalizeEventResponse extends BaseEventResponse {
         public String owner;
 
@@ -592,6 +543,8 @@ public class TransactionEvents extends Contract {
         public String rewardAsset;
 
         public BigInteger remainingRewardAmount;
+
+        public BigInteger timestamp;
     }
 
     public static class PayoutClaimedEventResponse extends BaseEventResponse {
@@ -606,6 +559,8 @@ public class TransactionEvents extends Contract {
         public String rewardAsset;
 
         public BigInteger payoutAmount;
+
+        public BigInteger timestamp;
     }
 
     public static class PayoutCreatedEventResponse extends BaseEventResponse {
@@ -618,6 +573,8 @@ public class TransactionEvents extends Contract {
         public String rewardAsset;
 
         public BigInteger totalRewardAmount;
+
+        public BigInteger timestamp;
     }
 
     public static class ReleaseEventResponse extends BaseEventResponse {

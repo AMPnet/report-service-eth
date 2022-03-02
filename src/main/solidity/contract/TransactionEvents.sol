@@ -38,13 +38,6 @@ interface TransactionEvents {
         address to,
         uint256 value
     );
-    event CreatePayout(
-        address indexed creator,
-        address asset,
-        uint256 payoutId,
-        uint256 amount,
-        uint256 timestamp
-    );
     event Release(
         address indexed investor,
         address asset,
@@ -57,14 +50,16 @@ interface TransactionEvents {
         address indexed payoutOwner,
         address asset,
         address rewardAsset,
-        uint256 totalRewardAmount
+        uint256 totalRewardAmount,
+        uint256 timestamp
     );
     event PayoutCanceled(
         uint256 payoutId,
         address indexed payoutOwner,
         address asset,
         address rewardAsset,
-        uint256 remainingRewardAmount
+        uint256 remainingRewardAmount,
+        uint256 timestamp
     );
     event PayoutClaimed(
         uint256 payoutId,
@@ -72,6 +67,7 @@ interface TransactionEvents {
         address asset,
         uint256 balance,
         address rewardAsset,
-        uint256 payoutAmount
+        uint256 payoutAmount,
+        uint256 timestamp
     );
 }

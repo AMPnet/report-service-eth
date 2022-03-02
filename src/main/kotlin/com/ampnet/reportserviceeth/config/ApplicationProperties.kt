@@ -38,7 +38,7 @@ class QueueProperties {
 class ChainProperties {
     var callerAddress: String = "0x0000000000000000000000000000000000000000"
     var cfManagerFactoryAddresses: List<String> = emptyList()
-    var snapshotDistributorAddresses: List<String> = emptyList()
+    var payoutManagerAddresses: List<String> = emptyList()
     var startBlockNumber: BigInteger = BigInteger.ONE
     var numOfConfirmations: BigInteger = BigInteger.TEN
     var maxBlocks: BigInteger = BigInteger.valueOf(1000L)
