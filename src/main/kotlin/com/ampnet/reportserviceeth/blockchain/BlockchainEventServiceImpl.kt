@@ -12,7 +12,6 @@ import com.ampnet.reportserviceeth.util.ContractAddress
 import com.ampnet.reportserviceth.contract.IAssetCommon
 import com.ampnet.reportserviceth.contract.ICampaignFactoryCommon
 import com.ampnet.reportserviceth.contract.IIssuerCommon
-import com.ampnet.reportserviceth.contract.ISnapshotDistributorFactoryCommon
 import com.ampnet.reportserviceth.contract.IToken
 import com.ampnet.reportserviceth.contract.TransactionEvents
 import mu.KotlinLogging
@@ -67,17 +66,9 @@ class BlockchainEventServiceImpl(
     private fun getDeployedContractsForFetchingEvents(
         chainProperties: ChainPropertiesWithServices
     ): List<String> {
-        val snapshotInstances: List<String> = chainProperties.chain.snapshotDistributorAddresses.map { address ->
-            val snapshotFactoryCommon = ISnapshotDistributorFactoryCommon.load(
-                address, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
-            )
-            snapshotFactoryCommon.instances.sendSafely()?.mapNotNull { it as? String }.orEmpty()
-        }.flatten()
-        if (snapshotInstances.isEmpty()) {
-            logger.info {
-                "There are no contracts deployed for the payoutManagerFactory address: " +
-                    chainProperties.chain.snapshotDistributorAddresses
-            }
+        val payoutMangerInstances = chainProperties.chain.payoutManagerAddresses
+        if (payoutMangerInstances.isEmpty()) {
+            logger.info { "There are no payout manager contracts specified" }
         }
         val cfManagerInstances: List<String> = chainProperties.chain.cfManagerFactoryAddresses.map { address ->
             val cfManagerFactoryContract = ICampaignFactoryCommon.load(
@@ -91,7 +82,7 @@ class BlockchainEventServiceImpl(
                     chainProperties.chain.cfManagerFactoryAddresses
             }
         }
-        return cfManagerInstances.plus(snapshotInstances)
+        return cfManagerInstances.plus(payoutMangerInstances)
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
@@ -138,9 +129,21 @@ class BlockchainEventServiceImpl(
             val stableCoinPrecision = getStableCoinPrecision(ContractAddress(asset.issuer), chainProperties)
             events.add(Event(it, chainId.value, log, asset, stableCoinPrecision))
         }
-        skipException { contract.getCreatePayoutEvents(txReceipt) }?.forEach {
+        skipException { contract.getPayoutCreatedEvents(txReceipt) }?.forEach {
             val log = getLog(logsMap, it)
-            val asset = getAsset(ContractAddress(it.asset), chainProperties)
+            val asset = getAsset(ContractAddress(it.rewardAsset), chainProperties)
+            val stableCoinPrecision = getStableCoinPrecision(ContractAddress(asset.issuer), chainProperties)
+            events.add(Event(it, chainId.value, log, asset, stableCoinPrecision))
+        }
+        skipException { contract.getPayoutCanceledEvents(txReceipt) }?.forEach {
+            val log = getLog(logsMap, it)
+            val asset = getAsset(ContractAddress(it.rewardAsset), chainProperties)
+            val stableCoinPrecision = getStableCoinPrecision(ContractAddress(asset.issuer), chainProperties)
+            events.add(Event(it, chainId.value, log, asset, stableCoinPrecision))
+        }
+        skipException { contract.getPayoutClaimedEvents(txReceipt) }?.forEach {
+            val log = getLog(logsMap, it)
+            val asset = getAsset(ContractAddress(it.rewardAsset), chainProperties)
             val stableCoinPrecision = getStableCoinPrecision(ContractAddress(asset.issuer), chainProperties)
             events.add(Event(it, chainId.value, log, asset, stableCoinPrecision))
         }

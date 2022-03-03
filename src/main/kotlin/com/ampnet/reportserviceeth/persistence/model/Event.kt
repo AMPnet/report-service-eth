@@ -182,7 +182,7 @@ class Event(
      * to - address of the PayoutManager contract.
      */
     constructor(
-        event: TransactionEvents.CreatePayoutEventResponse,
+        event: TransactionEvents.PayoutCreatedEventResponse,
         chainId: Long,
         log: Log,
         asset: IAssetCommon.AssetCommonState,
@@ -190,23 +190,89 @@ class Event(
     ) : this(
         uuid = UUID.randomUUID(),
         chainId = chainId,
-        fromAddress = event.creator,
+        fromAddress = event.payoutOwner,
         toAddress = log.address,
         contract = log.address,
         issuer = asset.issuer,
         hash = log.transactionHash,
-        type = TransactionType.CANCEL_INVESTMENT,
+        type = TransactionType.CREATE_PAYOUT,
         logIndex = log.logIndex.toLong(),
         asset = asset.name,
         tokenSymbol = asset.symbol,
         blockNumber = log.blockNumber.toLong(),
         blockHash = log.blockHash,
         timestamp = event.timestamp.toLong(),
-        tokenValue = event.amount,
+        tokenValue = event.totalRewardAmount,
         decimals = asset.decimals.toShort(),
-        tokenAmount = null,
+        tokenAmount = event.totalRewardAmount,
         payoutId = event.payoutId.toLong(),
-        revenue = event.amount,
+        revenue = null,
+        stableCoinDecimals = stableCoinDecimals.toShort()
+    )
+
+    /*
+     * from - address of the PayoutManager contract.
+     * to - address of the payout manager's wallet which created the PayoutManager contract.
+     */
+    constructor(
+        event: TransactionEvents.PayoutCanceledEventResponse,
+        chainId: Long,
+        log: Log,
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
+    ) : this(
+        uuid = UUID.randomUUID(),
+        chainId = chainId,
+        fromAddress = log.address,
+        toAddress = event.payoutOwner,
+        contract = log.address,
+        issuer = asset.issuer,
+        hash = log.transactionHash,
+        type = TransactionType.CANCEL_PAYOUT,
+        logIndex = log.logIndex.toLong(),
+        asset = asset.name,
+        tokenSymbol = asset.symbol,
+        blockNumber = log.blockNumber.toLong(),
+        blockHash = log.blockHash,
+        timestamp = event.timestamp.toLong(),
+        tokenValue = event.remainingRewardAmount,
+        decimals = asset.decimals.toShort(),
+        tokenAmount = event.remainingRewardAmount,
+        payoutId = event.payoutId.toLong(),
+        revenue = null,
+        stableCoinDecimals = stableCoinDecimals.toShort()
+    )
+
+    /*
+     * from - address of the PayoutManager contract.
+     * to - address of the claiming investor.
+     */
+    constructor(
+        event: TransactionEvents.PayoutClaimedEventResponse,
+        chainId: Long,
+        log: Log,
+        asset: IAssetCommon.AssetCommonState,
+        stableCoinDecimals: BigInteger
+    ) : this(
+        uuid = UUID.randomUUID(),
+        chainId = chainId,
+        fromAddress = log.address,
+        toAddress = event.wallet,
+        contract = log.address,
+        issuer = asset.issuer,
+        hash = log.transactionHash,
+        type = TransactionType.REVENUE_SHARE,
+        logIndex = log.logIndex.toLong(),
+        asset = asset.name,
+        tokenSymbol = asset.symbol,
+        blockNumber = log.blockNumber.toLong(),
+        blockHash = log.blockHash,
+        timestamp = event.timestamp.toLong(),
+        tokenValue = event.payoutAmount,
+        decimals = asset.decimals.toShort(),
+        tokenAmount = event.payoutAmount,
+        payoutId = event.payoutId.toLong(),
+        revenue = event.payoutAmount,
         stableCoinDecimals = stableCoinDecimals.toShort()
     )
 
