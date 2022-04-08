@@ -30,6 +30,7 @@ class ChainPropertiesHandler(private val applicationProperties: ApplicationPrope
             Chain.ETHEREUM_MAIN -> applicationProperties.chainEthereum
             Chain.GOERLI_TESTNET -> applicationProperties.chainGoerli
             Chain.HARDHAT_TESTNET -> applicationProperties.chainHardhatTestnet
+            Chain.AMPNET_POA -> applicationProperties.chainPoa
         }
         return if (chainProperties.callerAddress.isBlank() ||
             chainProperties.cfManagerFactoryAddresses.isEmpty()
