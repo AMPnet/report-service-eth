@@ -1,5 +1,7 @@
-package com.ampnet.reportserviceth.contract;
+package com.ampnet.reportserviceeth.blockchain;
 
+import java.math.BigInteger;
+import java.util.Arrays;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.DynamicStruct;
@@ -15,9 +17,6 @@ import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
-
-import java.math.BigInteger;
-import java.util.Arrays;
 
 /**
  * <p>Auto generated code.
@@ -144,7 +143,7 @@ public class IAssetCommon extends Contract {
         public String issuer;
 
         public AssetCommonState(String flavor, String version, String contractAddress, String owner, String info, String name, String symbol, BigInteger totalSupply, BigInteger decimals, String issuer) {
-            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Utf8String(info),new Utf8String(name),new Utf8String(symbol),new Uint256(totalSupply),new Uint8(decimals),new Address(issuer));
+            super(new org.web3j.abi.datatypes.Utf8String(flavor),new org.web3j.abi.datatypes.Utf8String(version),new org.web3j.abi.datatypes.Address(contractAddress),new org.web3j.abi.datatypes.Address(owner),new org.web3j.abi.datatypes.Utf8String(info),new org.web3j.abi.datatypes.Utf8String(name),new org.web3j.abi.datatypes.Utf8String(symbol),new org.web3j.abi.datatypes.generated.Uint256(totalSupply),new org.web3j.abi.datatypes.generated.Uint8(decimals),new org.web3j.abi.datatypes.Address(issuer));
             this.flavor = flavor;
             this.version = version;
             this.contractAddress = contractAddress;

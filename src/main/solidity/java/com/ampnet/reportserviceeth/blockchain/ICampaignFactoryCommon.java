@@ -1,5 +1,9 @@
-package com.ampnet.reportserviceth.contract;
+package com.ampnet.reportserviceeth.blockchain;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Callable;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.DynamicArray;
@@ -12,11 +16,6 @@ import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
-
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * <p>Auto generated code.
@@ -72,7 +71,7 @@ public class ICampaignFactoryCommon extends Contract {
 
     public RemoteFunctionCall<List> getInstancesForAsset(String asset) {
         final Function function = new Function(FUNC_GETINSTANCESFORASSET, 
-                Arrays.<Type>asList(new Address(160, asset)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, asset)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<Address>>() {}));
         return new RemoteFunctionCall<List>(function,
                 new Callable<List>() {
@@ -87,7 +86,7 @@ public class ICampaignFactoryCommon extends Contract {
 
     public RemoteFunctionCall<List> getInstancesForIssuer(String issuer) {
         final Function function = new Function(FUNC_GETINSTANCESFORISSUER, 
-                Arrays.<Type>asList(new Address(160, issuer)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, issuer)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<Address>>() {}));
         return new RemoteFunctionCall<List>(function,
                 new Callable<List>() {

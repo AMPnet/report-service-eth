@@ -1,5 +1,7 @@
-package com.ampnet.reportserviceth.contract;
+package com.ampnet.reportserviceeth.blockchain;
 
+import java.math.BigInteger;
+import java.util.Arrays;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
@@ -14,9 +16,6 @@ import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
-
-import java.math.BigInteger;
-import java.util.Arrays;
 
 /**
  * <p>Auto generated code.
@@ -73,7 +72,7 @@ public class IIssuerCommon extends Contract {
 
     public RemoteFunctionCall<Boolean> isWalletApproved(String wallet) {
         final Function function = new Function(FUNC_ISWALLETAPPROVED, 
-                Arrays.<Type>asList(new Address(160, wallet)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, wallet)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
@@ -137,7 +136,7 @@ public class IIssuerCommon extends Contract {
         public String info;
 
         public IssuerCommonState(String flavor, String version, String contractAddress, String owner, String stablecoin, String walletApprover, String info) {
-            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Address(stablecoin),new Address(walletApprover),new Utf8String(info));
+            super(new org.web3j.abi.datatypes.Utf8String(flavor),new org.web3j.abi.datatypes.Utf8String(version),new org.web3j.abi.datatypes.Address(contractAddress),new org.web3j.abi.datatypes.Address(owner),new org.web3j.abi.datatypes.Address(stablecoin),new org.web3j.abi.datatypes.Address(walletApprover),new org.web3j.abi.datatypes.Utf8String(info));
             this.flavor = flavor;
             this.version = version;
             this.contractAddress = contractAddress;

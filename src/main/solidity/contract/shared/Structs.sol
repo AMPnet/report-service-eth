@@ -27,7 +27,7 @@ contract Structs {
         string name;
         string symbol;
         uint256 totalSupply;
-        uint256 decimals;
+        uint8 decimals;
         address issuer;
     }
 
@@ -155,7 +155,6 @@ contract Structs {
         uint256 liquidationFundsTotal;
         uint256 liquidationTimestamp;
         uint256 liquidationFundsClaimed;
-        address childChainManager;
     }
 
     struct IssuerState {
@@ -214,17 +213,27 @@ contract Structs {
         uint256 totalTokensSold;
         uint256 totalTokensBalance;
         string info;
+        address feeManager;
     }
 
     struct Payout {
-        uint256 snapshotId;
-        string description;
-        address token;
-        uint256 amount;
-        uint256 totalReleased;
-        uint256 totalClaimsCount;
-        uint256 ignoredAmount;
-        address[] ignoredWallets;
+        uint256 payoutId; // ID of this payout
+        address payoutOwner; // address which created this payout
+        string payoutInfo; // payout info (or IPFS hash for info)
+        bool isCanceled; // determines if this payout is canceled
+
+        address asset; // asset for which payout is being made
+        uint256 totalAssetAmount; // sum of all asset holdings in the snapshot, minus ignored asset address holdings
+        address[] ignoredHolderAddresses; // addresses which aren't included in the payout
+
+        bytes32 assetSnapshotMerkleRoot; // Merkle root hash of asset holdings in the snapshot, without ignored addresses
+        uint256 assetSnapshotMerkleDepth; // depth of snapshot Merkle tree
+        uint256 assetSnapshotBlockNumber; // snapshot block number
+        string assetSnapshotMerkleIpfsHash; // IPFS hash of stored asset snapshot Merkle tree
+
+        address rewardAsset; // asset issued as payout reward
+        uint256 totalRewardAmount; // total amount of reward asset in this payout
+        uint256 remainingRewardAmount; // remaining reward asset amount in this payout
     }
 
     struct InfoEntry {

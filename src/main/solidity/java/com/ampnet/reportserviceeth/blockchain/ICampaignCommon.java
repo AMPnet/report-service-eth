@@ -1,5 +1,7 @@
-package com.ampnet.reportserviceth.contract;
+package com.ampnet.reportserviceeth.blockchain;
 
+import java.math.BigInteger;
+import java.util.Arrays;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
@@ -15,9 +17,6 @@ import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
-
-import java.math.BigInteger;
-import java.util.Arrays;
 
 /**
  * <p>Auto generated code.
@@ -64,7 +63,7 @@ public class ICampaignCommon extends Contract {
 
     public RemoteFunctionCall<BigInteger> claimedAmount(String investor) {
         final Function function = new Function(FUNC_CLAIMEDAMOUNT, 
-                Arrays.<Type>asList(new Address(160, investor)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, investor)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
@@ -85,14 +84,14 @@ public class ICampaignCommon extends Contract {
 
     public RemoteFunctionCall<BigInteger> investmentAmount(String investor) {
         final Function function = new Function(FUNC_INVESTMENTAMOUNT, 
-                Arrays.<Type>asList(new Address(160, investor)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, investor)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public RemoteFunctionCall<BigInteger> tokenAmount(String investor) {
         final Function function = new Function(FUNC_TOKENAMOUNT, 
-                Arrays.<Type>asList(new Address(160, investor)),
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, investor)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
@@ -168,7 +167,7 @@ public class ICampaignCommon extends Contract {
         public BigInteger tokensSold;
 
         public CampaignCommonState(String flavor, String version, String contractAddress, String owner, String info, String asset, String stablecoin, BigInteger softCap, Boolean finalized, Boolean canceled, BigInteger pricePerToken, BigInteger fundsRaised, BigInteger tokensSold) {
-            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Utf8String(info),new Address(asset),new Address(stablecoin),new Uint256(softCap),new Bool(finalized),new Bool(canceled),new Uint256(pricePerToken),new Uint256(fundsRaised),new Uint256(tokensSold));
+            super(new org.web3j.abi.datatypes.Utf8String(flavor),new org.web3j.abi.datatypes.Utf8String(version),new org.web3j.abi.datatypes.Address(contractAddress),new org.web3j.abi.datatypes.Address(owner),new org.web3j.abi.datatypes.Utf8String(info),new org.web3j.abi.datatypes.Address(asset),new org.web3j.abi.datatypes.Address(stablecoin),new org.web3j.abi.datatypes.generated.Uint256(softCap),new org.web3j.abi.datatypes.Bool(finalized),new org.web3j.abi.datatypes.Bool(canceled),new org.web3j.abi.datatypes.generated.Uint256(pricePerToken),new org.web3j.abi.datatypes.generated.Uint256(fundsRaised),new org.web3j.abi.datatypes.generated.Uint256(tokensSold));
             this.flavor = flavor;
             this.version = version;
             this.contractAddress = contractAddress;

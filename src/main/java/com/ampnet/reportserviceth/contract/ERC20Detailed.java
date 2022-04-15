@@ -36,17 +36,15 @@ import java.util.List;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.8.7.
+ * <p>Generated with web3j version 1.4.1.
  */
 @SuppressWarnings("rawtypes")
-public class IToken extends Contract {
+public class ERC20Detailed extends Contract {
     public static final String BINARY = "";
 
     public static final String FUNC_ALLOWANCE = "allowance";
 
     public static final String FUNC_APPROVE = "approve";
-
-    public static final String FUNC_BALANCEBEFORELIQUIDATION = "balanceBeforeLiquidation";
 
     public static final String FUNC_BALANCEOF = "balanceOf";
 
@@ -71,20 +69,20 @@ public class IToken extends Contract {
     ;
 
     @Deprecated
-    protected IToken(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
+    protected ERC20Detailed(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
         super(BINARY, contractAddress, web3j, credentials, gasPrice, gasLimit);
     }
 
-    protected IToken(String contractAddress, Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
+    protected ERC20Detailed(String contractAddress, Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, credentials, contractGasProvider);
     }
 
     @Deprecated
-    protected IToken(String contractAddress, Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
+    protected ERC20Detailed(String contractAddress, Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
         super(BINARY, contractAddress, web3j, transactionManager, gasPrice, gasLimit);
     }
 
-    protected IToken(String contractAddress, Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+    protected ERC20Detailed(String contractAddress, Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
         super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
@@ -175,13 +173,6 @@ public class IToken extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public RemoteFunctionCall<BigInteger> balanceBeforeLiquidation(String account) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_BALANCEBEFORELIQUIDATION, 
-                Arrays.<Type>asList(new Address(160, account)),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
-        return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
     public RemoteFunctionCall<BigInteger> balanceOf(String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_BALANCEOF, 
                 Arrays.<Type>asList(new Address(160, account)),
@@ -237,39 +228,39 @@ public class IToken extends Contract {
     }
 
     @Deprecated
-    public static IToken load(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
-        return new IToken(contractAddress, web3j, credentials, gasPrice, gasLimit);
+    public static ERC20Detailed load(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
+        return new ERC20Detailed(contractAddress, web3j, credentials, gasPrice, gasLimit);
     }
 
     @Deprecated
-    public static IToken load(String contractAddress, Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-        return new IToken(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
+    public static ERC20Detailed load(String contractAddress, Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
+        return new ERC20Detailed(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
     }
 
-    public static IToken load(String contractAddress, Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
-        return new IToken(contractAddress, web3j, credentials, contractGasProvider);
+    public static ERC20Detailed load(String contractAddress, Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
+        return new ERC20Detailed(contractAddress, web3j, credentials, contractGasProvider);
     }
 
-    public static IToken load(String contractAddress, Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
-        return new IToken(contractAddress, web3j, transactionManager, contractGasProvider);
+    public static ERC20Detailed load(String contractAddress, Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+        return new ERC20Detailed(contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
-    public static RemoteCall<IToken> deploy(Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
-        return deployRemoteCall(IToken.class, web3j, credentials, contractGasProvider, BINARY, "");
-    }
-
-    @Deprecated
-    public static RemoteCall<IToken> deploy(Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
-        return deployRemoteCall(IToken.class, web3j, credentials, gasPrice, gasLimit, BINARY, "");
-    }
-
-    public static RemoteCall<IToken> deploy(Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
-        return deployRemoteCall(IToken.class, web3j, transactionManager, contractGasProvider, BINARY, "");
+    public static RemoteCall<ERC20Detailed> deploy(Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
+        return deployRemoteCall(ERC20Detailed.class, web3j, credentials, contractGasProvider, BINARY, "");
     }
 
     @Deprecated
-    public static RemoteCall<IToken> deploy(Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-        return deployRemoteCall(IToken.class, web3j, transactionManager, gasPrice, gasLimit, BINARY, "");
+    public static RemoteCall<ERC20Detailed> deploy(Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
+        return deployRemoteCall(ERC20Detailed.class, web3j, credentials, gasPrice, gasLimit, BINARY, "");
+    }
+
+    public static RemoteCall<ERC20Detailed> deploy(Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+        return deployRemoteCall(ERC20Detailed.class, web3j, transactionManager, contractGasProvider, BINARY, "");
+    }
+
+    @Deprecated
+    public static RemoteCall<ERC20Detailed> deploy(Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
+        return deployRemoteCall(ERC20Detailed.class, web3j, transactionManager, gasPrice, gasLimit, BINARY, "");
     }
 
     public static class ApprovalEventResponse extends BaseEventResponse {
