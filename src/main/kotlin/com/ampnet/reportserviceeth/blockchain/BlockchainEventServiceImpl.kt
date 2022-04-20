@@ -147,12 +147,6 @@ class BlockchainEventServiceImpl(
             val stableCoinPrecision = getStableCoinPrecision(ContractAddress(asset.issuer), chainProperties)
             events.add(Event(it, chainId.value, log, asset, stableCoinPrecision))
         }
-//        skipException { contract.getReleaseEvents(txReceipt) }?.forEach {
-//            val log = getLog(logsMap, it)
-//            val asset = getAsset(ContractAddress(it.asset), chainProperties)
-//            val stableCoinPrecision = getStableCoinPrecision(ContractAddress(asset.issuer), chainProperties)
-//            events.add(Event(it, chainId.value, log, asset, stableCoinPrecision))
-//        }
         return events
     }
 
