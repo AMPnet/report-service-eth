@@ -9,10 +9,10 @@ import com.ampnet.reportserviceeth.service.sendSafely
 import com.ampnet.reportserviceeth.util.BlockNumber
 import com.ampnet.reportserviceeth.util.ChainId
 import com.ampnet.reportserviceeth.util.ContractAddress
+import com.ampnet.reportserviceth.contract.ERC20Detailed
 import com.ampnet.reportserviceth.contract.IAssetCommon
 import com.ampnet.reportserviceth.contract.ICampaignFactoryCommon
 import com.ampnet.reportserviceth.contract.IIssuerCommon
-import com.ampnet.reportserviceth.contract.IToken
 import com.ampnet.reportserviceth.contract.TransactionEvents
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
@@ -147,12 +147,6 @@ class BlockchainEventServiceImpl(
             val stableCoinPrecision = getStableCoinPrecision(ContractAddress(asset.issuer), chainProperties)
             events.add(Event(it, chainId.value, log, asset, stableCoinPrecision))
         }
-        skipException { contract.getReleaseEvents(txReceipt) }?.forEach {
-            val log = getLog(logsMap, it)
-            val asset = getAsset(ContractAddress(it.asset), chainProperties)
-            val stableCoinPrecision = getStableCoinPrecision(ContractAddress(asset.issuer), chainProperties)
-            events.add(Event(it, chainId.value, log, asset, stableCoinPrecision))
-        }
         return events
     }
 
@@ -189,7 +183,7 @@ class BlockchainEventServiceImpl(
             issuerAddress.value, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
         )
         val stableCoinAddress = issuer.commonState().sendSafely()?.stablecoin
-        val stableCoin = IToken.load(
+        val stableCoin = ERC20Detailed.load(
             stableCoinAddress,
             chainProperties.web3j,
             chainProperties.transactionManager,

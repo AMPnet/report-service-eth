@@ -159,29 +159,6 @@ data class TransactionInfo(
         stableCoinDecimals = stableCoinDecimals
     )
 
-    /*
-     * from - address of the PayoutManager contract.
-     * to - address of the wallet which received revenue share payout.
-     */
-    constructor(
-        event: TransactionEvents.ReleaseEventResponse,
-        txRecipient: TransactionReceipt,
-        asset: IAssetCommon.AssetCommonState,
-        stableCoinDecimals: BigInteger
-    ) : this(
-        type = TransactionType.REVENUE_SHARE,
-        from = txRecipient.to,
-        to = event.investor,
-        tokenValue = event.amount,
-        tokenAmount = null,
-        timestamp = event.timestamp.toLocalDateTime(),
-        txHash = txRecipient.transactionHash,
-        asset = asset.name,
-        assetTokenSymbol = asset.symbol,
-        decimals = asset.decimals,
-        stableCoinDecimals = stableCoinDecimals
-    )
-
     constructor(event: Event) : this(
         type = event.type,
         from = event.fromAddress,

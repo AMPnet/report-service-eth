@@ -275,37 +275,4 @@ class Event(
         revenue = event.payoutAmount,
         stableCoinDecimals = stableCoinDecimals.toShort()
     )
-
-    /*
-     * from - address of the PayoutManager contract.
-     * to - address of the wallet which received revenue share payout.
-     */
-    constructor(
-        event: TransactionEvents.ReleaseEventResponse,
-        chainId: Long,
-        log: Log,
-        asset: IAssetCommon.AssetCommonState,
-        stableCoinDecimals: BigInteger
-    ) : this(
-        uuid = UUID.randomUUID(),
-        chainId = chainId,
-        fromAddress = log.address,
-        toAddress = event.investor,
-        contract = log.address,
-        issuer = asset.issuer,
-        hash = log.transactionHash,
-        type = TransactionType.CANCEL_INVESTMENT,
-        logIndex = log.logIndex.toLong(),
-        asset = asset.name,
-        tokenSymbol = asset.symbol,
-        blockNumber = log.blockNumber.toLong(),
-        blockHash = log.blockHash,
-        timestamp = event.timestamp.toLong(),
-        tokenValue = event.amount,
-        decimals = asset.decimals.toShort(),
-        tokenAmount = null,
-        payoutId = event.payoutId.toLong(),
-        revenue = event.amount,
-        stableCoinDecimals = stableCoinDecimals.toShort()
-    )
 }

@@ -1,10 +1,5 @@
 package com.ampnet.reportserviceth.contract;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.Callable;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
@@ -14,7 +9,6 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.StaticStruct;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
@@ -24,6 +18,12 @@ import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Callable;
+
 /**
  * <p>Auto generated code.
  * <p><strong>Do not modify!</strong>
@@ -31,7 +31,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.8.7.
+ * <p>Generated with web3j version 1.4.1.
  */
 @SuppressWarnings("rawtypes")
 public class IIssuer extends Contract {
@@ -91,21 +91,6 @@ public class IIssuer extends Contract {
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
         return executeRemoteCallSingleValueReturn(function, String.class);
-    }
-
-    public RemoteFunctionCall<List> getInfoHistory() {
-        final Function function = new Function(FUNC_GETINFOHISTORY, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<InfoEntry>>() {}));
-        return new RemoteFunctionCall<List>(function,
-                new Callable<List>() {
-                    @Override
-                    @SuppressWarnings("unchecked")
-                    public List call() throws Exception {
-                        List<Type> result = (List<Type>) executeCallSingleValueReturn(function, List.class);
-                        return convertToNative(result);
-                    }
-                });
     }
 
     public RemoteFunctionCall<IssuerState> getState() {
@@ -233,24 +218,6 @@ public class IIssuer extends Contract {
             this.stablecoin = stablecoin.getValue();
             this.walletApprover = walletApprover.getValue();
             this.info = info.getValue();
-        }
-    }
-
-    public static class InfoEntry extends DynamicStruct {
-        public String info;
-
-        public BigInteger timestamp;
-
-        public InfoEntry(String info, BigInteger timestamp) {
-            super(new Utf8String(info),new Uint256(timestamp));
-            this.info = info;
-            this.timestamp = timestamp;
-        }
-
-        public InfoEntry(Utf8String info, Uint256 timestamp) {
-            super(info,timestamp);
-            this.info = info.getValue();
-            this.timestamp = timestamp.getValue();
         }
     }
 

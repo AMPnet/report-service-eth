@@ -1,7 +1,5 @@
 package com.ampnet.reportserviceth.contract;
 
-import java.math.BigInteger;
-import java.util.Arrays;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.DynamicStruct;
@@ -9,6 +7,7 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
@@ -17,6 +16,9 @@ import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+
 /**
  * <p>Auto generated code.
  * <p><strong>Do not modify!</strong>
@@ -24,7 +26,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.8.7.
+ * <p>Generated with web3j version 1.4.1.
  */
 @SuppressWarnings("rawtypes")
 public class IAssetCommon extends Contract {
@@ -142,7 +144,7 @@ public class IAssetCommon extends Contract {
         public String issuer;
 
         public AssetCommonState(String flavor, String version, String contractAddress, String owner, String info, String name, String symbol, BigInteger totalSupply, BigInteger decimals, String issuer) {
-            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Utf8String(info),new Utf8String(name),new Utf8String(symbol),new Uint256(totalSupply),new Uint256(decimals),new Address(issuer));
+            super(new Utf8String(flavor),new Utf8String(version),new Address(contractAddress),new Address(owner),new Utf8String(info),new Utf8String(name),new Utf8String(symbol),new Uint256(totalSupply),new Uint8(decimals),new Address(issuer));
             this.flavor = flavor;
             this.version = version;
             this.contractAddress = contractAddress;
@@ -155,7 +157,7 @@ public class IAssetCommon extends Contract {
             this.issuer = issuer;
         }
 
-        public AssetCommonState(Utf8String flavor, Utf8String version, Address contractAddress, Address owner, Utf8String info, Utf8String name, Utf8String symbol, Uint256 totalSupply, Uint256 decimals, Address issuer) {
+        public AssetCommonState(Utf8String flavor, Utf8String version, Address contractAddress, Address owner, Utf8String info, Utf8String name, Utf8String symbol, Uint256 totalSupply, Uint8 decimals, Address issuer) {
             super(flavor,version,contractAddress,owner,info,name,symbol,totalSupply,decimals,issuer);
             this.flavor = flavor.getValue();
             this.version = version.getValue();

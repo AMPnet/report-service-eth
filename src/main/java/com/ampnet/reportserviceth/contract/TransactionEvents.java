@@ -2,10 +2,6 @@ package com.ampnet.reportserviceth.contract;
 
 import io.reactivex.Flowable;
 import io.reactivex.functions.Function;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
@@ -22,6 +18,11 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * <p>Auto generated code.
@@ -64,10 +65,6 @@ public class TransactionEvents extends Contract {
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Address>(true) {}, new TypeReference<Address>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}));
     ;
 
-    public static final Event RELEASE_EVENT = new Event("Release", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}));
-    ;
-
     public static final Event TRANSFER_EVENT = new Event("Transfer", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}));
     ;
@@ -91,9 +88,9 @@ public class TransactionEvents extends Contract {
     }
 
     public List<CancelInvestmentEventResponse> getCancelInvestmentEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(CANCELINVESTMENT_EVENT, transactionReceipt);
+        List<EventValuesWithLog> valueList = extractEventParametersWithLog(CANCELINVESTMENT_EVENT, transactionReceipt);
         ArrayList<CancelInvestmentEventResponse> responses = new ArrayList<CancelInvestmentEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
+        for (EventValuesWithLog eventValues : valueList) {
             CancelInvestmentEventResponse typedResponse = new CancelInvestmentEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.investor = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -110,7 +107,7 @@ public class TransactionEvents extends Contract {
         return web3j.ethLogFlowable(filter).map(new Function<Log, CancelInvestmentEventResponse>() {
             @Override
             public CancelInvestmentEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(CANCELINVESTMENT_EVENT, log);
+                EventValuesWithLog eventValues = extractEventParametersWithLog(CANCELINVESTMENT_EVENT, log);
                 CancelInvestmentEventResponse typedResponse = new CancelInvestmentEventResponse();
                 typedResponse.log = log;
                 typedResponse.investor = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -130,9 +127,9 @@ public class TransactionEvents extends Contract {
     }
 
     public List<ClaimEventResponse> getClaimEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(CLAIM_EVENT, transactionReceipt);
+        List<EventValuesWithLog> valueList = extractEventParametersWithLog(CLAIM_EVENT, transactionReceipt);
         ArrayList<ClaimEventResponse> responses = new ArrayList<ClaimEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
+        for (EventValuesWithLog eventValues : valueList) {
             ClaimEventResponse typedResponse = new ClaimEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.investor = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -149,7 +146,7 @@ public class TransactionEvents extends Contract {
         return web3j.ethLogFlowable(filter).map(new Function<Log, ClaimEventResponse>() {
             @Override
             public ClaimEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(CLAIM_EVENT, log);
+                EventValuesWithLog eventValues = extractEventParametersWithLog(CLAIM_EVENT, log);
                 ClaimEventResponse typedResponse = new ClaimEventResponse();
                 typedResponse.log = log;
                 typedResponse.investor = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -169,9 +166,9 @@ public class TransactionEvents extends Contract {
     }
 
     public List<FinalizeEventResponse> getFinalizeEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(FINALIZE_EVENT, transactionReceipt);
+        List<EventValuesWithLog> valueList = extractEventParametersWithLog(FINALIZE_EVENT, transactionReceipt);
         ArrayList<FinalizeEventResponse> responses = new ArrayList<FinalizeEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
+        for (EventValuesWithLog eventValues : valueList) {
             FinalizeEventResponse typedResponse = new FinalizeEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.owner = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -189,7 +186,7 @@ public class TransactionEvents extends Contract {
         return web3j.ethLogFlowable(filter).map(new Function<Log, FinalizeEventResponse>() {
             @Override
             public FinalizeEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(FINALIZE_EVENT, log);
+                EventValuesWithLog eventValues = extractEventParametersWithLog(FINALIZE_EVENT, log);
                 FinalizeEventResponse typedResponse = new FinalizeEventResponse();
                 typedResponse.log = log;
                 typedResponse.owner = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -210,9 +207,9 @@ public class TransactionEvents extends Contract {
     }
 
     public List<InvestEventResponse> getInvestEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(INVEST_EVENT, transactionReceipt);
+        List<EventValuesWithLog> valueList = extractEventParametersWithLog(INVEST_EVENT, transactionReceipt);
         ArrayList<InvestEventResponse> responses = new ArrayList<InvestEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
+        for (EventValuesWithLog eventValues : valueList) {
             InvestEventResponse typedResponse = new InvestEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.investor = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -229,7 +226,7 @@ public class TransactionEvents extends Contract {
         return web3j.ethLogFlowable(filter).map(new Function<Log, InvestEventResponse>() {
             @Override
             public InvestEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(INVEST_EVENT, log);
+                EventValuesWithLog eventValues = extractEventParametersWithLog(INVEST_EVENT, log);
                 InvestEventResponse typedResponse = new InvestEventResponse();
                 typedResponse.log = log;
                 typedResponse.investor = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -249,9 +246,9 @@ public class TransactionEvents extends Contract {
     }
 
     public List<PayoutCanceledEventResponse> getPayoutCanceledEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(PAYOUTCANCELED_EVENT, transactionReceipt);
+        List<EventValuesWithLog> valueList = extractEventParametersWithLog(PAYOUTCANCELED_EVENT, transactionReceipt);
         ArrayList<PayoutCanceledEventResponse> responses = new ArrayList<PayoutCanceledEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
+        for (EventValuesWithLog eventValues : valueList) {
             PayoutCanceledEventResponse typedResponse = new PayoutCanceledEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.payoutOwner = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -269,7 +266,7 @@ public class TransactionEvents extends Contract {
         return web3j.ethLogFlowable(filter).map(new Function<Log, PayoutCanceledEventResponse>() {
             @Override
             public PayoutCanceledEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(PAYOUTCANCELED_EVENT, log);
+                EventValuesWithLog eventValues = extractEventParametersWithLog(PAYOUTCANCELED_EVENT, log);
                 PayoutCanceledEventResponse typedResponse = new PayoutCanceledEventResponse();
                 typedResponse.log = log;
                 typedResponse.payoutOwner = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -290,9 +287,9 @@ public class TransactionEvents extends Contract {
     }
 
     public List<PayoutClaimedEventResponse> getPayoutClaimedEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(PAYOUTCLAIMED_EVENT, transactionReceipt);
+        List<EventValuesWithLog> valueList = extractEventParametersWithLog(PAYOUTCLAIMED_EVENT, transactionReceipt);
         ArrayList<PayoutClaimedEventResponse> responses = new ArrayList<PayoutClaimedEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
+        for (EventValuesWithLog eventValues : valueList) {
             PayoutClaimedEventResponse typedResponse = new PayoutClaimedEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.wallet = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -311,7 +308,7 @@ public class TransactionEvents extends Contract {
         return web3j.ethLogFlowable(filter).map(new Function<Log, PayoutClaimedEventResponse>() {
             @Override
             public PayoutClaimedEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(PAYOUTCLAIMED_EVENT, log);
+                EventValuesWithLog eventValues = extractEventParametersWithLog(PAYOUTCLAIMED_EVENT, log);
                 PayoutClaimedEventResponse typedResponse = new PayoutClaimedEventResponse();
                 typedResponse.log = log;
                 typedResponse.wallet = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -333,9 +330,9 @@ public class TransactionEvents extends Contract {
     }
 
     public List<PayoutCreatedEventResponse> getPayoutCreatedEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(PAYOUTCREATED_EVENT, transactionReceipt);
+        List<EventValuesWithLog> valueList = extractEventParametersWithLog(PAYOUTCREATED_EVENT, transactionReceipt);
         ArrayList<PayoutCreatedEventResponse> responses = new ArrayList<PayoutCreatedEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
+        for (EventValuesWithLog eventValues : valueList) {
             PayoutCreatedEventResponse typedResponse = new PayoutCreatedEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.payoutOwner = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -353,7 +350,7 @@ public class TransactionEvents extends Contract {
         return web3j.ethLogFlowable(filter).map(new Function<Log, PayoutCreatedEventResponse>() {
             @Override
             public PayoutCreatedEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(PAYOUTCREATED_EVENT, log);
+                EventValuesWithLog eventValues = extractEventParametersWithLog(PAYOUTCREATED_EVENT, log);
                 PayoutCreatedEventResponse typedResponse = new PayoutCreatedEventResponse();
                 typedResponse.log = log;
                 typedResponse.payoutOwner = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -373,49 +370,10 @@ public class TransactionEvents extends Contract {
         return payoutCreatedEventFlowable(filter);
     }
 
-    public List<ReleaseEventResponse> getReleaseEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(RELEASE_EVENT, transactionReceipt);
-        ArrayList<ReleaseEventResponse> responses = new ArrayList<ReleaseEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
-            ReleaseEventResponse typedResponse = new ReleaseEventResponse();
-            typedResponse.log = eventValues.getLog();
-            typedResponse.investor = (String) eventValues.getIndexedValues().get(0).getValue();
-            typedResponse.asset = (String) eventValues.getNonIndexedValues().get(0).getValue();
-            typedResponse.payoutId = (BigInteger) eventValues.getNonIndexedValues().get(1).getValue();
-            typedResponse.amount = (BigInteger) eventValues.getNonIndexedValues().get(2).getValue();
-            typedResponse.timestamp = (BigInteger) eventValues.getNonIndexedValues().get(3).getValue();
-            responses.add(typedResponse);
-        }
-        return responses;
-    }
-
-    public Flowable<ReleaseEventResponse> releaseEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(new Function<Log, ReleaseEventResponse>() {
-            @Override
-            public ReleaseEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(RELEASE_EVENT, log);
-                ReleaseEventResponse typedResponse = new ReleaseEventResponse();
-                typedResponse.log = log;
-                typedResponse.investor = (String) eventValues.getIndexedValues().get(0).getValue();
-                typedResponse.asset = (String) eventValues.getNonIndexedValues().get(0).getValue();
-                typedResponse.payoutId = (BigInteger) eventValues.getNonIndexedValues().get(1).getValue();
-                typedResponse.amount = (BigInteger) eventValues.getNonIndexedValues().get(2).getValue();
-                typedResponse.timestamp = (BigInteger) eventValues.getNonIndexedValues().get(3).getValue();
-                return typedResponse;
-            }
-        });
-    }
-
-    public Flowable<ReleaseEventResponse> releaseEventFlowable(DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) {
-        EthFilter filter = new EthFilter(startBlock, endBlock, getContractAddress());
-        filter.addSingleTopic(EventEncoder.encode(RELEASE_EVENT));
-        return releaseEventFlowable(filter);
-    }
-
     public List<TransferEventResponse> getTransferEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(TRANSFER_EVENT, transactionReceipt);
+        List<EventValuesWithLog> valueList = extractEventParametersWithLog(TRANSFER_EVENT, transactionReceipt);
         ArrayList<TransferEventResponse> responses = new ArrayList<TransferEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
+        for (EventValuesWithLog eventValues : valueList) {
             TransferEventResponse typedResponse = new TransferEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.from = (String) eventValues.getNonIndexedValues().get(0).getValue();
@@ -430,7 +388,7 @@ public class TransactionEvents extends Contract {
         return web3j.ethLogFlowable(filter).map(new Function<Log, TransferEventResponse>() {
             @Override
             public TransferEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(TRANSFER_EVENT, log);
+                EventValuesWithLog eventValues = extractEventParametersWithLog(TRANSFER_EVENT, log);
                 TransferEventResponse typedResponse = new TransferEventResponse();
                 typedResponse.log = log;
                 typedResponse.from = (String) eventValues.getNonIndexedValues().get(0).getValue();
@@ -573,18 +531,6 @@ public class TransactionEvents extends Contract {
         public String rewardAsset;
 
         public BigInteger totalRewardAmount;
-
-        public BigInteger timestamp;
-    }
-
-    public static class ReleaseEventResponse extends BaseEventResponse {
-        public String investor;
-
-        public String asset;
-
-        public BigInteger payoutId;
-
-        public BigInteger amount;
 
         public BigInteger timestamp;
     }
