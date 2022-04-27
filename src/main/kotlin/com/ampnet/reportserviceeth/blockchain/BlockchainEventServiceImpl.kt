@@ -56,7 +56,7 @@ class BlockchainEventServiceImpl(
         val ethLog: EthLog = chainProperties.web3j.ethGetLogs(ethFilter).sendSafely()
             ?: throw InternalException(
                 ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-                "Failed to fetch events from $startBlockNumber to $endBlockNumber block, " +
+                "Failed to fetch events on chainId: $chainId from $startBlockNumber to $endBlockNumber block, " +
                     "for contracts ${deployedContracts.joinToString()}"
             )
         val logs = ethLog.logs.mapNotNull { it.get() as? EthLog.LogObject }
@@ -68,7 +68,7 @@ class BlockchainEventServiceImpl(
     ): List<String> {
         val payoutMangerInstances = chainProperties.chain.payoutManagerAddresses
         if (payoutMangerInstances.isEmpty()) {
-            logger.info { "There are no payout manager contracts specified" }
+            logger.info { "There are no payout manager contracts specified on chainId: ${chainProperties.chainId}" }
         }
         val cfManagerInstances: List<String> = chainProperties.chain.cfManagerFactoryAddresses.map { address ->
             val cfManagerFactoryContract = ICampaignFactoryCommon.load(
@@ -78,8 +78,8 @@ class BlockchainEventServiceImpl(
         }.flatten()
         if (cfManagerInstances.isEmpty()) {
             logger.info {
-                "There are no contracts deployed for the cfManagerFactory address: " +
-                    chainProperties.chain.cfManagerFactoryAddresses
+                "There are no contracts deployed on chainId: ${chainProperties.chainId} for the " +
+                    "cfManagerFactory address: ${chainProperties.chain.cfManagerFactoryAddresses}"
             }
         }
         return cfManagerInstances.plus(payoutMangerInstances)
@@ -167,7 +167,7 @@ class BlockchainEventServiceImpl(
         )
         val commonState = assetContract.commonState().sendSafely() ?: throw InternalException(
             ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-            "Cannot find the asset for address: $contractAddress"
+            "Cannot find the asset on chainId: ${chainProperties.chainId} for address: $contractAddress"
         )
         assetCache[cacheKey] = commonState
         return commonState
@@ -191,7 +191,7 @@ class BlockchainEventServiceImpl(
         )
         val stableCoinPrecision = stableCoin.decimals()?.sendSafely() ?: throw InternalException(
             ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-            "Cannot get stable coin decimals for issuer address: $issuerAddress"
+            "Cannot get stable coin decimals on chainId: ${chainProperties.chainId} for issuer address: $issuerAddress"
         )
         stableCoinPrecisionCache[cacheKey] = stableCoinPrecision
         return stableCoinPrecision

@@ -64,7 +64,7 @@ class EventQueueServiceImpl(
             }
             val events = blockchainEventService.getAllEvents(startBlockNumber, endBlockNumber, chain.id)
             if (events.isNotEmpty()) {
-                logger.debug { "Number of fetched events: ${events.size}" }
+                logger.debug { "Number of fetched events: ${events.size} on chainId: ${chain.id}" }
                 eventRepository.saveAll(events)
             }
             val updatedTask = task?.apply {
@@ -73,7 +73,7 @@ class EventQueueServiceImpl(
             } ?: Task(chain.id.value, endBlockNumber.value.longValueExact())
             taskRepository.save(updatedTask)
         } catch (ex: Throwable) {
-            logger.warn { "Failed to fetch blockchain events: ${ex.message}" }
+            logger.warn { "Failed to fetch blockchain events: ${ex.message} on chainId: ${chain.id}" }
         }
     }
 

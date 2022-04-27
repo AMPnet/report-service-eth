@@ -21,14 +21,14 @@ private val logger = KotlinLogging.logger {}
 class BlockchainServiceImpl(private val chainPropertiesHandler: ChainPropertiesHandler) : BlockchainService {
 
     override fun getTransactions(wallet: WalletAddress, chainId: ChainId): List<TransactionInfo> {
-        logger.debug { "Get transactions for wallet address: $wallet" }
+        logger.debug { "Get transactions for wallet address: $wallet on chainId: $chainId" }
         if (wallet.value.isBlank()) return emptyList()
         TODO("Not implemented")
     }
 
     @Throws(InternalException::class)
     override fun getIssuerOwner(issuerRequest: IssuerRequest): WalletAddress {
-        logger.debug { "Get owner of issuer: $issuerRequest" }
+        logger.debug { "Get owner of issuer: $issuerRequest on chainId: ${issuerRequest.chainId}" }
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(issuerRequest.chainId)
         val contract = IIssuerCommon.load(
             issuerRequest.address.value, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
@@ -42,7 +42,7 @@ class BlockchainServiceImpl(private val chainPropertiesHandler: ChainPropertiesH
 
     @Throws(InternalException::class)
     override fun getWhitelistedAddress(issuerRequest: IssuerRequest): List<WalletAddress> {
-        logger.debug { "Get whitelisted accounts for issuer: $issuerRequest" }
+        logger.debug { "Get whitelisted accounts for issuer: $issuerRequest on chainId: ${issuerRequest.chainId}" }
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(issuerRequest.chainId)
         val contract = IIssuer.load(
             issuerRequest.address.value, chainProperties.web3j, chainProperties.transactionManager, DefaultGasProvider()
@@ -53,7 +53,8 @@ class BlockchainServiceImpl(private val chainPropertiesHandler: ChainPropertiesH
             ?.map { WalletAddress(it.wallet) }
             ?: throw InternalException(
                 ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
-                "Failed to fetch whitelisted addresses for issuer contract address: $issuerRequest"
+                "Failed to fetch whitelisted addresses for issuer contract address: $issuerRequest " +
+                    "on chainId: ${issuerRequest.chainId}"
             )
     }
 
@@ -61,7 +62,10 @@ class BlockchainServiceImpl(private val chainPropertiesHandler: ChainPropertiesH
     override fun getBlockNumber(chainId: ChainId): BlockNumber {
         val chainProperties = chainPropertiesHandler.getBlockchainProperties(chainId)
         return chainProperties.web3j.ethBlockNumber().sendSafely()?.blockNumber?.let { BlockNumber(it) }
-            ?: throw InternalException(ErrorCode.INT_JSON_RPC_BLOCKCHAIN, "Failed to fetch latest block number")
+            ?: throw InternalException(
+                ErrorCode.INT_JSON_RPC_BLOCKCHAIN,
+                "Failed to fetch latest block number on chainId: $chainId"
+            )
     }
 
     override fun getIssuerCommonState(chainId: ChainId, issuer: ContractAddress): IIssuerCommon.IssuerCommonState? {
