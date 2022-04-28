@@ -91,52 +91,6 @@ data class TransactionInfo(
     )
 
     /*
-     * from - address of the payout manager's wallet which created the PayoutManager contract.
-     * to - address of the PayoutManager contract.
-     */
-    constructor(
-        event: TransactionEvents.PayoutCreatedEventResponse,
-        txRecipient: TransactionReceipt,
-        asset: IAssetCommon.AssetCommonState,
-        stableCoinDecimals: BigInteger
-    ) : this(
-        type = TransactionType.CREATE_PAYOUT,
-        from = event.payoutOwner,
-        to = txRecipient.to,
-        tokenValue = event.totalRewardAmount,
-        tokenAmount = event.totalRewardAmount,
-        timestamp = event.timestamp.toLocalDateTime(),
-        txHash = txRecipient.transactionHash,
-        asset = asset.name,
-        assetTokenSymbol = asset.symbol,
-        decimals = asset.decimals,
-        stableCoinDecimals = stableCoinDecimals
-    )
-
-    /*
-     * from - address of the PayoutManager contract.
-     * to - address of the payout manager's wallet which created the PayoutManager contract.
-     */
-    constructor(
-        event: TransactionEvents.PayoutCanceledEventResponse,
-        txRecipient: TransactionReceipt,
-        asset: IAssetCommon.AssetCommonState,
-        stableCoinDecimals: BigInteger
-    ) : this(
-        type = TransactionType.CANCEL_PAYOUT,
-        from = txRecipient.to,
-        to = event.payoutOwner,
-        tokenValue = event.remainingRewardAmount,
-        tokenAmount = event.remainingRewardAmount,
-        timestamp = event.timestamp.toLocalDateTime(),
-        txHash = txRecipient.transactionHash,
-        asset = asset.name,
-        assetTokenSymbol = asset.symbol,
-        decimals = asset.decimals,
-        stableCoinDecimals = stableCoinDecimals
-    )
-
-    /*
      * from - address of the PayoutManager contract.
      * to - address of the claiming investor.
      */
